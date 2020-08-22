@@ -4,7 +4,9 @@ import app.unattach.controller.Controller;
 import app.unattach.controller.ControllerFactory;
 import app.unattach.controller.LongTask;
 import app.unattach.model.*;
+import javafx.beans.Observable;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
@@ -28,7 +30,6 @@ import java.util.stream.Collectors;
 
 public class MainViewController {
   private static final Logger LOGGER = Logger.getLogger(MainViewController.class.getName());
-
   private Controller controller;
   @FXML
   private VBox root;
@@ -79,6 +80,8 @@ public class MainViewController {
   // Results view
   private static final String DESELECT_ALL_CAPTION = "Deselect all";
   private static final String SELECT_ALL_CAPTION = "Select all";
+  @FXML
+  private SubView resultsSubView;
   @FXML
   private TableView<Email> resultsTable;
   @FXML
@@ -212,7 +215,12 @@ public class MainViewController {
         try {
           updateMessage(String.format("Finished obtaining email metadata (%s).", getStatusString()));
           List<Email> emails = controller.getEmails();
-          resultsTable.setItems(FXCollections.observableList(emails));
+          ObservableList<Email> observableEmails = FXCollections.observableList(emails, email -> new Observable[]{email});
+          resultsTable.setItems(observableEmails);
+          updateResultsCaption();
+          observableEmails.addListener((ListChangeListener<? super Email>) change -> {
+            updateResultsCaption();
+          });
         } catch (Throwable t) {
           String message = "Failed to process email metadata.";
           updateMessage(message);
@@ -235,6 +243,18 @@ public class MainViewController {
     searchProgressBarWithText.textProperty().bind(task.messageProperty());
 
     new Thread(task).start();
+  }
+
+  private void updateResultsCaption() {
+    int selectedSizeInMegaBytes = 0, totalSizeInMegaBytes = 0;
+    for (Email email : resultsTable.getItems()) {
+      if (email.isSelected()) {
+        selectedSizeInMegaBytes += email.getSizeInMegaBytes();
+      }
+      totalSizeInMegaBytes += email.getSizeInMegaBytes();
+    }
+    resultsSubView.setText(String.format("Results (selected %dMB of %dMB)",
+            selectedSizeInMegaBytes, totalSizeInMegaBytes));
   }
 
   private void onError(String message, Throwable t) {

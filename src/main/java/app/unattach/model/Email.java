@@ -1,12 +1,14 @@
 package app.unattach.model;
 
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.fxml.FXML;
 import org.apache.commons.lang3.StringUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class Email {
+public class Email implements Observable {
   private final String gmailId;
   private final String uniqueId;
   private final SortedSet<String> labelIds;
@@ -16,6 +18,8 @@ public class Email {
   private final Date date;
   private final int sizeInBytes;
   private EmailStatus status;
+
+  private final List<InvalidationListener> listeners = new ArrayList<>();
 
   public Email(String gmailId, String uniqueId, List<String> labelIds, String from, String subject, long timestamp,
                int sizeInBytes) {
@@ -104,10 +108,23 @@ public class Email {
   @FXML
   public void setStatus(EmailStatus status) {
     this.status = status;
+    for (InvalidationListener listener : listeners) {
+      listener.invalidated(this);
+    }
   }
 
   long getTimestamp() {
     return timestamp;
+  }
+
+  @Override
+  public void addListener(InvalidationListener listener) {
+    listeners.add(listener);
+  }
+
+  @Override
+  public void removeListener(InvalidationListener listener) {
+    listeners.remove(listener);
   }
 
   @Override

@@ -84,7 +84,7 @@
     </VBox>
   </SubView>
 
-  <SubView text="Results" VBox.vgrow="ALWAYS">
+  <SubView fx:id="resultsSubView" text="Results" VBox.vgrow="ALWAYS">
     <VBox alignment="CENTER" spacing="10">
       <TableView fx:id="resultsTable" prefHeight="200" VBox.vgrow="ALWAYS">
         <columns>
