@@ -6,15 +6,16 @@ import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.List;
-import java.util.SortedSet;
+import java.util.TreeMap;
 
 public interface Model {
   void clearPreviousSearch();
   GetEmailMetadataTask getSearchTask(String query) throws IOException, InterruptedException;
   String getEmailAddress() throws IOException;
-  SortedSet<String> getEmailLabels() throws IOException;
+  TreeMap<String, String> getLabelToId() throws IOException;
   List<Email> getEmails();
   String getFilenameSchema();
+  String getIdForLabel(String label) throws IOException;
   LongTask<ProcessEmailResult> getProcessTask(Email email, ProcessSettings processSettings);
   DefaultArtifactVersion getLatestVersion() throws IOException, InterruptedException;
   String getSearchQuery();

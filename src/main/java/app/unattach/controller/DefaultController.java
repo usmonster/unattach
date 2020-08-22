@@ -11,6 +11,7 @@ import java.net.URI;
 import java.security.GeneralSecurityException;
 import java.util.List;
 import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -105,9 +106,9 @@ public class DefaultController implements Controller {
   public SortedSet<String> getEmailLabels() {
     try {
       LOGGER.info("Getting email labels..");
-      SortedSet<String> emailLabels = model.getEmailLabels();
+      TreeMap<String, String> labelToId = model.getLabelToId();
       LOGGER.info("Getting email labels.. successful.");
-      return emailLabels;
+      return (SortedSet<String>) labelToId.keySet();
     } catch (Throwable t) {
       LOGGER.log(Level.SEVERE, "Getting email labels.. failed.", t);
       return null;
@@ -117,6 +118,19 @@ public class DefaultController implements Controller {
   @Override
   public String getFilenameSchema() {
     return model.getFilenameSchema();
+  }
+
+  @Override
+  public String getIdForLabel(String label) {
+    try {
+      LOGGER.info("Getting ID for label..");
+      String id = model.getIdForLabel(label);
+      LOGGER.info("Getting ID for label.. successful.");
+      return id;
+    } catch (Throwable t) {
+      LOGGER.log(Level.SEVERE, "Getting ID for label.. failed.", t);
+      return null;
+    }
   }
 
   @Override

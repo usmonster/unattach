@@ -4,6 +4,7 @@ import app.unattach.controller.Controller;
 import app.unattach.controller.ControllerFactory;
 import app.unattach.controller.LongTask;
 import app.unattach.model.*;
+import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -218,9 +219,7 @@ public class MainViewController {
           ObservableList<Email> observableEmails = FXCollections.observableList(emails, email -> new Observable[]{email});
           resultsTable.setItems(observableEmails);
           updateResultsCaption();
-          observableEmails.addListener((ListChangeListener<? super Email>) change -> {
-            updateResultsCaption();
-          });
+          observableEmails.addListener((ListChangeListener<? super Email>) change -> updateResultsCaption());
         } catch (Throwable t) {
           String message = "Failed to process email metadata.";
           updateMessage(message);
@@ -246,15 +245,17 @@ public class MainViewController {
   }
 
   private void updateResultsCaption() {
-    int selectedSizeInMegaBytes = 0, totalSizeInMegaBytes = 0;
-    for (Email email : resultsTable.getItems()) {
-      if (email.isSelected()) {
-        selectedSizeInMegaBytes += email.getSizeInMegaBytes();
+    Platform.runLater(() -> {
+      int selectedSizeInMegaBytes = 0, totalSizeInMegaBytes = 0;
+      for (Email email : resultsTable.getItems()) {
+        if (email.isSelected()) {
+          selectedSizeInMegaBytes += email.getSizeInMegaBytes();
+        }
+        totalSizeInMegaBytes += email.getSizeInMegaBytes();
       }
-      totalSizeInMegaBytes += email.getSizeInMegaBytes();
-    }
-    resultsSubView.setText(String.format("Results (selected %dMB of %dMB)",
-            selectedSizeInMegaBytes, totalSizeInMegaBytes));
+      resultsSubView.setText(String.format("Results (selected %dMB of %dMB)",
+              selectedSizeInMegaBytes, totalSizeInMegaBytes));
+    });
   }
 
   private void onError(String message, Throwable t) {
@@ -340,17 +341,19 @@ public class MainViewController {
 
   @FXML
   private void onDownloadButtonPressed() {
-    processEmails(ProcessOption.DOWNLOAD);
+    processEmails(new ProcessOption(true, false));
   }
 
   @FXML
   private void onDownloadAndDeleteButtonPressed() {
-    processEmails(ProcessOption.DOWNLOAD_AND_REMOVE);
+    String labelId = controller.getIdForLabel("Unattach - Removed");
+    processEmails(new ProcessOption(true, true, labelId));
   }
 
   @FXML
   private void onDeleteButtonPressed() {
-    processEmails(ProcessOption.REMOVE);
+    String labelId = controller.getIdForLabel("Unattach - Removed");
+    processEmails(new ProcessOption(false, true, labelId));
   }
 
   private void processEmails(ProcessOption processOption) {

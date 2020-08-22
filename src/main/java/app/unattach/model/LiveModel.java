@@ -177,8 +177,9 @@ public class LiveModel implements Model {
     Set<String> fileNames = EmailProcessor.process(email, mimeMessage, processSettings);
     if (processSettings.processOption.shouldRemove() && !fileNames.isEmpty()) {
       updateRawMessage(message, mimeMessage);
-      insertSlimMessage(message); // 25 quota units
-      removeOriginalMessage(email); // 10 quota units
+      Message newMessage = insertSlimMessage(message); // 25 quota units
+      addLabel(newMessage.getId(), processSettings.processOption.getLabelId());
+      removeOriginalMessage(message.getId()); // 10 quota units
     }
     return new ProcessEmailResult(fileNames);
   }
@@ -204,15 +205,21 @@ public class LiveModel implements Model {
     message.setRaw(raw);
   }
 
-  private void insertSlimMessage(Message message) throws IOException {
-    // 1 messages.insert == 25 quota units
-    // upload limit = 500 MB / day / user
-    service.users().messages().insert(USER, message).setInternalDateSource("dateHeader").execute();
+  private void addLabel(String emailId, String labelId) throws IOException {
+    ModifyMessageRequest modifyMessageRequest = new ModifyMessageRequest();
+    modifyMessageRequest.setAddLabelIds(Collections.singletonList(labelId));
+    service.users().messages().modify(USER, emailId, modifyMessageRequest).execute();
   }
 
-  private void removeOriginalMessage(Email email) throws IOException {
+  private Message insertSlimMessage(Message message) throws IOException {
+    // 1 messages.insert == 25 quota units
+    // upload limit = 500 MB / day / user
+    return service.users().messages().insert(USER, message).setInternalDateSource("dateHeader").execute();
+  }
+
+  private void removeOriginalMessage(String emailId) throws IOException {
     // 1 messages.delete == 10 quota units
-    service.users().messages().delete(USER, email.getGmailId()).execute();
+    service.users().messages().delete(USER, emailId).execute();
   }
 
   @Override
@@ -274,14 +281,32 @@ public class LiveModel implements Model {
   }
 
   @Override
-  public SortedSet<String> getEmailLabels() throws IOException {
+  public TreeMap<String, String> getLabelToId() throws IOException {
     // 1 labels.get == 1 quota unit
     ListLabelsResponse response = service.users().labels().list(USER).setFields("labels/id,labels/name").execute();
-    SortedSet<String> emailLabels = new TreeSet<>();
+    TreeMap<String, String> labelToId = new TreeMap<>();
     for (Label label : response.getLabels()) {
-      emailLabels.add(label.getName());
+      labelToId.put(label.getName(), label.getId());
     }
-    return emailLabels;
+    return labelToId;
+  }
+
+  @Override
+  public String getIdForLabel(String label) throws IOException {
+    TreeMap<String, String> labelToId = getLabelToId();
+    if (labelToId.containsKey(label)) {
+      return labelToId.get(label);
+    }
+    Label labelIn = new Label();
+    labelIn.setName(label);
+    labelIn.setLabelListVisibility("labelShow");
+    labelIn.setMessageListVisibility("show");
+    LabelColor labelColor = new LabelColor();
+    labelColor.setBackgroundColor("#ffffff");
+    labelColor.setTextColor("#fb4c2f");
+    labelIn.setColor(labelColor);
+    Label labelOut = service.users().labels().create(USER, labelIn).execute();
+    return labelOut.getId();
   }
 
   private static void getEmailMetadata(Gmail service, String messageId, BatchRequest batch,

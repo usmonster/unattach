@@ -19,6 +19,7 @@ public interface Controller {
   String getEmailAddress() throws IOException;
   SortedSet<String> getEmailLabels();
   String getFilenameSchema();
+  String getIdForLabel(String label);
   DefaultArtifactVersion getLatestVersion();
   LongTask<ProcessEmailResult> getProcessTask(Email email, ProcessSettings processSettings);
   String getSearchQuery();

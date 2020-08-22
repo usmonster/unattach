@@ -3,6 +3,7 @@ package app.unattach.model;
 import app.unattach.controller.LongTask;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -56,10 +57,15 @@ public class MockModel implements Model {
   }
 
   @Override
-  public SortedSet<String> getEmailLabels() {
-    SortedSet<String> emailLabels = new TreeSet<>();
+  public String getIdForLabel(String label) {
+    return label;
+  }
+
+  @Override
+  public TreeMap<String, String> getLabelToId() {
+    TreeMap<String, String> emailLabels = new TreeMap<>();
     for (int i = 0; i < 10; ++i) {
-      emailLabels.add("Label Name " + i);
+      emailLabels.put("Label Name " + i, String.valueOf(i));
     }
     return emailLabels;
   }
