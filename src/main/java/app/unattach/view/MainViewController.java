@@ -246,15 +246,17 @@ public class MainViewController {
 
   private void updateResultsCaption() {
     Platform.runLater(() -> {
-      int selectedSizeInMegaBytes = 0, totalSizeInMegaBytes = 0;
+      int selected = 0, total = 0, selectedSizeInMegaBytes = 0, totalSizeInMegaBytes = 0;
       for (Email email : resultsTable.getItems()) {
         if (email.isSelected()) {
+          ++selected;
           selectedSizeInMegaBytes += email.getSizeInMegaBytes();
         }
+        ++total;
         totalSizeInMegaBytes += email.getSizeInMegaBytes();
       }
-      resultsSubView.setText(String.format("Results (selected %dMB of %dMB)",
-              selectedSizeInMegaBytes, totalSizeInMegaBytes));
+      resultsSubView.setText(String.format("Results: selected %d/%d (%dMB/%dMB)",
+              selected, total, selectedSizeInMegaBytes, totalSizeInMegaBytes));
     });
   }
 
