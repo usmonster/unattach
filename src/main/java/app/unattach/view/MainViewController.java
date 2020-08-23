@@ -18,6 +18,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -96,8 +97,6 @@ public class MainViewController {
   private TextField targetDirectoryTextField;
   @FXML
   private Button browseButton;
-  @FXML
-  private Button openButton;
   @FXML
   private Button downloadButton;
   @FXML
@@ -223,7 +222,7 @@ public class MainViewController {
         } catch (Throwable t) {
           String message = "Failed to process email metadata.";
           updateMessage(message);
-          onError(message, t);
+          reportError(message, t);
         } finally {
           resetControls();
         }
@@ -233,7 +232,7 @@ public class MainViewController {
       protected void failed() {
         String message = "Failed to obtain email metadata.";
         updateMessage(message);
-        onError(message, getException());
+        reportError(message, getException());
         resetControls();
       }
     };
@@ -260,20 +259,10 @@ public class MainViewController {
     });
   }
 
-  private void onError(String message, Throwable t) {
+  private void reportError(String message, Throwable t) {
     LOGGER.log(Level.SEVERE, message, t);
-    try {
-      Stage dialog = Scenes.createNewStage("an error occurred");
-      dialog.initOwner(root.getScene().getWindow());
-      dialog.initModality(Modality.APPLICATION_MODAL);
-      Scene scene = Scenes.loadScene("/error.view.fxml");
-      ErrorController errorController = (ErrorController) scene.getUserData();
-      errorController.setException(t);
-      dialog.setScene(scene);
-      Scenes.showAndPreventMakingSmaller(dialog);
-    } catch (IOException e) {
-      LOGGER.log(Level.SEVERE, "Failed to open the error dialog.", e);
-    }
+    String stackTraceText = ExceptionUtils.getStackTrace(t);
+    controller.sendToServer("stack trace", stackTraceText, null);
   }
 
   @FXML
@@ -374,7 +363,7 @@ public class MainViewController {
     String filenameSchema = controller.getFilenameSchema();
     ProcessSettings processSettings = new ProcessSettings(processOption, targetDirectory, filenameSchema,
         addMetadataCheckMenuItem.isSelected());
-    processEmail(emailsToProcess, 0, processSettings);
+    processEmail(emailsToProcess, 0, 0, processSettings);
   }
 
   private void showNoEmailsAlert() {
@@ -387,16 +376,16 @@ public class MainViewController {
     alert.showAndWait();
   }
 
-  private void processEmail(List<Email> emailsToProcess, int processedEmails, ProcessSettings processSettings) {
-    if (stopProcessingButtonPressed || processedEmails >= emailsToProcess.size()) {
+  private void processEmail(List<Email> emailsToProcess, int nextEmailIndex, int failed, ProcessSettings processSettings) {
+    if (stopProcessingButtonPressed || nextEmailIndex >= emailsToProcess.size()) {
       processingProgressBarWithText.textProperty().setValue(
-          String.format("Processing stopped (%s).", getProcessingStatusString(emailsToProcess, processedEmails)));
+          String.format("Processing stopped (%s).", getProcessingStatusString(emailsToProcess, nextEmailIndex, failed)));
       resetControls();
       return;
     }
-    Email email = emailsToProcess.get(processedEmails);
+    Email email = emailsToProcess.get(nextEmailIndex);
     processingProgressBarWithText.textProperty().setValue(
-        String.format("Processing selected emails (%s) ..", getProcessingStatusString(emailsToProcess, processedEmails)));
+        String.format("Processing selected emails (%s) ..", getProcessingStatusString(emailsToProcess, nextEmailIndex, failed)));
 
     Task<Void> task = new Task<>() {
       @Override
@@ -413,27 +402,26 @@ public class MainViewController {
         bytesProcessed += email.getSizeInBytes();
         processingProgressBarWithText.progressProperty().setValue(1.0 * bytesProcessed / allBytesToProcess);
         resultsTable.refresh();
-        processEmail(emailsToProcess, processedEmails + 1, processSettings);
+        processEmail(emailsToProcess, nextEmailIndex + 1, failed, processSettings);
       }
 
       @Override
       protected void failed() {
         email.setStatus(EmailStatus.FAILED);
+        email.setNote(getException().getMessage());
         resultsTable.refresh();
-        String message = "Failed to process selected emails.";
-        updateMessage(message);
-        onError(message, getException());
-        resetControls();
+        reportError("Failed to process selected emails.", getException());
+        processEmail(emailsToProcess, nextEmailIndex + 1, failed + 1, processSettings);
       }
     };
 
     new Thread(task).start();
   }
 
-  private String getProcessingStatusString(List<Email> emailsToProcess, int processedEmails) {
-    return String.format("completed %d of %d, %dMB / %dMB, %d%% by size",
-        processedEmails, emailsToProcess.size(), toMegaBytes(bytesProcessed), toMegaBytes(allBytesToProcess),
-        100 * bytesProcessed / allBytesToProcess);
+  private String getProcessingStatusString(List<Email> emailsToProcess, int nextEmailIndex, int failed) {
+    return String.format("processed %d of %d, %dMB / %dMB, %d%% by size, %d failed",
+        nextEmailIndex - failed, emailsToProcess.size(), toMegaBytes(bytesProcessed), toMegaBytes(allBytesToProcess),
+        100 * bytesProcessed / allBytesToProcess, failed);
   }
 
   private static int toMegaBytes(long bytes) {
@@ -471,6 +459,7 @@ public class MainViewController {
     stopSearchButton.setDisable(true);
     resultsTable.setEditable(true);
     toggleAllEmailsCheckBox.setDisable(false);
+    toggleAllEmailsCheckBox.setSelected(false);
     targetDirectoryTextField.setDisable(false);
     browseButton.setDisable(false);
     downloadButton.setDisable(false);
@@ -519,7 +508,7 @@ public class MainViewController {
       }
       controller.openFile(latest);
     } catch (Throwable t) {
-      onError("Couldn't open the log file.", t);
+      reportError("Couldn't open the log file.", t);
     }
   }
 

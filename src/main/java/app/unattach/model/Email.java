@@ -18,6 +18,7 @@ public class Email implements Observable {
   private final Date date;
   private final int sizeInBytes;
   private EmailStatus status;
+  private String note;
 
   private final List<InvalidationListener> listeners = new ArrayList<>();
 
@@ -32,6 +33,7 @@ public class Email implements Observable {
     this.date = new Date(timestamp);
     this.sizeInBytes = sizeInBytes;
     status = EmailStatus.IGNORED;
+    note = "";
   }
 
   @FXML
@@ -117,6 +119,16 @@ public class Email implements Observable {
     return timestamp;
   }
 
+  @FXML
+  public String getNote() {
+    return note;
+  }
+
+  @FXML
+  public void setNote(String note) {
+    this.note = note;
+  }
+
   @Override
   public void addListener(InvalidationListener listener) {
     listeners.add(listener);
@@ -130,13 +142,16 @@ public class Email implements Observable {
   @Override
   public String toString() {
     return "Email{" +
-        "gmailId='" + gmailId + '\'' +
-        ", uniqueId='" + uniqueId + '\'' +
-        ", labelIds=" + labelIds +
-        ", from='" + from + '\'' +
-        ", subject='" + subject + '\'' +
-        ", timestamp=" + timestamp +
-        ", sizeInBytes=" + sizeInBytes +
-        '}';
+            "gmailId='" + gmailId + '\'' +
+            ", uniqueId='" + uniqueId + '\'' +
+            ", labelIds=" + labelIds +
+            ", from='" + from + '\'' +
+            ", subject='" + subject + '\'' +
+            ", timestamp=" + timestamp +
+            ", date=" + date +
+            ", sizeInBytes=" + sizeInBytes +
+            ", status=" + status +
+            ", note='" + note + '\'' +
+            '}';
   }
 }

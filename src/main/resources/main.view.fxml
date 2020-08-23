@@ -131,6 +131,11 @@
               <PropertyValueFactory property="status"/>
             </cellValueFactory>
           </TableColumn>
+          <TableColumn text="Note" styleClass="center-left">
+            <cellValueFactory>
+              <PropertyValueFactory property="note"/>
+            </cellValueFactory>
+          </TableColumn>
         </columns>
       </TableView>
     </VBox>

@@ -4,12 +4,15 @@ import app.unattach.controller.LongTask;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Logger;
 
 public class MockModel implements Model {
   private static final Logger LOGGER = Logger.getLogger(MockModel.class.getName());
 
+  private final Random random = new Random(1337);
   private String filenameSchema = FilenameFactory.DEFAULT_SCHEMA;
   private ArrayList<Email> emails = new ArrayList<>();
 
@@ -72,7 +75,13 @@ public class MockModel implements Model {
 
   @Override
   public LongTask<ProcessEmailResult> getProcessTask(Email email, ProcessSettings processSettings) {
-    return new ProcessEmailTask(email, e -> new ProcessEmailResult(Collections.singleton(e.getGmailId())));
+    return new ProcessEmailTask(email, e -> {
+      if (random.nextBoolean()) {
+        return new ProcessEmailResult(Collections.singleton(e.getGmailId()));
+      } else {
+        throw new IOException("Something went wrong.");
+      }
+    });
   }
 
   @Override
@@ -87,7 +96,9 @@ public class MockModel implements Model {
 
   @Override
   public String getTargetDirectory() {
-    return null;
+    String userHome = System.getProperty("user.home");
+    Path defaultPath = Paths.get(userHome, "Downloads", Constants.PRODUCT_NAME);
+    return defaultPath.toString();
   }
 
   @Override
