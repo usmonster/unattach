@@ -4,7 +4,7 @@ set -e -u -x -o pipefail
 
 mvn clean package
 
-VERSION=2.0.0
+VERSION=2.1.0
 DESCRIPTION="Easily download Gmail attachments in bulk, and optionally remove them."
 VENDOR="Rok Strniša"
 COPYRIGHT="Copyright 2020, All rights reserved"
