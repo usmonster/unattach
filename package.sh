@@ -55,9 +55,9 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
   # Sign DMG.
   codesign -s "Developer ID Application: Rok Strnisa (73XQUXV944)" --options runtime --entitlements macos.entitlements -vvvv --deep Unattach-$VERSION.dmg
   # Upload DMG for verification.
-  REQUEST_UUID=$(xcrun altool --notarize-app --primary-bundle-id "app.unattach-$VERSION" -u "rok.strnisa@gmail.com" -p "@keychain:Unattach_APP_PASSWORD" --file Unattach-$VERSION.dmg | grep RequestUUID | awk '{print $3}')
+  REQUEST_UUID=$(xcrun altool --notarize-app --primary-bundle-id "app.unattach-$VERSION" -u "rok.strnisa@gmail.com" -p "@keychain:UNATTACH_APP_PASSWORD" --file Unattach-$VERSION.dmg | grep RequestUUID | awk '{print $3}')
   # Wait for verification to complete.
-  while xcrun altool --notarization-info "$REQUEST_UUID" -u rok.strnisa@gmail.com -p "@keychain:Unattach_APP_PASSWORD" | grep "Status: in progress" > /dev/null; do
+  while xcrun altool --notarization-info "$REQUEST_UUID" -u rok.strnisa@gmail.com -p "@keychain:UNATTACH_APP_PASSWORD" | grep "Status: in progress" > /dev/null; do
     echo "Verification in progress..."
     sleep 30
   done
