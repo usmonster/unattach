@@ -3,6 +3,7 @@ package app.unattach.model;
 import org.junit.Test;
 
 import java.security.InvalidParameterException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -37,8 +38,9 @@ public class FilenameFactoryTest {
 
   @Test
   public void testDate() {
-    testGetFilename("${DATE}", "a%b@.jpg", "2017-08-01");
-    testGetFilename("${DATE:7}", "a%b@.jpg", "2017-08");
+    String dateString = new SimpleDateFormat("yyyy-MM-dd").format(email.getDate());
+    testGetFilename("${DATE}", "a%b@.jpg", dateString);
+    testGetFilename("${DATE:7}", "a%b@.jpg", dateString.substring(0, 7));
   }
 
   @Test
