@@ -24,6 +24,7 @@ public class FilenameFactory {
     template = replaceRawAndNormalised(template, "SUBJECT", email.getSubject(), FilenameFactory::simpleTrim);
     template = replaceRawAndNormalised(template, "TIMESTAMP", String.valueOf(email.getTimestamp()), FilenameFactory::simpleTrim);
     template = replaceRawAndNormalised(template, "DATE", email.getDateIso8601(), FilenameFactory::simpleTrim);
+    template = replaceRawAndNormalised(template, "TIME", email.getTimeString(), FilenameFactory::simpleTrim);
     template = replaceRawAndNormalised(template, "ID", email.getGmailId(), FilenameFactory::simpleTrim);
     template = replaceRawAndNormalised(template, "BODY_PART_INDEX", String.valueOf(bodyPartIndex), FilenameFactory::simpleTrim);
     template = replaceRawAndNormalised(template, "LABELS", email.getLabelIdsString(), FilenameFactory::simpleTrim);

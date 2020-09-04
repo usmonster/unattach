@@ -15,7 +15,7 @@ import java.util.Arrays;
 public class FilenameSchemaController {
   private static final Email email = new Email("17b4aed892cc3f0b", "17b4aed892cc3f0b",
           Arrays.asList("IMPORTANT", "SENT"), "\"John Doe\" <john.doe@example.com>", "Re: Holiday plans",
-          1501545600000L, 1234567);
+          1501597962321L, 1234567);
   private Controller controller;
 
   @FXML
@@ -35,7 +35,7 @@ public class FilenameSchemaController {
   public void initialize() {
     controller = ControllerFactory.getDefaultController();
     introductionText.setText(
-        "You can here configure the file name schema for the downloaded attachments.\n\n" +
+        "Here, you can configure the file name schema for the downloaded attachments.\n\n" +
             "For example, to configure that every downloaded attachment should first contain Google's email\n" +
             "ID, followed by the index of the attachment within the email, followed by a normalized name of\n" +
             "the attachment file itself, with dashes as separators, you could write the following schema below:\n\n" +
@@ -46,6 +46,7 @@ public class FilenameSchemaController {
             "- SUBJECT, e.g. " + getSchemaVariableExample("SUBJECT") + "\n" +
             "- TIMESTAMP, e.g. " + getSchemaVariableExample("TIMESTAMP") + "\n" +
             "- DATE, e.g. " + getSchemaVariableExample("DATE") + "\n" +
+            "- TIME, e.g. " + getSchemaVariableExample("TIME") + "\n" +
             "- ID, e.g. " + getSchemaVariableExample("ID") + "\n" +
             "- BODY_PART_INDEX, e.g. " + getSchemaVariableExample("BODY_PART_INDEX") + "\n" +
             "- ATTACHMENT_NAME, e.g. " + getSchemaVariableExample("ATTACHMENT_NAME") + "\n" +

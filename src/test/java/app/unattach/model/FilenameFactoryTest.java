@@ -44,6 +44,13 @@ public class FilenameFactoryTest {
   }
 
   @Test
+  public void testTime() {
+    String timeString = new SimpleDateFormat("HH-mm-ss").format(email.getDate());
+    testGetFilename("${TIME}", "a%b@.jpg", timeString);
+    testGetFilename("${TIME:7}", "a%b@.jpg", timeString.substring(0, 7));
+  }
+
+  @Test
   public void testEmailId() {
     testGetFilename("${ID}", "a%b@.jpg", "id3");
     testGetFilename("${ID:2}", "a%b@.jpg","id");

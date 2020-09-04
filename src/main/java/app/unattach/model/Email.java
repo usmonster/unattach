@@ -60,6 +60,10 @@ public class Email implements Observable {
     return new SimpleDateFormat("yyyy-MM-dd").format(getDate());
   }
 
+  String getTimeString() {
+    return new SimpleDateFormat("HH-mm-ss").format(getDate());
+  }
+
   @FXML
   public String getFrom() {
     return from;
