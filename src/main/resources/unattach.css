@@ -5,8 +5,53 @@
   -fx-effect: innershadow( three-pass-box , rgba(0,0,0,0.7) , 6, 0.0 , 0 , 2 );
 }
 
-.intro {
+.main-title {
+  -fx-font-size: 36px;
+  -fx-padding: -10 0 10 0;
+}
+
+.slogan {
+  -fx-font-size: 28px;
+  -fx-font-weight: bold;
+  -fx-padding: 0 10 0 10;
+}
+
+.sub-slogan {
   -fx-font-size: 14px;
+  -fx-padding: 0 0 20 0;
+}
+
+.buy-coffee {
+  -fx-background-color: #0275d8;
+  -fx-cursor: hand;
+}
+
+.buy-coffee .list-cell {
+  -fx-text-fill: white;
+}
+
+.buy-coffee:hover {
+  -fx-background-color: #1285e8;
+}
+
+.buy-coffee-item {
+  -fx-text-fill: black !important;
+  -fx-background-color: white;
+  -fx-cursor: hand;
+}
+
+.buy-coffee-item:hover {
+  -fx-background-color: #1285e8;
+}
+
+.terms-and-conditions {
+  -fx-padding: 20 0 0 0;
+  -fx-font-size: 12px;
+  -fx-font-style: italic;
+}
+
+.button-row {
+  -fx-padding: 0 0 10 0;
 }
 
 .fixed-width-text {
@@ -37,6 +82,7 @@
 
 #donateMenu.menu .label {
   -fx-text-fill: white;
+  -fx-cursor: hand;
 }
 
 #donateMenu .menu-item .label {

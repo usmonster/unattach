@@ -8,19 +8,32 @@
 <?import javafx.scene.control.CheckBox?>
 
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
 <VBox xmlns:fx="http://javafx.com/fxml" fx:controller="app.unattach.view.SignInViewController"
       spacing="10" alignment="center" styleClass="root">
   <padding>
     <Insets top="10" right="10" bottom="10" left="10"/>
   </padding>
 
-  <Text fx:id="welcomeText"/>
+  <ImageView>
+    <Image url="@logo-128.png"/>
+  </ImageView>
 
-  <Label text="Please note that, by using this application, you agree with its Terms and Conditions, which include:"
-         styleClass="intro"/>
-  <Text fx:id="termsAndConditionsText" styleClass="fixed-width-text"/>
+  <Label text="Unattach" styleClass="main-title"/>
 
-  <HBox spacing="10" alignment="CENTER">
+  <Label text="Free space by removing attachments." styleClass="slogan"/>
+
+  <Label text="Easily download Gmail attachments in bulk, and optionally remove them."
+         styleClass="sub-slogan"/>
+
+  <Label text="Unattach lives from your donations. If you like it," styleClass="intro"/>
+  <ComboBox fx:id="buyCoffeeComboBox" styleClass="buy-coffee" promptText="Buy Developers a Coffee ☕" />
+
+  <Label text="By using this app, you agree with its Terms and Conditions." styleClass="terms-and-conditions"/>
+
+  <HBox spacing="10" alignment="CENTER" styleClass="button-row">
     <Button fx:id="homepageButton" text="See Homepage" onAction="#onHomepageButtonPressed" styleClass="secondary"/>
     <Button fx:id="termsAndConditionsButton" text="See Terms and Conditions"
             onAction="#onTermsAndConditionsButtonPressed" styleClass="secondary"/>

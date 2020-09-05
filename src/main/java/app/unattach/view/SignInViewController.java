@@ -6,10 +6,11 @@ import app.unattach.controller.ControllerFactory;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.util.Callback;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
 import java.io.IOException;
@@ -21,9 +22,7 @@ public class SignInViewController {
 
   private Controller controller;
   @FXML
-  private Text welcomeText;
-  @FXML
-  private Text termsAndConditionsText;
+  private ComboBox<DonationOption> buyCoffeeComboBox;
   @FXML
   private Button homepageButton;
   @FXML
@@ -38,14 +37,32 @@ public class SignInViewController {
   @FXML
   public void initialize() {
     controller = ControllerFactory.getDefaultController();
-    welcomeText.setText("Welcome to " + Constants.PRODUCT_NAME + "!");
-    termsAndConditionsText.setText(
-        "6. Liability: To the extent permitted under Law, the Software is provided under an AS-IS basis. Licensor\n" +
-        "shall never, and without any limit, be liable for any damage, cost, expense or any other payment incurred\n" +
-        "by Licensee as a result of Software's actions, failure, bugs and/or any other interaction between the\n" +
-        "Software and Licensee's end-equipment, computers, other software or any 3rd party, end-equipment, computer\n" +
-        "or services. Moreover, Licensor shall never be liable for any defect in source code written by Licensee\n" +
-        "when relying on the Software or using the Software's source code.");
+    buyCoffeeComboBox.setCellFactory(new Callback<>() {
+      @Override
+      public ListCell<DonationOption> call(ListView<DonationOption> p) {
+        return new ListCell<>() {
+          @Override
+          protected void updateItem(DonationOption item, boolean empty) {
+            super.updateItem(item, empty);
+            if (item != null) {
+              setText(item.toString());
+              getStyleClass().add("buy-coffee-item");
+            }
+          }
+        };
+      }
+    });
+    buyCoffeeComboBox.getItems().setAll(
+            new DonationOption("Espresso", 2),
+            new DonationOption("Cappuccino", 5),
+            new DonationOption("Caramel Machiato", 10),
+            new DonationOption("Bag of Coffee", 25),
+            new DonationOption("Coffee Machine", 50),
+            new DonationOption("A Truck of Coffee", 0)
+    );
+    buyCoffeeComboBox.getSelectionModel().selectedItemProperty().addListener((selected, oldValue, newValue) -> {
+      controller.donate(newValue.name, newValue.amount);
+    });
     Platform.runLater(() -> signInButton.requestFocus());
     Platform.runLater(this::checkLatestVersion);
   }
@@ -126,5 +143,20 @@ public class SignInViewController {
     termsAndConditionsButton.setDisable(false);
     signInButton.setDisable(false);
     subscribeToUpdatesCheckBox.setDisable(false);
+  }
+
+  private static class DonationOption {
+    private final String name;
+    private final int amount;
+
+    private DonationOption(String name, int amount) {
+      this.name = name;
+      this.amount = amount;
+    }
+
+    @Override
+    public String toString() {
+      return name + (amount == 0 ? "" : " (" + amount + " USD)");
+    }
   }
 }
