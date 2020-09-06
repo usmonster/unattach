@@ -216,6 +216,10 @@ public class LiveModel implements Model {
   }
 
   private void addLabel(String emailId, String labelId) throws IOException {
+    if (labelId == null) {
+      LOGGER.log(Level.WARNING, "Cannot add a label, because it was not specified.");
+      return;
+    }
     ModifyMessageRequest modifyMessageRequest = new ModifyMessageRequest();
     modifyMessageRequest.setAddLabelIds(Collections.singletonList(labelId));
     service.users().messages().modify(USER, emailId, modifyMessageRequest).execute();
