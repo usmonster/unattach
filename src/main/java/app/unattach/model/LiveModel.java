@@ -200,8 +200,11 @@ public class LiveModel implements Model {
     return service.users().messages().get(USER, emailId).setFormat("raw").execute();
   }
 
-  private MimeMessage getMimeMessage(Message message) throws MessagingException {
+  private MimeMessage getMimeMessage(Message message) throws MessagingException, IOException {
     String rawBefore = message.getRaw();
+    if (rawBefore == null) {
+      throw new IOException("Unable to extract the contents of the email.");
+    }
     byte[] emailBytes = decodeBase64(rawBefore);
     Properties props = new Properties();
     Session session = Session.getInstance(props);
