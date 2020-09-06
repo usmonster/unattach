@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 public class FileConfig implements Config {
     private static final Logger LOGGER = Logger.getLogger(FileConfig.class.getName());
     private static final String FILENAME_SCHEMA_PROPERTY = "filename_schema";
+    private static final String REMOVED_LABEL_ID_PROPERTY = "removed_label_id";
     private static final String SEARCH_QUERY_PROPERTY = "search_query";
     private static final String TARGET_DIRECTORY_PROPERTY = "target_directory";
 
@@ -26,6 +27,11 @@ public class FileConfig implements Config {
     }
 
     @Override
+    public String getRemovedLabelId() {
+        return config.getProperty(REMOVED_LABEL_ID_PROPERTY);
+    }
+
+    @Override
     public String getSearchQuery() {
         return config.getProperty(SEARCH_QUERY_PROPERTY, "has:attachment size:1m");
     }
@@ -38,6 +44,12 @@ public class FileConfig implements Config {
     @Override
     public void saveFilenameSchema(String schema) {
         config.setProperty(FILENAME_SCHEMA_PROPERTY, schema);
+        saveConfigToFile();
+    }
+
+    @Override
+    public void saveRemovedLabelId(String removedLabelId) {
+        config.setProperty(REMOVED_LABEL_ID_PROPERTY, removedLabelId);
         saveConfigToFile();
     }
 

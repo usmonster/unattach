@@ -10,13 +10,14 @@ import java.io.IOException;
 import java.net.URI;
 import java.security.GeneralSecurityException;
 import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeMap;
+import java.util.Map;
+import java.util.SortedMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class DefaultController implements Controller {
   private static final Logger LOGGER = Logger.getLogger(DefaultController.class.getName());
+  private static final String DEFAULT_REMOVED_LABEL_NAME = "Unattach - Removed";
 
   private final Model model;
 
@@ -27,6 +28,19 @@ public class DefaultController implements Controller {
   @Override
   public void clearPreviousSearch() {
     model.clearPreviousSearch();
+  }
+
+  @Override
+  public String createLabel(String name) {
+    try {
+      LOGGER.info("Creating label " + name + "..");
+      String id = model.createLabel(name);
+      LOGGER.info("Creating label " + name + ".. successful.");
+      return id;
+    } catch (Throwable t) {
+      LOGGER.log(Level.SEVERE, "Creating label " + name + ".. failed.", t);
+      return null;
+    }
   }
 
   @Override
@@ -47,8 +61,36 @@ public class DefaultController implements Controller {
   }
 
   @Override
+  public String getOrCreateRemovedLabelId() {
+    SortedMap<String, String> idToLabel = getIdToLabel();
+    String removedLabelId = getRemovedLabelId();
+    if (removedLabelId != null) {
+      if (idToLabel.containsKey(removedLabelId)) {
+        return removedLabelId;
+      }
+      LOGGER.log(Level.SEVERE, "Couldn't find the label ID in the user config within Gmail label IDs.");
+    }
+    for (Map.Entry<String, String> entry : idToLabel.entrySet()) {
+      String id = entry.getKey();
+      String name = entry.getValue();
+      if (name.equals(DEFAULT_REMOVED_LABEL_NAME)) {
+        saveRemovedLabelId(id);
+        return id;
+      }
+    }
+    String id = createLabel(DEFAULT_REMOVED_LABEL_NAME);
+    saveRemovedLabelId(id);
+    return id;
+  }
+
+  @Override
   public LongTask<ProcessEmailResult> getProcessTask(Email email, ProcessSettings processSettings) {
     return model.getProcessTask(email, processSettings);
+  }
+
+  @Override
+  public String getRemovedLabelId() {
+    return model.getRemovedLabelId();
   }
 
   @Override
@@ -74,6 +116,11 @@ public class DefaultController implements Controller {
   @Override
   public void setFilenameSchema(String filenameSchema) {
     model.setFilenameSchema(filenameSchema);
+  }
+
+  @Override
+  public void saveRemovedLabelId(String removedLabelId) {
+    model.saveRemovedLabelId(removedLabelId);
   }
 
   @Override
@@ -103,12 +150,12 @@ public class DefaultController implements Controller {
   }
 
   @Override
-  public SortedSet<String> getEmailLabels() {
+  public SortedMap<String, String> getIdToLabel() {
     try {
       LOGGER.info("Getting email labels..");
-      TreeMap<String, String> labelToId = model.getLabelToId();
+      SortedMap<String, String> idToLabel = model.getIdToLabel();
       LOGGER.info("Getting email labels.. successful.");
-      return (SortedSet<String>) labelToId.keySet();
+      return idToLabel;
     } catch (Throwable t) {
       LOGGER.log(Level.SEVERE, "Getting email labels.. failed.", t);
       return null;
@@ -118,19 +165,6 @@ public class DefaultController implements Controller {
   @Override
   public String getFilenameSchema() {
     return model.getFilenameSchema();
-  }
-
-  @Override
-  public String getIdForLabel(String label) {
-    try {
-      LOGGER.info("Getting ID for label..");
-      String id = model.getIdForLabel(label);
-      LOGGER.info("Getting ID for label.. successful.");
-      return id;
-    } catch (Throwable t) {
-      LOGGER.log(Level.SEVERE, "Getting ID for label.. failed.", t);
-      return null;
-    }
   }
 
   @Override

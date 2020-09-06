@@ -20,6 +20,7 @@
       <Menu fx:id="viewColumnMenu" text="View Column" />
       <CheckMenuItem fx:id="addMetadataCheckMenuItem" text="Add metadata about removed attachments" selected="true" />
       <MenuItem text="File name schema .." onAction="#onFilenameSchemaMenuItemPressed" />
+      <MenuItem text="Gmail label .." onAction="#onGmailLabelMenuItemPressed" />
     </Menu>
     <Menu text="Help">
       <MenuItem text="Give feedback" onAction="#onFeedbackMenuItemPressed"/>

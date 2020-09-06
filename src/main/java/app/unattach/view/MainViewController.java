@@ -22,9 +22,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Vector;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -32,6 +30,7 @@ import java.util.stream.Collectors;
 
 public class MainViewController {
   private static final Logger LOGGER = Logger.getLogger(MainViewController.class.getName());
+
   private Controller controller;
   @FXML
   private VBox root;
@@ -129,7 +128,9 @@ public class MainViewController {
     processingProgressBarWithText.textProperty().setValue("(Processing of emails not started yet.)");
     labelsListViewLabel.setText("Email labels:\n(If selecting multiple, results will match any.)");
     labelsListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-    labelsListView.setItems(FXCollections.observableList(new ArrayList<>(controller.getEmailLabels())));
+    ArrayList<String> labels = new ArrayList<>(controller.getIdToLabel().values());
+    Collections.sort(labels);
+    labelsListView.setItems(FXCollections.observableList(labels));
   }
 
   private void addMenuForHidingColumns() {
@@ -337,14 +338,14 @@ public class MainViewController {
 
   @FXML
   private void onDownloadAndDeleteButtonPressed() {
-    String labelId = controller.getIdForLabel("Unattach - Removed");
-    processEmails(new ProcessOption(true, true, labelId));
+    String removedLabelId = controller.getOrCreateRemovedLabelId();
+    processEmails(new ProcessOption(true, true, removedLabelId));
   }
 
   @FXML
   private void onDeleteButtonPressed() {
-    String labelId = controller.getIdForLabel("Unattach - Removed");
-    processEmails(new ProcessOption(false, true, labelId));
+    String removedLabelId = controller.getOrCreateRemovedLabelId();
+    processEmails(new ProcessOption(false, true, removedLabelId));
   }
 
   private void processEmails(ProcessOption processOption) {
@@ -529,7 +530,21 @@ public class MainViewController {
       dialog.setScene(scene);
       Scenes.showAndPreventMakingSmaller(dialog);
     } catch (IOException e) {
-      LOGGER.log(Level.SEVERE, "Failed to open the error dialog.", e);
+      LOGGER.log(Level.SEVERE, "Failed to open the file name scheme dialog.", e);
+    }
+  }
+
+  @FXML
+  private void onGmailLabelMenuItemPressed() {
+    try {
+      Stage dialog = Scenes.createNewStage("Gmail label");
+      dialog.initOwner(root.getScene().getWindow());
+      dialog.initModality(Modality.APPLICATION_MODAL);
+      Scene scene = Scenes.loadScene("/gmail-label.view.fxml");
+      dialog.setScene(scene);
+      Scenes.showAndPreventMakingSmaller(dialog);
+    } catch (IOException e) {
+      LOGGER.log(Level.SEVERE, "Failed to open the gmail label dialog.", e);
     }
   }
 }

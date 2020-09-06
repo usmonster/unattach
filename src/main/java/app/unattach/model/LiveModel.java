@@ -94,6 +94,11 @@ public class LiveModel implements Model {
   }
 
   @Override
+  public void saveRemovedLabelId(String removedLabelId) {
+    config.saveRemovedLabelId(removedLabelId);
+  }
+
+  @Override
   public void saveSearchQuery(String query) {
     config.saveSearchQuery(query);
   }
@@ -168,6 +173,11 @@ public class LiveModel implements Model {
   @Override
   public LongTask<ProcessEmailResult> getProcessTask(Email email, ProcessSettings processSettings) {
     return new ProcessEmailTask(email, e -> processEmail(e, processSettings) /* 40 quota units */);
+  }
+
+  @Override
+  public String getRemovedLabelId() {
+    return config.getRemovedLabelId();
   }
 
   private ProcessEmailResult processEmail(Email email, ProcessSettings processSettings)
@@ -281,24 +291,20 @@ public class LiveModel implements Model {
   }
 
   @Override
-  public TreeMap<String, String> getLabelToId() throws IOException {
+  public SortedMap<String, String> getIdToLabel() throws IOException {
     // 1 labels.get == 1 quota unit
     ListLabelsResponse response = service.users().labels().list(USER).setFields("labels/id,labels/name").execute();
-    TreeMap<String, String> labelToId = new TreeMap<>();
+    SortedMap<String, String> labelToId = new TreeMap<>();
     for (Label label : response.getLabels()) {
-      labelToId.put(label.getName(), label.getId());
+      labelToId.put(label.getId(), label.getName());
     }
     return labelToId;
   }
 
   @Override
-  public String getIdForLabel(String label) throws IOException {
-    TreeMap<String, String> labelToId = getLabelToId();
-    if (labelToId.containsKey(label)) {
-      return labelToId.get(label);
-    }
+  public String createLabel(String name) throws IOException {
     Label labelIn = new Label();
-    labelIn.setName(label);
+    labelIn.setName(name);
     labelIn.setLabelListVisibility("labelShow");
     labelIn.setMessageListVisibility("show");
     LabelColor labelColor = new LabelColor();

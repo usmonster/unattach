@@ -10,18 +10,20 @@ import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.List;
-import java.util.SortedSet;
+import java.util.SortedMap;
 
 public interface Controller {
   void clearPreviousSearch();
+  String createLabel(String name);
   void donate(String item, int amount);
   List<Email> getEmails();
   String getEmailAddress() throws IOException;
-  SortedSet<String> getEmailLabels();
+  SortedMap<String, String> getIdToLabel();
   String getFilenameSchema();
-  String getIdForLabel(String label);
   DefaultArtifactVersion getLatestVersion();
+  String getOrCreateRemovedLabelId();
   LongTask<ProcessEmailResult> getProcessTask(Email email, ProcessSettings processSettings);
+  String getRemovedLabelId();
   String getSearchQuery();
   GetEmailMetadataTask getSearchTask(String query) throws IOException, InterruptedException;
   String getTargetDirectory();
@@ -31,6 +33,7 @@ public interface Controller {
   void openTermsAndConditions();
   void openWebPage(String uriString);
   void setFilenameSchema(String filenameSchema);
+  void saveRemovedLabelId(String removedLabelId);
   void saveSearchQuery(String query);
   void saveTargetDirectory(String path);
   String signIn() throws IOException, GeneralSecurityException;

@@ -22,6 +22,11 @@ public class MockModel implements Model {
   }
 
   @Override
+  public String createLabel(String name) {
+    return "removed-label-id";
+  }
+
+  @Override
   public GetEmailMetadataTask getSearchTask(String query) {
     int minEmailSizeInMb = 1;
     List<String> emailIds = new ArrayList<>();
@@ -60,17 +65,12 @@ public class MockModel implements Model {
   }
 
   @Override
-  public String getIdForLabel(String label) {
-    return label;
-  }
-
-  @Override
-  public TreeMap<String, String> getLabelToId() {
-    TreeMap<String, String> emailLabels = new TreeMap<>();
+  public SortedMap<String, String> getIdToLabel() {
+    SortedMap<String, String> idToLabel = new TreeMap<>();
     for (int i = 0; i < 10; ++i) {
-      emailLabels.put("Label Name " + i, String.valueOf(i));
+      idToLabel.put(String.valueOf(i), "Label Name " + i);
     }
-    return emailLabels;
+    return idToLabel;
   }
 
   @Override
@@ -82,6 +82,11 @@ public class MockModel implements Model {
         throw new IOException("Something went wrong.");
       }
     });
+  }
+
+  @Override
+  public String getRemovedLabelId() {
+    return "removed-label-id";
   }
 
   @Override
@@ -102,14 +107,13 @@ public class MockModel implements Model {
   }
 
   @Override
-  public void saveSearchQuery(String query) {
-
-  }
+  public void saveRemovedLabelId(String removedLabelId) {}
 
   @Override
-  public void saveTargetDirectory(String path) {
+  public void saveSearchQuery(String query) {}
 
-  }
+  @Override
+  public void saveTargetDirectory(String path) {}
 
   @Override
   public void signIn() {

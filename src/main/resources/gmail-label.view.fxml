@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import java.net.URL?>
+<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="app.unattach.view.GmailLabelController"
+      alignment="CENTER" spacing="10">
+  <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+  <GridPane VBox.vgrow="ALWAYS" vgap="10" hgap="10">
+    <Label fx:id="introductionLabel" GridPane.columnSpan="2" />
+    <Label text="Gmail label to use:" GridPane.rowIndex="1"/>
+    <ComboBox fx:id="labelComboBox" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+    <Label fx:id="customizeLabel" GridPane.columnSpan="2" GridPane.rowIndex="2" />
+    <columnConstraints>
+      <ColumnConstraints hgrow="NEVER"/>
+      <ColumnConstraints hgrow="ALWAYS"/>
+    </columnConstraints>
+  </GridPane>
+  <HBox>
+    <Region HBox.hgrow="ALWAYS"/>
+    <Button text="Labels Settings in Gmail" onAction="#onEditLabelsInGmailButtonPressed"/>
+    <Region HBox.hgrow="ALWAYS"/>
+  </HBox>
+  <Region prefHeight="10"/>
+  <HBox>
+    <Region HBox.hgrow="ALWAYS"/>
+    <Button fx:id="cancelButton" text="Cancel" onAction="#onCancelButtonPressed" HBox.hgrow="NEVER"/>
+    <Region prefWidth="20"/>
+    <Button fx:id="okButton" text="OK" onAction="#onOkButtonPressed" HBox.hgrow="NEVER"/>
+    <Region HBox.hgrow="ALWAYS"/>
+  </HBox>
+  <stylesheets>
+    <URL value="@unattach.css"/>
+  </stylesheets>
+</VBox>
