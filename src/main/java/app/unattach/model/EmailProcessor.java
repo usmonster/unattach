@@ -74,10 +74,9 @@ class EmailProcessor {
     }
     if (contentTypes.length == 1) {
       String contentType = contentTypes[0];
-      if (contentType.equals("text/plain; charset=iso-8859-8-i")) {
-        bodyPart.setHeader("Content-Type", "text/plain; charset=iso-8859-8");
-      } else if (contentType.equals("text/html; charset=iso-8859-8-i")) {
-        bodyPart.setHeader("Content-Type", "text/plain; charset=iso-8859-8");
+      if (contentType.contains("iso-8859-8-i")) {
+        String newContentType = contentType.replace("iso-8859-8-i", "iso-8859-8");
+        bodyPart.setHeader("Content-Type", newContentType);
       }
     }
   }
