@@ -16,7 +16,7 @@ Dependencies
 Build & Run
 -----------
 * Build with `mvn clean package`.
-* Run with `java -jar target/client-2.1.0-jar-with-dependencies.jar`.
+* Run with `java -jar target/client-2.2.0-jar-with-dependencies.jar`.
 
 Contributions
 -------------
