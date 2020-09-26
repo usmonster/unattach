@@ -281,7 +281,7 @@ public class LiveModel implements Model {
     do {
       // 1 messages.list == 5 quota units
       Gmail.Users.Messages.List request = service.users().messages().list(USER).setFields("messages/id").setQ(query)
-          .setMaxResults(500L).setPageToken(pageToken);
+          .setMaxResults(100000L).setPageToken(pageToken);
       ListMessagesResponse response = request.execute();
       if (response == null) {
         break;
