@@ -117,7 +117,7 @@ public class MainViewController {
     addMenuForHidingColumns();
     donateMenu.setGraphic(new Label()); // This enables the CSS style for the menu.
     emailSizeComboBox.setItems(FXCollections.observableList(getEmailSizeOptions()));
-    emailSizeComboBox.getSelectionModel().selectFirst();
+    emailSizeComboBox.getSelectionModel().select(1);
     searchQueryTextField.setText(controller.getSearchQuery());
     searchProgressBarWithText.progressProperty().setValue(0);
     searchProgressBarWithText.textProperty().setValue("(Searching not started yet.)");
@@ -144,8 +144,8 @@ public class MainViewController {
 
   private Vector<ComboItem<Integer>> getEmailSizeOptions() {
     Vector<ComboItem<Integer>> options = new Vector<>();
-    for (int minEmailSizeInMb : new int[] {1, 2, 3, 5, 10, 25, 50, 100}) {
-      String caption = String.format("more than %d MB", minEmailSizeInMb);
+    for (int minEmailSizeInMb : new int[] {0, 1, 2, 3, 5, 10, 25, 50, 100}) {
+      String caption = minEmailSizeInMb == 0 ? "all sizes" : String.format("more than %d MB", minEmailSizeInMb);
       options.add(new ComboItem<>(caption, minEmailSizeInMb));
     }
     return options;
