@@ -159,7 +159,13 @@
         </Button>
       </HBox>
 
-      <HBox>
+      <HBox alignment="CENTER">
+        <Region HBox.hgrow="ALWAYS"/>
+        <CheckBox fx:id="backupCheckBox" text="Backup Emails">
+          <tooltip>
+            <Tooltip text="Backup raw emails to the specified directory."/>
+          </tooltip>
+        </CheckBox>
         <Region HBox.hgrow="ALWAYS"/>
         <Button fx:id="downloadButton" text="Download attachments" onAction="#onDownloadButtonPressed"
                 styleClass="primary">

@@ -12,9 +12,7 @@ import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.lang.Thread;
 import java.security.GeneralSecurityException;
 import java.util.*;
@@ -184,6 +182,10 @@ public class LiveModel implements Model {
       throws IOException, MessagingException {
     Message message = getRawMessage(email.getGmailId()); // 5 quota units
     MimeMessage mimeMessage = getMimeMessage(message);
+    if (processSettings.processOption.shouldBackup()) {
+      String filename = email.getGmailId() + ".eml";
+      mimeMessage.writeTo(new FileOutputStream(new File(processSettings.targetDirectory, filename)));
+    }
     Set<String> fileNames = EmailProcessor.process(email, mimeMessage, processSettings);
     if (processSettings.processOption.shouldRemove() && !fileNames.isEmpty()) {
       updateRawMessage(message, mimeMessage);

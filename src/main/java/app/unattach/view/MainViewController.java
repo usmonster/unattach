@@ -75,6 +75,8 @@ public class MainViewController {
   @FXML
   private ProgressBarWithText searchProgressBarWithText;
   @FXML
+  private CheckBox backupCheckBox;
+  @FXML
   private Button stopSearchButton;
   private boolean stopSearchButtonPressed;
 
@@ -333,19 +335,19 @@ public class MainViewController {
 
   @FXML
   private void onDownloadButtonPressed() {
-    processEmails(new ProcessOption(true, false));
+    processEmails(new ProcessOption(backupCheckBox.isSelected(), true, false));
   }
 
   @FXML
   private void onDownloadAndDeleteButtonPressed() {
     String removedLabelId = controller.getOrCreateRemovedLabelId();
-    processEmails(new ProcessOption(true, true, removedLabelId));
+    processEmails(new ProcessOption(backupCheckBox.isSelected(), true, true, removedLabelId));
   }
 
   @FXML
   private void onDeleteButtonPressed() {
     String removedLabelId = controller.getOrCreateRemovedLabelId();
-    processEmails(new ProcessOption(false, true, removedLabelId));
+    processEmails(new ProcessOption(backupCheckBox.isSelected(), false, true, removedLabelId));
   }
 
   private void processEmails(ProcessOption processOption) {
@@ -448,6 +450,7 @@ public class MainViewController {
     toggleAllEmailsCheckBox.setDisable(true);
     targetDirectoryTextField.setDisable(true);
     browseButton.setDisable(true);
+    backupCheckBox.setDisable(true);
     downloadButton.setDisable(true);
     downloadAndDeleteButton.setDisable(true);
     deleteButton.setDisable(true);
@@ -463,6 +466,7 @@ public class MainViewController {
     toggleAllEmailsCheckBox.setSelected(false);
     targetDirectoryTextField.setDisable(false);
     browseButton.setDisable(false);
+    backupCheckBox.setDisable(false);
     downloadButton.setDisable(false);
     downloadAndDeleteButton.setDisable(false);
     deleteButton.setDisable(false);
