@@ -18,6 +18,17 @@ Build & Run
 * Build with `mvn clean package`.
 * Run with `java -jar target/client-2.2.0-jar-with-dependencies.jar`.
 
+Known limitations
+-----------------
+* On some emails, the app will fail with `OutOfMemoryError` even with the maximum heap size set to 2GB. This occurs
+  when the Gmail API client library unpacks the downloaded email in local memory using a third-party JSON library, which
+  appears to sometimes make inefficient use of the available memory. If this happens, the original email will remain
+  intact, the memory will be recovered, and the processing will continue with the next email.
+* The maximum number of search results is 500 despite the requested limit being much higher. This appears to be a
+  restriction within the Gmail API service. A potential workaround would be to apply date ranges in automatic follow-up
+  requests. For now, this workaround can be done manually, by modifying the query in the Advanced view. If removing
+  attachments, re-running the search will work, since the app will find a different set of (up to) 500 emails.
+
 Contributions
 -------------
 Feel free to
