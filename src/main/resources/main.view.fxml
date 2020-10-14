@@ -21,6 +21,7 @@
       <CheckMenuItem fx:id="addMetadataCheckMenuItem" text="Add metadata about removed attachments" selected="true" />
       <MenuItem text="File name schema .." onAction="#onFilenameSchemaMenuItemPressed" />
       <MenuItem text="Gmail label .." onAction="#onGmailLabelMenuItemPressed" />
+      <Menu fx:id="donationCurrencyMenu" text="Donation currency" />
     </Menu>
     <Menu text="Help">
       <MenuItem text="Give feedback" onAction="#onFeedbackMenuItemPressed"/>
@@ -28,12 +29,12 @@
       <MenuItem text="About" onAction="#onAboutButtonPressed"/>
     </Menu>
     <Menu fx:id="donateMenu" text="Buy Developers a Coffee ☕">
-      <MenuItem fx:id="donateTwo" text="Espresso (2 USD)" onAction="#onDonateMenuItemPressed"/>
-      <MenuItem fx:id="donateFive" text="Cappuccino (5 USD)" onAction="#onDonateMenuItemPressed"/>
-      <MenuItem fx:id="donateTen" text="Caramel Machiato (10 USD)" onAction="#onDonateMenuItemPressed"/>
-      <MenuItem fx:id="donateTwentyFive" text="Bag of Coffee (25 USD)" onAction="#onDonateMenuItemPressed"/>
-      <MenuItem fx:id="donateFifty" text="Coffee Machine (50 USD)" onAction="#onDonateMenuItemPressed"/>
-      <MenuItem fx:id="donateCustom" text="A Truck of Coffee" onAction="#onDonateMenuItemPressed"/>
+      <MenuItem fx:id="donateTwo" text="Espresso (2 X)" onAction="#onDonateMenuItemPressed"/>
+      <MenuItem fx:id="donateFive" text="Cappuccino (5 X)" onAction="#onDonateMenuItemPressed"/>
+      <MenuItem fx:id="donateTen" text="Caramel Machiato (10 X)" onAction="#onDonateMenuItemPressed"/>
+      <MenuItem fx:id="donateTwentyFive" text="Bag of Coffee (25 X)" onAction="#onDonateMenuItemPressed"/>
+      <MenuItem fx:id="donateFifty" text="Coffee Machine (50 X)" onAction="#onDonateMenuItemPressed"/>
+      <MenuItem fx:id="donateCustom" text="A Truck of Coffee (custom)" onAction="#onDonateMenuItemPressed"/>
     </Menu>
   </MenuBar>
 

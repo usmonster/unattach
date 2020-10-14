@@ -29,7 +29,10 @@
          styleClass="sub-slogan"/>
 
   <Label text="Unattach lives from your donations. If you like it," styleClass="intro"/>
-  <ComboBox fx:id="buyCoffeeComboBox" styleClass="buy-coffee" promptText="Buy Developers a Coffee ☕" />
+  <HBox spacing="10" alignment="CENTER">
+    <ComboBox fx:id="buyCoffeeComboBox" styleClass="buy-coffee" promptText="Buy Developers a Coffee ☕" />
+    <ComboBox fx:id="currencyComboBox" />
+  </HBox>
 
   <Label text="By using this app, you agree with its Terms and Conditions." styleClass="terms-and-conditions"/>
 

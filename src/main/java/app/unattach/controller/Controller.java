@@ -15,7 +15,7 @@ import java.util.SortedMap;
 public interface Controller {
   void clearPreviousSearch();
   String createLabel(String name);
-  void donate(String item, int amount);
+  void donate(String item, int amount, String currency);
   List<Email> getEmails();
   String getEmailAddress() throws IOException;
   SortedMap<String, String> getIdToLabel();

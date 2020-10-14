@@ -54,9 +54,10 @@ public class DefaultController implements Controller {
   }
 
   @Override
-  public void donate(String item, int amount) {
+  public void donate(String item, int amount, String currency) {
     String uriString = Constants.DONATE_URL;
-    uriString += "&coffee_type=" + item.replace(" ", "%20") + "&coffee_price=" + amount;
+    uriString += "&coffee_type=" + item.replace(" ", "%20") + "&coffee_price=" + amount +
+            "&currency=" + currency;
     openWebPage(uriString);
   }
 

@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class MainViewController {
   private static final Logger LOGGER = Logger.getLogger(MainViewController.class.getName());
@@ -44,6 +45,8 @@ public class MainViewController {
   private CheckMenuItem addMetadataCheckMenuItem;
   @FXML
   private Menu viewColumnMenu;
+  @FXML
+  private Menu donationCurrencyMenu;
   @FXML
   private Menu donateMenu;
   @FXML
@@ -117,6 +120,14 @@ public class MainViewController {
     controller = ControllerFactory.getDefaultController();
     emailMenuItem.setText("Signed in as " + controller.getEmailAddress() + ".");
     addMenuForHidingColumns();
+    List<CheckMenuItem> currencyMenuItems =
+            Arrays.stream(Constants.CURRENCIES).map(CheckMenuItem::new).collect(Collectors.toList());
+    currencyMenuItems.forEach(menuItem -> menuItem.setOnAction(this::onDonationCurrencySelected));
+    donationCurrencyMenu.getItems().addAll(currencyMenuItems);
+    Platform.runLater(() -> {
+      currencyMenuItems.stream().filter(menuItem -> menuItem.getText().equals(Constants.DEFAULT_CURRENCY))
+              .forEach(menuItem -> {menuItem.setSelected(true); menuItem.fire();});
+    });
     donateMenu.setGraphic(new Label()); // This enables the CSS style for the menu.
     emailSizeComboBox.setItems(FXCollections.observableList(getEmailSizeOptions()));
     emailSizeComboBox.getSelectionModel().select(1);
@@ -476,18 +487,19 @@ public class MainViewController {
   @FXML
   private void onDonateMenuItemPressed(ActionEvent event) {
     Object source = event.getSource();
+    String currency = getSelectedCurrency();
     if (source == donateTwo) {
-      controller.donate("Espresso", 2);
+      controller.donate("Espresso", 2, currency);
     } else if (source == donateFive) {
-      controller.donate("Cappuccino", 5);
+      controller.donate("Cappuccino", 5, currency);
     } else if (source == donateTen) {
-      controller.donate("Caramel Machiato", 10);
+      controller.donate("Caramel Machiato", 10, currency);
     } else if (source == donateTwentyFive) {
-      controller.donate("Bag of Coffee", 25);
+      controller.donate("Bag of Coffee", 25, currency);
     } else if (source == donateFifty) {
-      controller.donate("Coffee Machine", 50);
+      controller.donate("Coffee Machine", 50, currency);
     } else if (source == donateCustom) {
-      controller.donate("A Truck of Coffee", 0);
+      controller.donate("A Truck of Coffee", 0, currency);
     }
   }
 
@@ -550,5 +562,28 @@ public class MainViewController {
     } catch (IOException e) {
       LOGGER.log(Level.SEVERE, "Failed to open the gmail label dialog.", e);
     }
+  }
+
+  @FXML
+  private void onDonationCurrencySelected(ActionEvent actionEvent) {
+    donationCurrencyMenu.getItems().stream().map(CheckMenuItem.class::cast).forEach(e -> e.setSelected(false));
+    ((CheckMenuItem) actionEvent.getSource()).setSelected(true);
+    String currency = getSelectedCurrency();
+    donateMenu.getItems().forEach(e -> {
+      String text = e.getText();
+      int start = text.indexOf('(');
+      String details = text.substring(start + 1, text.length() - 1);
+      String[] parts = details.split(" ");
+      if (parts.length == 2) {
+        String prefix = text.substring(0, start);
+        e.setText(prefix + "(" + parts[0] + " " + currency + ")");
+      }
+    });
+  }
+
+  private String getSelectedCurrency() {
+    Optional<CheckMenuItem> selectedCurrencyMenu = donationCurrencyMenu.getItems().stream()
+            .map(CheckMenuItem.class::cast).filter(CheckMenuItem::isSelected).findFirst();
+    return selectedCurrencyMenu.isEmpty() ? null : selectedCurrencyMenu.get().getText();
   }
 }
