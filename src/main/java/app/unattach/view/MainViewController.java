@@ -187,6 +187,7 @@ public class MainViewController {
   @FXML
   private void onSearchButtonPressed() {
     disableControls();
+    resultsSubView.setText("Results");
     stopSearchButton.setDisable(false);
     stopSearchButtonPressed = false;
     controller.clearPreviousSearch();
