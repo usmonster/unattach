@@ -18,7 +18,7 @@ Build & Run
 * Build with `mvn clean package`.
 * Run with `java -jar target/client-2.2.0-jar-with-dependencies.jar`.
 
-Known limitations
+Known Limitations
 -----------------
 * On some emails, the app will fail with `OutOfMemoryError` even with the maximum heap size set to 2GB. This occurs
   when the Gmail API client library unpacks the downloaded email in local memory using a third-party JSON library, which
@@ -32,7 +32,7 @@ Known limitations
 Contributions
 -------------
 Feel free to
-[file issues](https://help.github.com/en/articles/creating-an-issue) and
+[report issues](https://help.github.com/en/articles/creating-an-issue) and
 [create pull requests](https://help.github.com/en/articles/creating-a-pull-request).
 
 Support This Project
