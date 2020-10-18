@@ -9,7 +9,7 @@ Unattach's use of information received from Google APIs will adhere to the Googl
 API Services User Data Policy, including the Limited Use requirements. See
 http://tiny.cc/google-reqs-api-scopes for more info.
 
-Unattach may send stack traces (in case program failures) to our servers in
+Unattach may send stack traces (in case of program failures) to our servers in
 order to continually improve our service to you. We made every effort to ensure
 that these stack traces don't contain any personal information.
 
