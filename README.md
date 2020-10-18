@@ -37,7 +37,6 @@ Feel free to
 
 Support This Project
 --------------------
-If you like Unattach,
-[Buy Developers a Coffee](https://unattach.app/?action=buy_coffee&coffee_type=Coffee&coffee_price=0) ☕
+If you like Unattach, [Buy Developers a Coffee](https://unattach.app/#support) ☕
 
 You can also [Become My Sponsor](https://github.com/sponsors/rokstrnisa) ❤️
