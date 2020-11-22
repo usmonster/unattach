@@ -34,15 +34,21 @@
     <ComboBox fx:id="currencyComboBox" />
   </HBox>
 
-  <Label text="By using this app, you agree with its Terms and Conditions." styleClass="terms-and-conditions"/>
+  <Label fx:id="signInMessageLabel" textAlignment="CENTER" styleClass="sign-in-message"/>
 
   <HBox spacing="10" alignment="CENTER" styleClass="button-row">
-    <Button fx:id="homepageButton" text="See Homepage" onAction="#onHomepageButtonPressed" styleClass="secondary"/>
-    <Button fx:id="termsAndConditionsButton" text="See Terms and Conditions"
+    <Button fx:id="howUnattachWorksButton" text="How Unattach Works" onAction="#onHowUnattachWorksButtonPressed"
+            styleClass="secondary"/>
+    <Button fx:id="privacyPolicyButton" text="Privacy Policy"
+            onAction="#onPrivacyPolicyButtonPressed" styleClass="secondary"/>
+    <Button fx:id="termsAndConditionsButton" text="T&amp;Cs"
             onAction="#onTermsAndConditionsButtonPressed" styleClass="secondary"/>
     <Button fx:id="signInButton" text="Sign in with Google" onAction="#onSignInWithGoogleButtonPressed"
             styleClass="primary"/>
   </HBox>
+
+  <Label text="By using this app, you agree with its Terms and Conditions." styleClass="terms-and-conditions"/>
+
   <HBox spacing="50" alignment="CENTER">
     <CheckBox fx:id="subscribeToUpdatesCheckBox" text="Subscribe to updates" selected="true"/>
     <Region minWidth="50" HBox.hgrow="ALWAYS" />

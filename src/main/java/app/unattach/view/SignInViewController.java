@@ -29,7 +29,11 @@ public class SignInViewController {
   @FXML
   private ComboBox<String> currencyComboBox;
   @FXML
-  private Button homepageButton;
+  private Label signInMessageLabel;
+  @FXML
+  private Button howUnattachWorksButton;
+  @FXML
+  private Button privacyPolicyButton;
   @FXML
   private Button termsAndConditionsButton;
   @FXML
@@ -94,13 +98,19 @@ public class SignInViewController {
       }
       buyCoffeeComboBox.getItems().addAll(donationOptions);
     });
+    signInMessageLabel.setText("The first time you sign in, you will be asked to give the app permissions to your Gmail.\n" +
+            "Click on 'How Unattach Works' to see why this is required and how your privacy is protected.");
     Platform.runLater(() -> signInButton.requestFocus());
     Platform.runLater(this::checkLatestVersion);
   }
 
   @FXML
-  private void onHomepageButtonPressed() {
-    controller.openUnattachHomepage();
+  private void onHowUnattachWorksButtonPressed() {
+    controller.openWebPage(Constants.HOW_UNATTACH_WORKS_URL);
+  }
+
+  public void onPrivacyPolicyButtonPressed() {
+    controller.openWebPage(Constants.PRIVACY_POLICY_URL);
   }
 
   @FXML
@@ -163,14 +173,16 @@ public class SignInViewController {
   }
 
   private void disableControls() {
-    homepageButton.setDisable(true);
+    howUnattachWorksButton.setDisable(true);
+    privacyPolicyButton.setDisable(true);
     termsAndConditionsButton.setDisable(true);
     signInButton.setDisable(true);
     subscribeToUpdatesCheckBox.setDisable(true);
   }
 
   private void resetControls() {
-    homepageButton.setDisable(false);
+    howUnattachWorksButton.setDisable(false);
+    privacyPolicyButton.setDisable(false);
     termsAndConditionsButton.setDisable(false);
     signInButton.setDisable(false);
     subscribeToUpdatesCheckBox.setDisable(false);

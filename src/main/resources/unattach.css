@@ -44,13 +44,17 @@
   -fx-background-color: #1285e8;
 }
 
+.sign-in-message,
 .terms-and-conditions {
-  -fx-padding: 20 0 0 0;
   -fx-font-size: 12px;
   -fx-font-style: italic;
 }
 
-.button-row {
+.sign-in-message {
+  -fx-padding: 20 0 0 0;
+}
+
+.terms-and-conditions {
   -fx-padding: 0 0 10 0;
 }
 
