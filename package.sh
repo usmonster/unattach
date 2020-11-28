@@ -68,15 +68,17 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
   codesign -vvv --deep --strict Unattach-$VERSION.dmg
   codesign -dvv Unattach-$VERSION.dmg
 elif [[ "$OSTYPE" == "msys" ]]; then
-  rm -rf ./*.exe
-  jpackage --name Unattach --app-version $VERSION --description "$DESCRIPTION" --vendor "$VENDOR" --copyright "$COPYRIGHT" \
+  rm -rf ./*.msi
+  jpackage --type msi --name Unattach --app-version $VERSION --description "$DESCRIPTION" --vendor "$VENDOR" --copyright "$COPYRIGHT" \
     --license-file LICENSE \
     --icon src/main/resources/logo-256.ico \
     --win-shortcut --win-dir-chooser \
+    --win-upgrade-uuid c1fce3eb-862f-4321-98ed-67178316160c \
     --input target \
     --java-options "$JAVA_OPTION" \
     --main-jar "$JAR_FILE" \
     --main-class app.unattach.Main
+  Powershell -File windows-sign.ps1
 else
   echo "Unsupported system: $OSTYPE"
 fi
