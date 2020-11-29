@@ -21,6 +21,7 @@ public interface Model {
   DefaultArtifactVersion getLatestVersion() throws IOException, InterruptedException;
   String getSearchQuery();
   String getTargetDirectory();
+  int incrementNumberOfRuns();
   void saveRemovedLabelId(String removedLabelId);
   void saveSearchQuery(String query);
   void saveTargetDirectory(String path);

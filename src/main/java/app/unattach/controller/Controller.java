@@ -27,6 +27,7 @@ public interface Controller {
   String getSearchQuery();
   GetEmailMetadataTask getSearchTask(String query) throws IOException, InterruptedException;
   String getTargetDirectory();
+  int incrementNumberOfRuns();
   void openFile(File file);
   void openQueryLanguagePage();
   void openUnattachHomepage();

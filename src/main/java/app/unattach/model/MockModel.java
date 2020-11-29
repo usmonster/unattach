@@ -13,6 +13,7 @@ public class MockModel implements Model {
   private static final Logger LOGGER = Logger.getLogger(MockModel.class.getName());
 
   private final Random random = new Random(1337);
+  private int numberOfRuns = 0;
   private String filenameSchema = FilenameFactory.DEFAULT_SCHEMA;
   private ArrayList<Email> emails = new ArrayList<>();
 
@@ -104,6 +105,11 @@ public class MockModel implements Model {
     String userHome = System.getProperty("user.home");
     Path defaultPath = Paths.get(userHome, "Downloads", Constants.PRODUCT_NAME);
     return defaultPath.toString();
+  }
+
+  @Override
+  public int incrementNumberOfRuns() {
+    return ++numberOfRuns;
   }
 
   @Override

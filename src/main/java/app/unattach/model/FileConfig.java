@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 public class FileConfig implements Config {
     private static final Logger LOGGER = Logger.getLogger(FileConfig.class.getName());
     private static final String FILENAME_SCHEMA_PROPERTY = "filename_schema";
+    private static final String NUMBER_OF_RUNS_PROPERTY = "number_of_runs";
     private static final String REMOVED_LABEL_ID_PROPERTY = "removed_label_id";
     private static final String SEARCH_QUERY_PROPERTY = "search_query";
     private static final String TARGET_DIRECTORY_PROPERTY = "target_directory";
@@ -26,6 +27,10 @@ public class FileConfig implements Config {
         return config.getProperty(FILENAME_SCHEMA_PROPERTY, FilenameFactory.DEFAULT_SCHEMA);
     }
 
+    private int getNumberOfRuns() {
+        return Integer.parseInt(config.getProperty(NUMBER_OF_RUNS_PROPERTY, "0"));
+    }
+
     @Override
     public String getRemovedLabelId() {
         return config.getProperty(REMOVED_LABEL_ID_PROPERTY);
@@ -39,6 +44,14 @@ public class FileConfig implements Config {
     @Override
     public String getTargetDirectory() {
         return config.getProperty(TARGET_DIRECTORY_PROPERTY, getDefaultTargetDirectory());
+    }
+
+    @Override
+    public int incrementNumberOfRuns() {
+        int numberOfRuns = getNumberOfRuns() + 1;
+        config.setProperty(NUMBER_OF_RUNS_PROPERTY, Integer.toString(numberOfRuns));
+        saveConfigToFile();
+        return numberOfRuns;
     }
 
     @Override

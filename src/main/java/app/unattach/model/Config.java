@@ -5,6 +5,7 @@ public interface Config {
     String getRemovedLabelId();
     String getSearchQuery();
     String getTargetDirectory();
+    int incrementNumberOfRuns();
     void saveFilenameSchema(String schema);
     void saveRemovedLabelId(String removedLabelId);
     void saveSearchQuery(String query);

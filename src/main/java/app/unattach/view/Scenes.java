@@ -34,9 +34,12 @@ public enum Scenes {
     return createNewStage(null);
   }
 
-  static Stage createNewStage(String subTitle) {
+  static Stage createNewStage(String title) {
+    if (title == null) {
+      title = Constants.PRODUCT_NAME + " (" + Constants.VERSION + ")";
+    }
     Stage newStage = new Stage();
-    newStage.setTitle(Constants.PRODUCT_NAME + (subTitle == null ? "" : ": " + subTitle) + " (" + Constants.VERSION + ")");
+    newStage.setTitle(title);
     newStage.getIcons().add(new Image(Scenes.class.getResourceAsStream("/logo-256.png")));
     return newStage;
   }

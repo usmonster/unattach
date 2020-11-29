@@ -27,11 +27,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class MainViewController {
   private static final Logger LOGGER = Logger.getLogger(MainViewController.class.getName());
 
+  private final Random random = new Random();
   private Controller controller;
   @FXML
   private VBox root;
@@ -170,12 +170,16 @@ public class MainViewController {
   }
 
   @FXML
-  private void onFeedbackMenuItemPressed() throws IOException {
-    Stage dialog = Scenes.createNewStage("feedback");
-    dialog.initOwner(root.getScene().getWindow());
-    dialog.initModality(Modality.APPLICATION_MODAL);
-    dialog.setScene(Scenes.loadScene("/feedback.view.fxml"));
-    Scenes.showAndPreventMakingSmaller(dialog);
+  private void onFeedbackMenuItemPressed() {
+    try {
+      Stage dialog = Scenes.createNewStage(Constants.PRODUCT_NAME +" : feedback");
+      dialog.initOwner(root.getScene().getWindow());
+      dialog.initModality(Modality.APPLICATION_MODAL);
+      dialog.setScene(Scenes.loadScene("/feedback.view.fxml"));
+      Scenes.showAndPreventMakingSmaller(dialog);
+    } catch (Throwable t) {
+      reportError("Unable to open feedback view.", t);
+    }
   }
 
   @FXML
@@ -396,6 +400,10 @@ public class MainViewController {
       processingProgressBarWithText.textProperty().setValue(
           String.format("Processing stopped (%s).", getProcessingStatusString(emailsToProcess, nextEmailIndex, failed)));
       resetControls();
+      int numberOfRuns = controller.incrementNumberOfRuns();
+      if (numberOfRuns % 10 == 0) {
+        showThankYouDialog();
+      }
       return;
     }
     Email email = emailsToProcess.get(nextEmailIndex);
@@ -538,7 +546,7 @@ public class MainViewController {
   @FXML
   private void onFilenameSchemaMenuItemPressed() {
     try {
-      Stage dialog = Scenes.createNewStage("file name scheme");
+      Stage dialog = Scenes.createNewStage(Constants.PRODUCT_NAME + " : file name scheme");
       dialog.initOwner(root.getScene().getWindow());
       dialog.initModality(Modality.APPLICATION_MODAL);
       Scene scene = Scenes.loadScene("/filename-schema.view.fxml");
@@ -554,7 +562,7 @@ public class MainViewController {
   @FXML
   private void onGmailLabelMenuItemPressed() {
     try {
-      Stage dialog = Scenes.createNewStage("Gmail label");
+      Stage dialog = Scenes.createNewStage(Constants.PRODUCT_NAME + " : Gmail label");
       dialog.initOwner(root.getScene().getWindow());
       dialog.initModality(Modality.APPLICATION_MODAL);
       Scene scene = Scenes.loadScene("/gmail-label.view.fxml");
@@ -586,5 +594,20 @@ public class MainViewController {
     Optional<CheckMenuItem> selectedCurrencyMenu = donationCurrencyMenu.getItems().stream()
             .map(CheckMenuItem.class::cast).filter(CheckMenuItem::isSelected).findFirst();
     return selectedCurrencyMenu.isEmpty() ? null : selectedCurrencyMenu.get().getText();
+  }
+
+  private void showThankYouDialog() {
+    try {
+      Stage dialog = Scenes.createNewStage("Thank you");
+      dialog.initOwner(root.getScene().getWindow());
+      dialog.initModality(Modality.APPLICATION_MODAL);
+      Scene scene = Scenes.loadScene("/thank-you.view.fxml");
+      ThankYouViewController thankYouViewController = (ThankYouViewController) scene.getUserData();
+      thankYouViewController.setOnSubmitFeedbackCallback(this::onFeedbackMenuItemPressed);
+      dialog.setScene(scene);
+      Scenes.showAndPreventMakingSmaller(dialog);
+    } catch (IOException e) {
+      LOGGER.log(Level.SEVERE, "Failed to open the thank you dialog.", e);
+    }
   }
 }

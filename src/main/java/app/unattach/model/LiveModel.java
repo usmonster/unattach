@@ -92,6 +92,11 @@ public class LiveModel implements Model {
   }
 
   @Override
+  public int incrementNumberOfRuns() {
+    return config.incrementNumberOfRuns();
+  }
+
+  @Override
   public void saveRemovedLabelId(String removedLabelId) {
     config.saveRemovedLabelId(removedLabelId);
   }
