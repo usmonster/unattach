@@ -36,9 +36,9 @@ public class GmailLabelController {
         "attachments have been removed."
     );
     customizeLabel.setText(
-        "You can edit the label settings within Gmail itself,\n" +
-        "while you can edit the label appearance by pressing\n" +
-        "⋮ next to the label name in the list of labels."
+        "You can edit the label settings within Gmail itself.\n" +
+        "You can update the label's appearance by pressing\n" +
+        "⋮ next to the label's name in the list of labels."
     );
     String removedLabelId = controller.getOrCreateRemovedLabelId();
     List<GmailLabel> labels = controller.getIdToLabel().entrySet().stream()
