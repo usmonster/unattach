@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 
 public class FileConfig implements Config {
     private static final Logger LOGGER = Logger.getLogger(FileConfig.class.getName());
+    private static final String DELETE_ORIGINAL_PROPERTY = "delete_original";
     private static final String FILENAME_SCHEMA_PROPERTY = "filename_schema";
     private static final String NUMBER_OF_RUNS_PROPERTY = "number_of_runs";
     private static final String REMOVED_LABEL_ID_PROPERTY = "removed_label_id";
@@ -20,6 +21,11 @@ public class FileConfig implements Config {
     public FileConfig() {
         config = new Properties();
         loadConfigFromFile();
+    }
+
+    @Override
+    public boolean getDeleteOriginal() {
+        return Boolean.parseBoolean(config.getProperty(DELETE_ORIGINAL_PROPERTY, "true"));
     }
 
     @Override
@@ -75,6 +81,12 @@ public class FileConfig implements Config {
     @Override
     public void saveTargetDirectory(String path) {
         config.setProperty(TARGET_DIRECTORY_PROPERTY, path);
+        saveConfigToFile();
+    }
+
+    @Override
+    public void setDeleteOriginal(boolean deleteOriginal) {
+        config.setProperty(DELETE_ORIGINAL_PROPERTY, Boolean.toString(deleteOriginal));
         saveConfigToFile();
     }
 

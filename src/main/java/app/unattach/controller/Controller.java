@@ -16,6 +16,7 @@ public interface Controller {
   void clearPreviousSearch();
   String createLabel(String name);
   void donate(String item, int amount, String currency);
+  boolean getDeleteOriginal();
   List<Email> getEmails();
   String getEmailAddress() throws IOException;
   SortedMap<String, String> getIdToLabel();
@@ -40,5 +41,6 @@ public interface Controller {
   String signIn() throws IOException, GeneralSecurityException;
   void signOut();
   boolean sendToServer(String contentDescription, String exceptionText, String userText);
+  void setDeleteOriginal(boolean deleteOriginal);
   void subscribe(String emailAddress) throws Exception;
 }

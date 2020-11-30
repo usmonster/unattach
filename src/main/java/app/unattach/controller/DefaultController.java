@@ -67,6 +67,11 @@ public class DefaultController implements Controller {
   }
 
   @Override
+  public boolean getDeleteOriginal() {
+    return model.getDeleteOriginal();
+  }
+
+  @Override
   public String getOrCreateRemovedLabelId() {
     SortedMap<String, String> idToLabel = getIdToLabel();
     String removedLabelId = getRemovedLabelId();
@@ -142,6 +147,11 @@ public class DefaultController implements Controller {
   @Override
   public void openQueryLanguagePage() {
     openWebPage("https://support.google.com/mail/answer/7190");
+  }
+
+  @Override
+  public void setDeleteOriginal(boolean deleteOriginal) {
+    model.setDeleteOriginal(deleteOriginal);
   }
 
   @Override

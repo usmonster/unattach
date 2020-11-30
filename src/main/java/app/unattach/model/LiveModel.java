@@ -112,6 +112,11 @@ public class LiveModel implements Model {
   }
 
   @Override
+  public void setDeleteOriginal(boolean deleteOriginal) {
+    config.setDeleteOriginal(deleteOriginal);
+  }
+
+  @Override
   public void signIn() throws IOException, GeneralSecurityException {
     configureService();
     try {
@@ -196,7 +201,7 @@ public class LiveModel implements Model {
       updateRawMessage(message, mimeMessage);
       Message newMessage = insertSlimMessage(message); // 25 quota units
       addLabel(newMessage.getId(), processSettings.processOption.getLabelId());
-      removeOriginalMessage(message.getId()); // 10 quota units
+      removeOriginalMessage(processSettings.processOption.shouldDeleteOriginal(), message.getId()); // 5-10 quota units
     }
     return new ProcessEmailResult(fileNames);
   }
@@ -241,9 +246,14 @@ public class LiveModel implements Model {
     return service.users().messages().insert(USER, message).setInternalDateSource("dateHeader").execute();
   }
 
-  private void removeOriginalMessage(String emailId) throws IOException {
-    // 1 messages.delete == 10 quota units
-    service.users().messages().delete(USER, emailId).execute();
+  private void removeOriginalMessage(boolean deleteOriginal, String emailId) throws IOException {
+    if (deleteOriginal) {
+      // 1 messages.delete == 10 quota units
+      service.users().messages().delete(USER, emailId).execute();
+    } else {
+      // 1 messages.trash == 5 quota units
+      service.users().messages().trash(USER, emailId).execute();
+    }
   }
 
   @Override
@@ -280,6 +290,11 @@ public class LiveModel implements Model {
           batch.execute();
         }
     );
+  }
+
+  @Override
+  public boolean getDeleteOriginal() {
+    return config.getDeleteOriginal();
   }
 
   private List<Message> getEmailIds(String query) throws IOException, InterruptedException {

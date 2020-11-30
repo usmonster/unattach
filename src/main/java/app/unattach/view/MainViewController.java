@@ -31,7 +31,6 @@ import java.util.stream.Collectors;
 public class MainViewController {
   private static final Logger LOGGER = Logger.getLogger(MainViewController.class.getName());
 
-  private final Random random = new Random();
   private Controller controller;
   @FXML
   private VBox root;
@@ -45,6 +44,10 @@ public class MainViewController {
   private CheckMenuItem addMetadataCheckMenuItem;
   @FXML
   private Menu viewColumnMenu;
+  @FXML
+  private CheckMenuItem deleteOriginalMenuItem;
+  @FXML
+  private CheckMenuItem trashOriginalMenuItem;
   @FXML
   private Menu donationCurrencyMenu;
   @FXML
@@ -120,6 +123,9 @@ public class MainViewController {
     controller = ControllerFactory.getDefaultController();
     emailMenuItem.setText("Signed in as " + controller.getEmailAddress() + ".");
     addMenuForHidingColumns();
+    if (!controller.getDeleteOriginal()) {
+      onTrashOriginalMenuItemPressed();
+    }
     List<CheckMenuItem> currencyMenuItems =
             Arrays.stream(Constants.CURRENCIES).map(CheckMenuItem::new).collect(Collectors.toList());
     currencyMenuItems.forEach(menuItem -> menuItem.setOnAction(this::onDonationCurrencySelected));
@@ -356,14 +362,16 @@ public class MainViewController {
 
   @FXML
   private void onDownloadAndDeleteButtonPressed() {
+    boolean deleteOriginal = deleteOriginalMenuItem.isSelected();
     String removedLabelId = controller.getOrCreateRemovedLabelId();
-    processEmails(new ProcessOption(backupCheckBox.isSelected(), true, true, removedLabelId));
+    processEmails(new ProcessOption(backupCheckBox.isSelected(), true, true, deleteOriginal, removedLabelId));
   }
 
   @FXML
   private void onDeleteButtonPressed() {
+    boolean deleteOriginal = deleteOriginalMenuItem.isSelected();
     String removedLabelId = controller.getOrCreateRemovedLabelId();
-    processEmails(new ProcessOption(backupCheckBox.isSelected(), false, true, removedLabelId));
+    processEmails(new ProcessOption(backupCheckBox.isSelected(), false, true, deleteOriginal, removedLabelId));
   }
 
   private void processEmails(ProcessOption processOption) {
@@ -536,6 +544,20 @@ public class MainViewController {
     } catch (Throwable t) {
       reportError("Couldn't open the log file.", t);
     }
+  }
+
+  @FXML
+  private void onDeleteOriginalMenuItemPressed() {
+    deleteOriginalMenuItem.setSelected(true);
+    trashOriginalMenuItem.setSelected(false);
+    controller.setDeleteOriginal(true);
+  }
+
+  @FXML
+  private void onTrashOriginalMenuItemPressed() {
+    deleteOriginalMenuItem.setSelected(false);
+    trashOriginalMenuItem.setSelected(true);
+    controller.setDeleteOriginal(false);
   }
 
   @FXML

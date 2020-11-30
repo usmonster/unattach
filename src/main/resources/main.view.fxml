@@ -19,6 +19,12 @@
     <Menu text="Settings">
       <Menu fx:id="viewColumnMenu" text="View Column" />
       <CheckMenuItem fx:id="addMetadataCheckMenuItem" text="Add metadata about removed attachments" selected="true" />
+      <Menu text="After inserting email copy without attachments .." >
+        <CheckMenuItem fx:id="deleteOriginalMenuItem" text="Permanently delete original email" selected="true"
+                       onAction="#onDeleteOriginalMenuItemPressed" />
+        <CheckMenuItem fx:id="trashOriginalMenuItem" text="Trash original email (doesn't free space)"
+                       onAction="#onTrashOriginalMenuItemPressed" />
+      </Menu>
       <MenuItem text="File name schema .." onAction="#onFilenameSchemaMenuItemPressed" />
       <MenuItem text="Gmail label .." onAction="#onGmailLabelMenuItemPressed" />
       <Menu fx:id="donationCurrencyMenu" text="Donation currency" />

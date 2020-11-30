@@ -1,6 +1,7 @@
 package app.unattach.model;
 
 public interface Config {
+    boolean getDeleteOriginal();
     String getFilenameSchema();
     String getRemovedLabelId();
     String getSearchQuery();
@@ -10,4 +11,5 @@ public interface Config {
     void saveRemovedLabelId(String removedLabelId);
     void saveSearchQuery(String query);
     void saveTargetDirectory(String path);
+    void setDeleteOriginal(boolean deleteOriginal);
 }

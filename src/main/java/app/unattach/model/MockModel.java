@@ -51,6 +51,11 @@ public class MockModel implements Model {
   }
 
   @Override
+  public boolean getDeleteOriginal() {
+    return true;
+  }
+
+  @Override
   public String getEmailAddress() {
     return "user@mock.com";
   }
@@ -120,6 +125,9 @@ public class MockModel implements Model {
 
   @Override
   public void saveTargetDirectory(String path) {}
+
+  @Override
+  public void setDeleteOriginal(boolean deleteOriginal) {}
 
   @Override
   public void signIn() {
