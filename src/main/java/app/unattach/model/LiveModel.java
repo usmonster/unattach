@@ -193,8 +193,7 @@ public class LiveModel implements Model {
     Message message = getRawMessage(email.getGmailId()); // 5 quota units
     MimeMessage mimeMessage = getMimeMessage(message);
     if (processSettings.processOption.shouldBackup()) {
-      String filename = email.getGmailId() + ".eml";
-      mimeMessage.writeTo(new FileOutputStream(new File(processSettings.targetDirectory, filename)));
+      backupEmail(email, processSettings, mimeMessage);
     }
     Set<String> fileNames = EmailProcessor.process(email, mimeMessage, processSettings);
     if (processSettings.processOption.shouldRemove() && !fileNames.isEmpty()) {
@@ -221,6 +220,14 @@ public class LiveModel implements Model {
     Properties props = new Properties();
     Session session = Session.getInstance(props);
     return new MimeMessage(session, new ByteArrayInputStream(emailBytes));
+  }
+
+  private void backupEmail(Email email, ProcessSettings processSettings, MimeMessage mimeMessage)
+          throws IOException, MessagingException {
+    //noinspection ResultOfMethodCallIgnored
+    processSettings.targetDirectory.getParentFile().mkdirs();
+    String filename = email.getGmailId() + ".eml";
+    mimeMessage.writeTo(new FileOutputStream(new File(processSettings.targetDirectory, filename)));
   }
 
   private void updateRawMessage(Message message, MimeMessage mimeMessage) throws IOException, MessagingException {
