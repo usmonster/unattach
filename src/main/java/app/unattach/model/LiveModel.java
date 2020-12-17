@@ -143,6 +143,11 @@ public class LiveModel implements Model {
   }
 
   @Override
+  public void setEmailSize(int emailSize) {
+    config.setEmailSize(emailSize);
+  }
+
+  @Override
   public void sendToServer(String contentDescription, String userEmail, String stackTraceText, String userText)
       throws IOException, InterruptedException {
     HttpClient.sendToServer(contentDescription, userEmail, stackTraceText, userText);
@@ -171,6 +176,11 @@ public class LiveModel implements Model {
   @Override
   public List<Email> getEmails() {
     return emails;
+  }
+
+  @Override
+  public int getEmailSize() {
+    return config.getEmailSize();
   }
 
   @Override

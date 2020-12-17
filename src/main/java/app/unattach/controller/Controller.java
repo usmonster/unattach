@@ -19,6 +19,7 @@ public interface Controller {
   boolean getDeleteOriginal();
   List<Email> getEmails();
   String getEmailAddress() throws IOException;
+  int getEmailSize();
   SortedMap<String, String> getIdToLabel();
   String getFilenameSchema();
   DefaultArtifactVersion getLatestVersion();
@@ -34,13 +35,14 @@ public interface Controller {
   void openUnattachHomepage();
   void openTermsAndConditions();
   void openWebPage(String uriString);
+  void setEmailSize(int emailSize);
   void setFilenameSchema(String filenameSchema);
   void saveRemovedLabelId(String removedLabelId);
   void saveSearchQuery(String query);
   void saveTargetDirectory(String path);
   String signIn() throws IOException, GeneralSecurityException;
   void signOut();
-  boolean sendToServer(String contentDescription, String exceptionText, String userText);
+  void sendToServer(String contentDescription, String exceptionText, String userText);
   void setDeleteOriginal(boolean deleteOriginal);
   void subscribe(String emailAddress) throws Exception;
 }

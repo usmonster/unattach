@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class MainViewController {
   private static final Logger LOGGER = Logger.getLogger(MainViewController.class.getName());
@@ -130,13 +131,18 @@ public class MainViewController {
             Arrays.stream(Constants.CURRENCIES).map(CheckMenuItem::new).collect(Collectors.toList());
     currencyMenuItems.forEach(menuItem -> menuItem.setOnAction(this::onDonationCurrencySelected));
     donationCurrencyMenu.getItems().addAll(currencyMenuItems);
+    //noinspection CodeBlock2Expr
     Platform.runLater(() -> {
       currencyMenuItems.stream().filter(menuItem -> menuItem.getText().equals(Constants.DEFAULT_CURRENCY))
               .forEach(menuItem -> {menuItem.setSelected(true); menuItem.fire();});
     });
     donateMenu.setGraphic(new Label()); // This enables the CSS style for the menu.
     emailSizeComboBox.setItems(FXCollections.observableList(getEmailSizeOptions()));
-    emailSizeComboBox.getSelectionModel().select(1);
+    int emailSize = controller.getEmailSize();
+    int emailSizeIndex = IntStream.range(0, emailSizeComboBox.getItems().size())
+        .filter(i -> emailSizeComboBox.getItems().get(i).value.equals(emailSize))
+        .findFirst().orElse(1);
+    emailSizeComboBox.getSelectionModel().select(emailSizeIndex);
     searchQueryTextField.setText(controller.getSearchQuery());
     searchProgressBarWithText.progressProperty().setValue(0);
     searchProgressBarWithText.textProperty().setValue("(Searching not started yet.)");
@@ -579,6 +585,11 @@ public class MainViewController {
     } catch (IOException e) {
       LOGGER.log(Level.SEVERE, "Failed to open the file name scheme dialog.", e);
     }
+  }
+
+  @FXML
+  private void onEmailSizeComboBoxChanged() {
+    controller.setEmailSize(emailSizeComboBox.getValue().value);
   }
 
   @FXML

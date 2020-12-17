@@ -66,6 +66,11 @@ public class MockModel implements Model {
   }
 
   @Override
+  public int getEmailSize() {
+    return 1;
+  }
+
+  @Override
   public String getFilenameSchema() {
     return filenameSchema;
   }
@@ -138,6 +143,9 @@ public class MockModel implements Model {
   public void signOut() {
     LOGGER.info("signOut");
   }
+
+  @Override
+  public void setEmailSize(int emailSize) {}
 
   @Override
   public void sendToServer(String contentDescription, String userEmail, String stackTraceText, String userText) {

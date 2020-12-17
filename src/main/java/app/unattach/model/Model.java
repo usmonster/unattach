@@ -16,6 +16,7 @@ public interface Model {
   String getEmailAddress() throws IOException;
   SortedMap<String, String> getIdToLabel() throws IOException;
   List<Email> getEmails();
+  int getEmailSize();
   String getFilenameSchema();
   LongTask<ProcessEmailResult> getProcessTask(Email email, ProcessSettings processSettings);
   String getRemovedLabelId();
@@ -29,8 +30,9 @@ public interface Model {
   void setDeleteOriginal(boolean deleteOriginal);
   void signIn() throws IOException, GeneralSecurityException;
   void signOut() throws IOException;
+  void setEmailSize(int emailSize);
+  void setFilenameSchema(String filenameSchema);
   void sendToServer(String contentDescription, String userEmail, String stackTraceText, String userText)
       throws IOException, InterruptedException;
-  void setFilenameSchema(String filenameSchema);
   void subscribe(String emailAddress) throws IOException, InterruptedException;
 }

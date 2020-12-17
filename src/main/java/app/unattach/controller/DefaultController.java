@@ -166,6 +166,11 @@ public class DefaultController implements Controller {
   }
 
   @Override
+  public int getEmailSize() {
+    return model.getEmailSize();
+  }
+
+  @Override
   public SortedMap<String, String> getIdToLabel() {
     try {
       LOGGER.info("Getting email labels..");
@@ -212,18 +217,16 @@ public class DefaultController implements Controller {
   }
 
   @Override
-  public boolean sendToServer(String contentDescription, String stackTraceText, String userText) {
+  public void sendToServer(String contentDescription, String stackTraceText, String userText) {
     try {
       LOGGER.info("Sending " + contentDescription + " ..");
       String userEmail = model.getEmailAddress();
       model.sendToServer(contentDescription, userEmail, stackTraceText, userText);
       LOGGER.info("Sending " + contentDescription + " .. successful. Thanks!");
-      return true;
     } catch (Throwable t) {
       String logMessage = "Failed to send " + contentDescription + " to the server. " +
           "Please consider sending an email to " + Constants.CONTACT_EMAIL + " instead.";
       LOGGER.log(Level.SEVERE, logMessage, t);
-      return false;
     }
   }
 
@@ -281,5 +284,10 @@ public class DefaultController implements Controller {
     } catch (Throwable t) {
       LOGGER.info("Unable to open a web page from within the application. " + manualInstructions);
     }
+  }
+
+  @Override
+  public void setEmailSize(int emailSize) {
+    model.setEmailSize(emailSize);
   }
 }
