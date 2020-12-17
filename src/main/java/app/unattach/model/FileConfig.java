@@ -3,14 +3,18 @@ package app.unattach.model;
 import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class FileConfig implements Config {
   private static final Logger LOGGER = Logger.getLogger(FileConfig.class.getName());
   private static final String DELETE_ORIGINAL_PROPERTY = "delete_original";
   private static final String EMAIL_SIZE_PROPERTY = "email_size";
+  private static final String LABEL_IDS_PROPERTY = "label_ids";
   private static final String FILENAME_SCHEMA_PROPERTY = "filename_schema";
   private static final String NUMBER_OF_RUNS_PROPERTY = "number_of_runs";
   private static final String REMOVED_LABEL_ID_PROPERTY = "removed_label_id";
@@ -37,6 +41,11 @@ public class FileConfig implements Config {
   @Override
   public String getFilenameSchema() {
     return config.getProperty(FILENAME_SCHEMA_PROPERTY, FilenameFactory.DEFAULT_SCHEMA);
+  }
+
+  @Override
+  public List<String> getLabelIds() {
+    return Arrays.asList(config.getProperty(LABEL_IDS_PROPERTY, "").split(","));
   }
 
   private int getNumberOfRuns() {
@@ -73,6 +82,12 @@ public class FileConfig implements Config {
   }
 
   @Override
+  public void saveLabelIds(List<String> labelIds) {
+    config.setProperty(LABEL_IDS_PROPERTY, String.join(",", labelIds));
+    saveConfigToFile();
+  }
+
+  @Override
   public void saveRemovedLabelId(String removedLabelId) {
     config.setProperty(REMOVED_LABEL_ID_PROPERTY, removedLabelId);
     saveConfigToFile();
@@ -91,7 +106,7 @@ public class FileConfig implements Config {
   }
 
   @Override
-  public void setEmailSize(int emailSize) {
+  public void saveEmailSize(int emailSize) {
     config.setProperty(EMAIL_SIZE_PROPERTY, Integer.toString(emailSize));
     saveConfigToFile();
   }

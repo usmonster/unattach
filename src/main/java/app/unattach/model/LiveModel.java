@@ -97,6 +97,11 @@ public class LiveModel implements Model {
   }
 
   @Override
+  public void saveLabelIds(List<String> labelIds) {
+    config.saveLabelIds(labelIds);
+  }
+
+  @Override
   public void saveRemovedLabelId(String removedLabelId) {
     config.saveRemovedLabelId(removedLabelId);
   }
@@ -143,8 +148,8 @@ public class LiveModel implements Model {
   }
 
   @Override
-  public void setEmailSize(int emailSize) {
-    config.setEmailSize(emailSize);
+  public void saveEmailSize(int emailSize) {
+    config.saveEmailSize(emailSize);
   }
 
   @Override
@@ -186,6 +191,11 @@ public class LiveModel implements Model {
   @Override
   public String getFilenameSchema() {
     return config.getFilenameSchema();
+  }
+
+  @Override
+  public List<String> getLabelIds() {
+    return config.getLabelIds();
   }
 
   @Override

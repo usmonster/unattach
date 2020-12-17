@@ -84,7 +84,7 @@ public class FilenameSchemaController {
 
   @FXML
   private void onOkButtonPressed() {
-    controller.setFilenameSchema(filenameSchemaTextField.getText());
+    controller.saveFilenameSchema(filenameSchemaTextField.getText());
     okButton.getScene().getWindow().hide();
   }
 

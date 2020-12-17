@@ -125,8 +125,13 @@ public class DefaultController implements Controller {
   }
 
   @Override
-  public void setFilenameSchema(String filenameSchema) {
+  public void saveFilenameSchema(String filenameSchema) {
     model.setFilenameSchema(filenameSchema);
+  }
+
+  @Override
+  public void saveLabelIds(List<String> labelIds) {
+    model.saveLabelIds(labelIds);
   }
 
   @Override
@@ -186,6 +191,11 @@ public class DefaultController implements Controller {
   @Override
   public String getFilenameSchema() {
     return model.getFilenameSchema();
+  }
+
+  @Override
+  public List<String> getLabelIds() {
+    return model.getLabelIds();
   }
 
   @Override
@@ -287,7 +297,7 @@ public class DefaultController implements Controller {
   }
 
   @Override
-  public void setEmailSize(int emailSize) {
-    model.setEmailSize(emailSize);
+  public void saveEmailSize(int emailSize) {
+    model.saveEmailSize(emailSize);
   }
 }

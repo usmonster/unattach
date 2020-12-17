@@ -76,6 +76,11 @@ public class MockModel implements Model {
   }
 
   @Override
+  public List<String> getLabelIds() {
+    return Collections.emptyList();
+  }
+
+  @Override
   public SortedMap<String, String> getIdToLabel() {
     SortedMap<String, String> idToLabel = new TreeMap<>();
     for (int i = 0; i < 10; ++i) {
@@ -123,6 +128,9 @@ public class MockModel implements Model {
   }
 
   @Override
+  public void saveLabelIds(List<String> labelIds) {}
+
+  @Override
   public void saveRemovedLabelId(String removedLabelId) {}
 
   @Override
@@ -145,7 +153,7 @@ public class MockModel implements Model {
   }
 
   @Override
-  public void setEmailSize(int emailSize) {}
+  public void saveEmailSize(int emailSize) {}
 
   @Override
   public void sendToServer(String contentDescription, String userEmail, String stackTraceText, String userText) {

@@ -18,19 +18,21 @@ public interface Model {
   List<Email> getEmails();
   int getEmailSize();
   String getFilenameSchema();
+  List<String> getLabelIds();
   LongTask<ProcessEmailResult> getProcessTask(Email email, ProcessSettings processSettings);
   String getRemovedLabelId();
   DefaultArtifactVersion getLatestVersion() throws IOException, InterruptedException;
   String getSearchQuery();
   String getTargetDirectory();
   int incrementNumberOfRuns();
+  void saveLabelIds(List<String> labelIds);
   void saveRemovedLabelId(String removedLabelId);
   void saveSearchQuery(String query);
   void saveTargetDirectory(String path);
   void setDeleteOriginal(boolean deleteOriginal);
   void signIn() throws IOException, GeneralSecurityException;
   void signOut() throws IOException;
-  void setEmailSize(int emailSize);
+  void saveEmailSize(int emailSize);
   void setFilenameSchema(String filenameSchema);
   void sendToServer(String contentDescription, String userEmail, String stackTraceText, String userText)
       throws IOException, InterruptedException;

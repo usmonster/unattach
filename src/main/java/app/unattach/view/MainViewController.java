@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -74,7 +75,7 @@ public class MainViewController {
   @FXML
   private Label labelsListViewLabel;
   @FXML
-  private ListView<String> labelsListView;
+  private ListView<IdLabel> labelsListView;
   @FXML
   private TextField searchQueryTextField;
   @FXML
@@ -153,9 +154,12 @@ public class MainViewController {
     processingProgressBarWithText.textProperty().setValue("(Processing of emails not started yet.)");
     labelsListViewLabel.setText("Email labels:\n(If selecting multiple, results will match any.)");
     labelsListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-    ArrayList<String> labels = new ArrayList<>(controller.getIdToLabel().values());
-    Collections.sort(labels);
-    labelsListView.setItems(FXCollections.observableList(labels));
+    List<IdLabel> idLabels = controller.getIdToLabel().entrySet().stream()
+        .map(e -> new IdLabel(e.getKey(), e.getValue())).sorted(Comparator.comparing(IdLabel::getLabel))
+        .collect(Collectors.toList());
+    labelsListView.setItems(FXCollections.observableList(idLabels));
+    selectSavedLabels(idLabels);
+    saveLabelsOnChange();
   }
 
   private void addMenuForHidingColumns() {
@@ -164,6 +168,20 @@ public class MainViewController {
       menuItem.setSelected(true);
       menuItem.setOnAction(event -> column.setVisible(menuItem.isSelected()));
       viewColumnMenu.getItems().add(menuItem);
+    });
+  }
+
+  private void selectSavedLabels(List<IdLabel> idLabels) {
+    Map<String, IdLabel> idToIdLabel = idLabels.stream().collect(Collectors.toMap(IdLabel::getId, Function.identity()));
+    controller.getLabelIds().stream().map(idToIdLabel::get).filter(Objects::nonNull).
+        forEach(labelsListView.getSelectionModel()::select);
+  }
+
+  private void saveLabelsOnChange() {
+    labelsListView.getSelectionModel().getSelectedItems().addListener((ListChangeListener<IdLabel>) change -> {
+      List<String> labelIds = labelsListView.getSelectionModel().getSelectedItems()
+          .stream().map(IdLabel::getId).collect(Collectors.toList());
+      controller.saveLabelIds(labelIds);
     });
   }
 
@@ -319,10 +337,10 @@ public class MainViewController {
     if (basicSearchTab.isSelected()) {
       int minEmailSizeInMb = emailSizeComboBox.getSelectionModel().getSelectedItem().value;
       query.append(String.format("has:attachment size:%dm", minEmailSizeInMb));
-      ObservableList<String> emailLabels = labelsListView.getSelectionModel().getSelectedItems();
+      ObservableList<IdLabel> emailLabels = labelsListView.getSelectionModel().getSelectedItems();
       if (!emailLabels.isEmpty()) {
         query.append(" {");
-        query.append(emailLabels.stream().map(label -> String.format("label:\"%s\"", label))
+        query.append(emailLabels.stream().map(idLabel -> String.format("label:\"%s\"", idLabel.getLabel()))
                 .collect(Collectors.joining(" ")));
         query.append("}");
       }
@@ -589,7 +607,7 @@ public class MainViewController {
 
   @FXML
   private void onEmailSizeComboBoxChanged() {
-    controller.setEmailSize(emailSizeComboBox.getValue().value);
+    controller.saveEmailSize(emailSizeComboBox.getValue().value);
   }
 
   @FXML

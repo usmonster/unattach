@@ -22,6 +22,7 @@ public interface Controller {
   int getEmailSize();
   SortedMap<String, String> getIdToLabel();
   String getFilenameSchema();
+  List<String> getLabelIds();
   DefaultArtifactVersion getLatestVersion();
   String getOrCreateRemovedLabelId();
   LongTask<ProcessEmailResult> getProcessTask(Email email, ProcessSettings processSettings);
@@ -35,8 +36,9 @@ public interface Controller {
   void openUnattachHomepage();
   void openTermsAndConditions();
   void openWebPage(String uriString);
-  void setEmailSize(int emailSize);
-  void setFilenameSchema(String filenameSchema);
+  void saveEmailSize(int emailSize);
+  void saveFilenameSchema(String filenameSchema);
+  void saveLabelIds(List<String> labelIds);
   void saveRemovedLabelId(String removedLabelId);
   void saveSearchQuery(String query);
   void saveTargetDirectory(String path);
