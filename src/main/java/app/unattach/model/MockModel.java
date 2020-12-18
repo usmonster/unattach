@@ -101,6 +101,11 @@ public class MockModel implements Model {
   }
 
   @Override
+  public String getDownloadedLabelId() {
+    return "downloaded-label-id";
+  }
+
+  @Override
   public String getRemovedLabelId() {
     return "removed-label-id";
   }
@@ -129,6 +134,9 @@ public class MockModel implements Model {
 
   @Override
   public void saveLabelIds(List<String> labelIds) {}
+
+  @Override
+  public void saveDownloadedLabelId(String downloadedLabelId) {}
 
   @Override
   public void saveRemovedLabelId(String removedLabelId) {}

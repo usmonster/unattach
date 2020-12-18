@@ -102,6 +102,11 @@ public class LiveModel implements Model {
   }
 
   @Override
+  public void saveDownloadedLabelId(String downloadedLabelId) {
+    config.saveDownloadedLabelId(downloadedLabelId);
+  }
+
+  @Override
   public void saveRemovedLabelId(String removedLabelId) {
     config.saveRemovedLabelId(removedLabelId);
   }
@@ -204,6 +209,11 @@ public class LiveModel implements Model {
   }
 
   @Override
+  public String getDownloadedLabelId() {
+    return config.getDownloadedLabelId();
+  }
+
+  @Override
   public String getRemovedLabelId() {
     return config.getRemovedLabelId();
   }
@@ -216,10 +226,16 @@ public class LiveModel implements Model {
       backupEmail(email, processSettings, mimeMessage);
     }
     Set<String> fileNames = EmailProcessor.process(email, mimeMessage, processSettings);
+    if (processSettings.processOption.shouldDownload() && !processSettings.processOption.shouldRemove()) {
+      addLabel(message.getId(), processSettings.processOption.getDownloadedLabelId());
+    }
     if (processSettings.processOption.shouldRemove() && !fileNames.isEmpty()) {
       updateRawMessage(message, mimeMessage);
       Message newMessage = insertSlimMessage(message); // 25 quota units
-      addLabel(newMessage.getId(), processSettings.processOption.getLabelId());
+      if (processSettings.processOption.shouldDownload()) {
+        addLabel(newMessage.getId(), processSettings.processOption.getDownloadedLabelId());
+      }
+      addLabel(newMessage.getId(), processSettings.processOption.getRemovedLabelId());
       removeOriginalMessage(processSettings.processOption.shouldDeleteOriginal(), message.getId()); // 5-10 quota units
     }
     return new ProcessEmailResult(fileNames);

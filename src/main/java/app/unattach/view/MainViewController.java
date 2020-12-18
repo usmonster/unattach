@@ -75,7 +75,7 @@ public class MainViewController {
   @FXML
   private Label labelsListViewLabel;
   @FXML
-  private ListView<IdLabel> labelsListView;
+  private ListView<GmailLabel> labelsListView;
   @FXML
   private TextField searchQueryTextField;
   @FXML
@@ -154,11 +154,11 @@ public class MainViewController {
     processingProgressBarWithText.textProperty().setValue("(Processing of emails not started yet.)");
     labelsListViewLabel.setText("Email labels:\n(If selecting multiple, results will match any.)");
     labelsListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-    List<IdLabel> idLabels = controller.getIdToLabel().entrySet().stream()
-        .map(e -> new IdLabel(e.getKey(), e.getValue())).sorted(Comparator.comparing(IdLabel::getLabel))
+    List<GmailLabel> labels = controller.getIdToLabel().entrySet().stream()
+        .map(e -> new GmailLabel(e.getKey(), e.getValue())).sorted(Comparator.comparing(GmailLabel::getName))
         .collect(Collectors.toList());
-    labelsListView.setItems(FXCollections.observableList(idLabels));
-    selectSavedLabels(idLabels);
+    labelsListView.setItems(FXCollections.observableList(labels));
+    selectSavedLabels(labels);
     saveLabelsOnChange();
   }
 
@@ -171,16 +171,16 @@ public class MainViewController {
     });
   }
 
-  private void selectSavedLabels(List<IdLabel> idLabels) {
-    Map<String, IdLabel> idToIdLabel = idLabels.stream().collect(Collectors.toMap(IdLabel::getId, Function.identity()));
+  private void selectSavedLabels(List<GmailLabel> labels) {
+    Map<String, GmailLabel> idToIdLabel = labels.stream().collect(Collectors.toMap(GmailLabel::getId, Function.identity()));
     controller.getLabelIds().stream().map(idToIdLabel::get).filter(Objects::nonNull).
         forEach(labelsListView.getSelectionModel()::select);
   }
 
   private void saveLabelsOnChange() {
-    labelsListView.getSelectionModel().getSelectedItems().addListener((ListChangeListener<IdLabel>) change -> {
+    labelsListView.getSelectionModel().getSelectedItems().addListener((ListChangeListener<GmailLabel>) change -> {
       List<String> labelIds = labelsListView.getSelectionModel().getSelectedItems()
-          .stream().map(IdLabel::getId).collect(Collectors.toList());
+          .stream().map(GmailLabel::getId).collect(Collectors.toList());
       controller.saveLabelIds(labelIds);
     });
   }
@@ -337,10 +337,10 @@ public class MainViewController {
     if (basicSearchTab.isSelected()) {
       int minEmailSizeInMb = emailSizeComboBox.getSelectionModel().getSelectedItem().value;
       query.append(String.format("has:attachment size:%dm", minEmailSizeInMb));
-      ObservableList<IdLabel> emailLabels = labelsListView.getSelectionModel().getSelectedItems();
-      if (!emailLabels.isEmpty()) {
+      ObservableList<GmailLabel> labels = labelsListView.getSelectionModel().getSelectedItems();
+      if (!labels.isEmpty()) {
         query.append(" {");
-        query.append(emailLabels.stream().map(idLabel -> String.format("label:\"%s\"", idLabel.getLabel()))
+        query.append(labels.stream().map(label -> String.format("label:\"%s\"", label.getName()))
                 .collect(Collectors.joining(" ")));
         query.append("}");
       }
@@ -381,21 +381,30 @@ public class MainViewController {
 
   @FXML
   private void onDownloadButtonPressed() {
-    processEmails(new ProcessOption(backupCheckBox.isSelected(), true, false));
+    String downloadedLabelId = controller.getOrCreateDownloadedLabelId();
+    ProcessOption processOption = new ProcessOption(backupCheckBox.isSelected(), true, false,
+        false, downloadedLabelId, null);
+    processEmails(processOption);
   }
 
   @FXML
   private void onDownloadAndDeleteButtonPressed() {
     boolean deleteOriginal = deleteOriginalMenuItem.isSelected();
+    String downloadedLabelId = controller.getOrCreateDownloadedLabelId();
     String removedLabelId = controller.getOrCreateRemovedLabelId();
-    processEmails(new ProcessOption(backupCheckBox.isSelected(), true, true, deleteOriginal, removedLabelId));
+    ProcessOption processOption = new ProcessOption(backupCheckBox.isSelected(), true, true,
+        deleteOriginal, downloadedLabelId, removedLabelId);
+    processEmails(processOption);
   }
 
   @FXML
   private void onDeleteButtonPressed() {
     boolean deleteOriginal = deleteOriginalMenuItem.isSelected();
+    String downloadedLabelId = controller.getOrCreateDownloadedLabelId();
     String removedLabelId = controller.getOrCreateRemovedLabelId();
-    processEmails(new ProcessOption(backupCheckBox.isSelected(), false, true, deleteOriginal, removedLabelId));
+    ProcessOption processOption = new ProcessOption(backupCheckBox.isSelected(), false, true,
+        deleteOriginal, downloadedLabelId, removedLabelId);
+    processEmails(processOption);
   }
 
   private void processEmails(ProcessOption processOption) {

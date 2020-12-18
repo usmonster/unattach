@@ -5,18 +5,17 @@ public class ProcessOption {
   private final boolean download;
   private final boolean remove;
   private final boolean deleteOriginal;
-  private final String labelId;
+  private final String downloadedLabelId;
+  private final String removedLabelId;
 
-  public ProcessOption(boolean backup, boolean download, boolean remove) {
-    this(backup, download, remove, false, null);
-  }
-
-  public ProcessOption(boolean backup, boolean download, boolean remove, boolean deleteOriginal, String labelId) {
+  public ProcessOption(boolean backup, boolean download, boolean remove, boolean deleteOriginal,
+                       String downloadedLabelId, String removedLabelId) {
     this.backup = backup;
     this.download = download;
     this.remove = remove;
     this.deleteOriginal = deleteOriginal;
-    this.labelId = labelId;
+    this.downloadedLabelId = downloadedLabelId;
+    this.removedLabelId = removedLabelId;
   }
 
   boolean shouldBackup() {
@@ -35,7 +34,11 @@ public class ProcessOption {
     return deleteOriginal;
   }
 
-  public String getLabelId() {
-    return labelId;
+  public String getDownloadedLabelId() {
+    return downloadedLabelId;
+  }
+
+  public String getRemovedLabelId() {
+    return removedLabelId;
   }
 }

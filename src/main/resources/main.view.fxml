@@ -26,7 +26,7 @@
                        onAction="#onTrashOriginalMenuItemPressed" />
       </Menu>
       <MenuItem text="File name schema .." onAction="#onFilenameSchemaMenuItemPressed" />
-      <MenuItem text="Gmail label .." onAction="#onGmailLabelMenuItemPressed" />
+      <MenuItem text="Gmail labels .." onAction="#onGmailLabelMenuItemPressed" />
       <Menu fx:id="donationCurrencyMenu" text="Donation currency" />
     </Menu>
     <Menu text="Help">

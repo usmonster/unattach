@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 public class FileConfig implements Config {
   private static final Logger LOGGER = Logger.getLogger(FileConfig.class.getName());
@@ -17,6 +16,7 @@ public class FileConfig implements Config {
   private static final String LABEL_IDS_PROPERTY = "label_ids";
   private static final String FILENAME_SCHEMA_PROPERTY = "filename_schema";
   private static final String NUMBER_OF_RUNS_PROPERTY = "number_of_runs";
+  private static final String DOWNLOADED_LABEL_ID_PROPERTY = "downloaded_label_id";
   private static final String REMOVED_LABEL_ID_PROPERTY = "removed_label_id";
   private static final String SEARCH_QUERY_PROPERTY = "search_query";
   private static final String TARGET_DIRECTORY_PROPERTY = "target_directory";
@@ -53,6 +53,11 @@ public class FileConfig implements Config {
   }
 
   @Override
+  public String getDownloadedLabelId() {
+    return config.getProperty(DOWNLOADED_LABEL_ID_PROPERTY);
+  }
+
+  @Override
   public String getRemovedLabelId() {
     return config.getProperty(REMOVED_LABEL_ID_PROPERTY);
   }
@@ -84,6 +89,12 @@ public class FileConfig implements Config {
   @Override
   public void saveLabelIds(List<String> labelIds) {
     config.setProperty(LABEL_IDS_PROPERTY, String.join(",", labelIds));
+    saveConfigToFile();
+  }
+
+  @Override
+  public void saveDownloadedLabelId(String downloadedLabelId) {
+    config.setProperty(DOWNLOADED_LABEL_ID_PROPERTY, downloadedLabelId);
     saveConfigToFile();
   }
 

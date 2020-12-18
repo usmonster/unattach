@@ -20,7 +20,9 @@ public class GmailLabelController {
   @FXML
   private Label introductionLabel;
   @FXML
-  private ComboBox<GmailLabel> labelComboBox;
+  private ComboBox<GmailLabel> downloadLabelComboBox;
+  @FXML
+  private ComboBox<GmailLabel> removeLabelComboBox;
   @FXML
   private Label customizeLabel;
   @FXML
@@ -32,24 +34,31 @@ public class GmailLabelController {
   public void initialize() {
     controller = ControllerFactory.getDefaultController();
     introductionLabel.setText(
-        Constants.PRODUCT_NAME + " adds a Gmail label to all emails where\n" +
-        "attachments have been removed."
+        Constants.PRODUCT_NAME + " adds Gmail labels to all emails where\n" +
+        "attachments have been downloaded and/or removed."
     );
     customizeLabel.setText(
-        "You can edit the label settings within Gmail itself.\n" +
+        "You can edit the labels' settings within Gmail itself.\n" +
         "You can update the label's appearance by pressing\n" +
         "⋮ next to the label's name in the list of labels."
     );
+    String downloadedLabelId = controller.getOrCreateDownloadedLabelId();
     String removedLabelId = controller.getOrCreateRemovedLabelId();
     List<GmailLabel> labels = controller.getIdToLabel().entrySet().stream()
             .map(entry -> new GmailLabel(entry.getKey(), entry.getValue()))
-            .sorted(Comparator.comparing(label -> label.name))
+            .sorted(Comparator.comparing(GmailLabel::getName))
             .collect(Collectors.toList());
-    labelComboBox.getItems().setAll(labels);
-    OptionalInt index = IntStream.range(0, labels.size())
-            .filter(i -> labels.get(i).id.equals(removedLabelId)).findFirst();
-    if (index.isPresent()) {
-      labelComboBox.getSelectionModel().select(index.getAsInt());
+    downloadLabelComboBox.getItems().setAll(labels);
+    removeLabelComboBox.getItems().setAll(labels);
+    selectLabel(labels, downloadedLabelId, downloadLabelComboBox);
+    selectLabel(labels, removedLabelId, removeLabelComboBox);
+  }
+
+  private void selectLabel(List<GmailLabel> labels, String labelId, ComboBox<GmailLabel> comboBox) {
+    OptionalInt downloadLabelIndex = IntStream.range(0, labels.size())
+        .filter(i -> labels.get(i).getId().equals(labelId)).findFirst();
+    if (downloadLabelIndex.isPresent()) {
+      comboBox.getSelectionModel().select(downloadLabelIndex.getAsInt());
     }
   }
 
@@ -65,23 +74,9 @@ public class GmailLabelController {
 
   @FXML
   private void onOkButtonPressed() {
-    GmailLabel label = labelComboBox.getSelectionModel().getSelectedItem();
-    controller.saveRemovedLabelId(label.id);
+    GmailLabel label = removeLabelComboBox.getSelectionModel().getSelectedItem();
+    controller.saveRemovedLabelId(label.getId());
     okButton.getScene().getWindow().hide();
   }
 
-  private static class GmailLabel {
-    private final String id;
-    private final String name;
-
-    private GmailLabel(String id, String name) {
-      this.id = id;
-      this.name = name;
-    }
-
-    @Override
-    public String toString() {
-      return name;
-    }
-  }
 }

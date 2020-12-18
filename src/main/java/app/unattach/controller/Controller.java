@@ -24,6 +24,7 @@ public interface Controller {
   String getFilenameSchema();
   List<String> getLabelIds();
   DefaultArtifactVersion getLatestVersion();
+  String getOrCreateDownloadedLabelId();
   String getOrCreateRemovedLabelId();
   LongTask<ProcessEmailResult> getProcessTask(Email email, ProcessSettings processSettings);
   String getRemovedLabelId();
@@ -39,6 +40,7 @@ public interface Controller {
   void saveEmailSize(int emailSize);
   void saveFilenameSchema(String filenameSchema);
   void saveLabelIds(List<String> labelIds);
+  void saveDownloadedLabelId(String downloadedLabelId);
   void saveRemovedLabelId(String removedLabelId);
   void saveSearchQuery(String query);
   void saveTargetDirectory(String path);

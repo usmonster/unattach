@@ -1,24 +1,24 @@
 package app.unattach.view;
 
-class IdLabel {
+class GmailLabel {
   private final String id;
-  private final String label;
+  private final String name;
 
-  IdLabel(String id, String label) {
+  GmailLabel(String id, String name) {
     this.id = id;
-    this.label = label;
+    this.name = name;
   }
 
   String getId() {
     return id;
   }
 
-  String getLabel() {
-    return label;
+  String getName() {
+    return name;
   }
 
   @Override
   public String toString() {
-    return label;
+    return name;
   }
 }

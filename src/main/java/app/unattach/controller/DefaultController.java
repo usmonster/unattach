@@ -12,11 +12,13 @@ import java.security.GeneralSecurityException;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class DefaultController implements Controller {
   private static final Logger LOGGER = Logger.getLogger(DefaultController.class.getName());
+  private static final String DEFAULT_DOWNLOADED_LABEL_NAME = "Unattach - Downloaded";
   private static final String DEFAULT_REMOVED_LABEL_NAME = "Unattach - Removed";
 
   private final Model model;
@@ -72,31 +74,43 @@ public class DefaultController implements Controller {
   }
 
   @Override
+  public String getOrCreateDownloadedLabelId() {
+    return getOrCreateLabelId(getDownloadedLabelId(), DEFAULT_DOWNLOADED_LABEL_NAME, this::saveDownloadedLabelId);
+  }
+
+  @Override
   public String getOrCreateRemovedLabelId() {
+    return getOrCreateLabelId(getRemovedLabelId(), DEFAULT_REMOVED_LABEL_NAME, this::saveRemovedLabelId);
+  }
+
+  private String getOrCreateLabelId(String labelId, String defaultLabelName, Consumer<String> saveLabelId) {
     SortedMap<String, String> idToLabel = getIdToLabel();
-    String removedLabelId = getRemovedLabelId();
-    if (removedLabelId != null) {
-      if (idToLabel.containsKey(removedLabelId)) {
-        return removedLabelId;
+    if (labelId != null) {
+      if (idToLabel.containsKey(labelId)) {
+        return labelId;
       }
-      LOGGER.log(Level.SEVERE, "Couldn't find the label ID in the user config within Gmail label IDs.");
+      LOGGER.log(Level.SEVERE, "Couldn't find the label ID in the user config within Gmail label IDs: " + labelId);
     }
     for (Map.Entry<String, String> entry : idToLabel.entrySet()) {
       String id = entry.getKey();
       String name = entry.getValue();
-      if (name.equals(DEFAULT_REMOVED_LABEL_NAME)) {
-        saveRemovedLabelId(id);
+      if (name.equals(defaultLabelName)) {
+        saveLabelId.accept(id);
         return id;
       }
     }
-    String id = createLabel(DEFAULT_REMOVED_LABEL_NAME);
-    saveRemovedLabelId(id);
+    String id = createLabel(defaultLabelName);
+    saveLabelId.accept(id);
     return id;
   }
 
   @Override
   public LongTask<ProcessEmailResult> getProcessTask(Email email, ProcessSettings processSettings) {
     return model.getProcessTask(email, processSettings);
+  }
+
+  private String getDownloadedLabelId() {
+    return model.getDownloadedLabelId();
   }
 
   @Override
@@ -132,6 +146,11 @@ public class DefaultController implements Controller {
   @Override
   public void saveLabelIds(List<String> labelIds) {
     model.saveLabelIds(labelIds);
+  }
+
+  @Override
+  public void saveDownloadedLabelId(String downloadedLabelId) {
+    model.saveDownloadedLabelId(downloadedLabelId);
   }
 
   @Override
