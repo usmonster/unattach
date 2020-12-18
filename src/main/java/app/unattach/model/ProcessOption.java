@@ -1,6 +1,9 @@
 package app.unattach.model;
 
+import app.unattach.view.Action;
+
 public class ProcessOption {
+  private final Action action;
   private final boolean backup;
   private final boolean download;
   private final boolean remove;
@@ -8,8 +11,9 @@ public class ProcessOption {
   private final String downloadedLabelId;
   private final String removedLabelId;
 
-  public ProcessOption(boolean backup, boolean download, boolean remove, boolean deleteOriginal,
+  public ProcessOption(Action action, boolean backup, boolean download, boolean remove, boolean deleteOriginal,
                        String downloadedLabelId, String removedLabelId) {
+    this.action = action;
     this.backup = backup;
     this.download = download;
     this.remove = remove;
@@ -18,15 +22,19 @@ public class ProcessOption {
     this.removedLabelId = removedLabelId;
   }
 
+  public Action getAction() {
+    return action;
+  }
+
   boolean shouldBackup() {
     return backup;
   }
 
-  boolean shouldDownload() {
+  public boolean shouldDownload() {
     return download;
   }
 
-  boolean shouldRemove() {
+  public boolean shouldRemove() {
     return remove;
   }
 

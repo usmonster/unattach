@@ -131,7 +131,7 @@
               <SelectedCheckBoxTableCellFactory/>
             </cellValueFactory>
             <graphic>
-              <CheckBox fx:id="toggleAllEmailsCheckBox" onAction="#onToggleAllEmailsButtonPressed"/>
+              <CheckBox fx:id="toggleAllEmailsCheckBox"/>
             </graphic>
           </TableColumn>
           <TableColumn text="Status" styleClass="center">
@@ -159,7 +159,7 @@
             <Tooltip text="Select the directory for downloaded attachments."/>
           </tooltip>
         </Button>
-        <Button fx:id="openButton" text="Open" onAction="#onOpenButtonPressed" styleClass="secondary">
+        <Button text="Open" onAction="#onOpenButtonPressed" styleClass="secondary">
           <tooltip>
             <Tooltip text="Open the directory for downloaded attachments in the file explorer."/>
           </tooltip>
@@ -201,6 +201,26 @@
         <ProgressBarWithText fx:id="processingProgressBarWithText"
                              minWidth="400" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
         <Button fx:id="stopProcessingButton" text="Stop" onAction="#onStopProcessingButtonPressed" disable="true"
+                styleClass="danger"/>
+      </HBox>
+    </VBox>
+  </SubView>
+
+  <SubView text="Schedule">
+    <VBox alignment="CENTER" spacing="10">
+      <HBox alignment="CENTER" spacing="10">
+        <CheckBox fx:id="enableScheduleCheckBox">
+          <tooltip>
+            <Tooltip text="Enable periodic mode."/>
+          </tooltip>
+        </CheckBox>
+        <Label fx:id="schedulePeriodPrefixLabel" text="Run current search and last action every" disable="true"/>
+        <ComboBox fx:id="schedulePeriodComboBox" disable="true"/>
+        <Label text="."/>
+      </HBox>
+      <HBox alignment="CENTER" spacing="10">
+        <Label fx:id="scheduleTimeLabel"/>
+        <Button fx:id="stopScheduleButton" text="Stop schedule" onAction="#onStopScheduleButtonPressed" disable="true"
                 styleClass="danger"/>
       </HBox>
     </VBox>

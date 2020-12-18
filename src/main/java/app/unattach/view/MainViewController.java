@@ -4,6 +4,8 @@ import app.unattach.controller.Controller;
 import app.unattach.controller.ControllerFactory;
 import app.unattach.controller.LongTask;
 import app.unattach.model.*;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.collections.FXCollections;
@@ -18,10 +20,13 @@ import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
@@ -99,7 +104,6 @@ public class MainViewController {
   private TableColumn<Email, CheckBox> selectedTableColumn;
   @FXML
   private CheckBox toggleAllEmailsCheckBox;
-  private boolean toggleAllShouldSelect = true;
 
   // Download view
   @FXML
@@ -116,9 +120,23 @@ public class MainViewController {
   private Button stopProcessingButton;
   @FXML
   private ProgressBarWithText processingProgressBarWithText;
+
+  // Schedule view
+  @FXML
+  private CheckBox enableScheduleCheckBox;
+  @FXML
+  private Label schedulePeriodPrefixLabel;
+  @FXML
+  private ComboBox<SchedulePeriod> schedulePeriodComboBox;
+  @FXML
+  private Label scheduleTimeLabel;
+  @FXML
+  private Button stopScheduleButton;
+
   private long bytesProcessed = 0;
   private long allBytesToProcess = 0;
   private boolean stopProcessingButtonPressed = false;
+  private Timeline timeline;
 
   @FXML
   private void initialize() throws IOException {
@@ -147,7 +165,9 @@ public class MainViewController {
     searchQueryTextField.setText(controller.getSearchQuery());
     searchProgressBarWithText.progressProperty().setValue(0);
     searchProgressBarWithText.textProperty().setValue("(Searching not started yet.)");
-    toggleAllEmailsCheckBox.setTooltip(new Tooltip(DESELECT_ALL_CAPTION));
+    toggleAllEmailsCheckBox.setTooltip(new Tooltip(SELECT_ALL_CAPTION));
+    toggleAllEmailsCheckBox.selectedProperty()
+        .addListener((checkbox, previous, current) -> onToggleAllEmailsCheckBoxChange());
     selectedTableColumn.setComparator((cb1, cb2) -> Boolean.compare(cb1.isSelected(), cb2.isSelected()));
     targetDirectoryTextField.setText(controller.getTargetDirectory());
     processingProgressBarWithText.progressProperty().setValue(0);
@@ -160,6 +180,21 @@ public class MainViewController {
     labelsListView.setItems(FXCollections.observableList(labels));
     selectSavedLabels(labels);
     saveLabelsOnChange();
+    enableScheduleCheckBox.selectedProperty()
+        .addListener((checkBox, previous, current) -> onEnableScheduleCheckBoxChange());
+    schedulePeriodComboBox.setItems(FXCollections.observableList(Arrays.asList(
+        new SchedulePeriod("minute", 60),
+        new SchedulePeriod("5 minutes", 5 * 60),
+        new SchedulePeriod("10 minutes", 10 * 60),
+        new SchedulePeriod("15 minutes", 15 * 60),
+        new SchedulePeriod("30 minutes", 30 * 60),
+        new SchedulePeriod("1 hour", 3600),
+        new SchedulePeriod("3 hours", 3 * 3600),
+        new SchedulePeriod("6 hours", 6 * 3600),
+        new SchedulePeriod("12 hours", 12 * 3600),
+        new SchedulePeriod("24 hours", 24 * 3600)
+    )));
+    schedulePeriodComboBox.getSelectionModel().select(5);
   }
 
   private void addMenuForHidingColumns() {
@@ -220,6 +255,10 @@ public class MainViewController {
 
   @FXML
   private void onSearchButtonPressed() {
+    onSearchButtonPressed(null);
+  }
+
+  private void onSearchButtonPressed(Runnable successCallback) {
     disableControls();
     resultsSubView.setText("Results");
     stopSearchButton.setDisable(false);
@@ -261,6 +300,7 @@ public class MainViewController {
 
       @Override
       protected void succeeded() {
+        boolean successful = false;
         try {
           updateMessage(String.format("Finished obtaining email metadata (%s).", getStatusString()));
           List<Email> emails = controller.getEmails();
@@ -268,12 +308,16 @@ public class MainViewController {
           resultsTable.setItems(observableEmails);
           updateResultsCaption();
           observableEmails.addListener((ListChangeListener<? super Email>) change -> updateResultsCaption());
+          successful = true;
         } catch (Throwable t) {
           String message = "Failed to process email metadata.";
           updateMessage(message);
           reportError(message, t);
         } finally {
           resetControls();
+        }
+        if (successful && successCallback != null) {
+          successCallback.run();
         }
       }
 
@@ -320,16 +364,16 @@ public class MainViewController {
   }
 
   @FXML
-  private void onToggleAllEmailsButtonPressed() {
-    EmailStatus targetStatus = toggleAllShouldSelect ? EmailStatus.TO_PROCESS : EmailStatus.IGNORED;
+  private void onToggleAllEmailsCheckBoxChange() {
+    EmailStatus targetStatus = toggleAllEmailsCheckBox.isSelected() ? EmailStatus.TO_PROCESS : EmailStatus.IGNORED;
     resultsTable.getItems().forEach(email -> {
       if (email.getStatus() == EmailStatus.IGNORED || email.getStatus() == EmailStatus.TO_PROCESS) {
         email.setStatus(targetStatus);
       }
     });
     resultsTable.refresh();
-    toggleAllShouldSelect = !toggleAllShouldSelect;
-    toggleAllEmailsCheckBox.setTooltip(new Tooltip(toggleAllShouldSelect ? SELECT_ALL_CAPTION : DESELECT_ALL_CAPTION));
+    Tooltip tooltip = new Tooltip(toggleAllEmailsCheckBox.isSelected() ? DESELECT_ALL_CAPTION : SELECT_ALL_CAPTION);
+    toggleAllEmailsCheckBox.setTooltip(tooltip);
   }
 
   private String getQuery() {
@@ -382,8 +426,8 @@ public class MainViewController {
   @FXML
   private void onDownloadButtonPressed() {
     String downloadedLabelId = controller.getOrCreateDownloadedLabelId();
-    ProcessOption processOption = new ProcessOption(backupCheckBox.isSelected(), true, false,
-        false, downloadedLabelId, null);
+    ProcessOption processOption = new ProcessOption(Action.DOWNLOAD, backupCheckBox.isSelected(), true,
+        false, false, downloadedLabelId, null);
     processEmails(processOption);
   }
 
@@ -392,8 +436,8 @@ public class MainViewController {
     boolean deleteOriginal = deleteOriginalMenuItem.isSelected();
     String downloadedLabelId = controller.getOrCreateDownloadedLabelId();
     String removedLabelId = controller.getOrCreateRemovedLabelId();
-    ProcessOption processOption = new ProcessOption(backupCheckBox.isSelected(), true, true,
-        deleteOriginal, downloadedLabelId, removedLabelId);
+    ProcessOption processOption = new ProcessOption(Action.DOWNLOAD_AND_DELETE, backupCheckBox.isSelected(),
+        true, true, deleteOriginal, downloadedLabelId, removedLabelId);
     processEmails(processOption);
   }
 
@@ -402,14 +446,14 @@ public class MainViewController {
     boolean deleteOriginal = deleteOriginalMenuItem.isSelected();
     String downloadedLabelId = controller.getOrCreateDownloadedLabelId();
     String removedLabelId = controller.getOrCreateRemovedLabelId();
-    ProcessOption processOption = new ProcessOption(backupCheckBox.isSelected(), false, true,
-        deleteOriginal, downloadedLabelId, removedLabelId);
+    ProcessOption processOption = new ProcessOption(Action.DELETE, backupCheckBox.isSelected(),
+        false, true, deleteOriginal, downloadedLabelId, removedLabelId);
     processEmails(processOption);
   }
 
   private void processEmails(ProcessOption processOption) {
     List<Email> emailsToProcess = getEmailsToProcess();
-    if (emailsToProcess.isEmpty()) {
+    if (emailsToProcess.isEmpty() && !enableScheduleCheckBox.isSelected()) {
       showNoEmailsAlert();
       return;
     }
@@ -442,7 +486,9 @@ public class MainViewController {
           String.format("Processing stopped (%s).", getProcessingStatusString(emailsToProcess, nextEmailIndex, failed)));
       resetControls();
       int numberOfRuns = controller.incrementNumberOfRuns();
-      if (numberOfRuns % 10 == 0) {
+      if (enableScheduleCheckBox.isSelected()) {
+        scheduleNextRun(processSettings.getProcessOption().getAction());
+      } else if (numberOfRuns % 10 == 0) {
         showThankYouDialog();
       }
       return;
@@ -485,7 +531,7 @@ public class MainViewController {
   private String getProcessingStatusString(List<Email> emailsToProcess, int nextEmailIndex, int failed) {
     return String.format("processed %d of %d, %dMB / %dMB, %d%% by size, %d failed",
         nextEmailIndex - failed, emailsToProcess.size(), toMegaBytes(bytesProcessed), toMegaBytes(allBytesToProcess),
-        100 * bytesProcessed / allBytesToProcess, failed);
+        allBytesToProcess == 0 ? 0 : 100 * bytesProcessed / allBytesToProcess, failed);
   }
 
   private static int toMegaBytes(long bytes) {
@@ -669,5 +715,60 @@ public class MainViewController {
     } catch (IOException e) {
       LOGGER.log(Level.SEVERE, "Failed to open the thank you dialog.", e);
     }
+  }
+
+  private void onEnableScheduleCheckBoxChange() {
+    boolean enabled = enableScheduleCheckBox.isSelected();
+    schedulePeriodPrefixLabel.setDisable(!enabled);
+    schedulePeriodComboBox.setDisable(!enabled);
+  }
+
+  private void scheduleNextRun(Action action) {
+    stopAnyRunningSchedule();
+    stopScheduleButton.setDisable(false);
+    SchedulePeriod schedulePeriod = schedulePeriodComboBox.getSelectionModel().getSelectedItem();
+    LocalDateTime nextRunTime = LocalDateTime.now().plusSeconds(schedulePeriod.getSeconds());
+    timeline = new Timeline(new KeyFrame(Duration.ZERO, event -> {
+      LocalDateTime now = LocalDateTime.now();
+      if (now.isAfter(nextRunTime)) {
+        timeline.stop();
+        timeline = null;
+        scheduleTimeLabel.setText("");
+        onSchedule(action);
+      } else {
+        long durationMillis = java.time.Duration.between(now, nextRunTime).toMillis();
+        String duration = DurationFormatUtils.formatDurationWords(durationMillis, true, false);
+        scheduleTimeLabel.setText("Next '" + action + "' in " + duration + ".");
+      }
+    }), new KeyFrame(Duration.seconds(1)));
+    timeline.setCycleCount(Timeline.INDEFINITE);
+    timeline.play();
+  }
+
+  @FXML
+  private void onSchedule(Action action) {
+    onSearchButtonPressed(() -> {
+      toggleAllEmailsCheckBox.setSelected(true);
+      switch (action) {
+        case DOWNLOAD -> onDownloadButtonPressed();
+        case DELETE -> onDeleteButtonPressed();
+        case DOWNLOAD_AND_DELETE -> onDownloadAndDeleteButtonPressed();
+      }
+    });
+  }
+
+  @FXML
+  private void onStopScheduleButtonPressed() {
+    stopAnyRunningSchedule();
+    enableScheduleCheckBox.setSelected(false);
+  }
+
+  private void stopAnyRunningSchedule() {
+    if (timeline != null) {
+      timeline.stop();
+      timeline = null;
+    }
+    scheduleTimeLabel.setText("");
+    stopScheduleButton.setDisable(true);
   }
 }

@@ -15,4 +15,8 @@ public class ProcessSettings {
     this.filenameSchema = filenameSchema;
     this.addMetadata = addMetadata;
   }
+
+  public ProcessOption getProcessOption() {
+    return processOption;
+  }
 }
