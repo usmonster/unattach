@@ -661,6 +661,11 @@ public class MainViewController {
   }
 
   @FXML
+  private void onTutorialVideoButtonPressed() {
+    controller.openWebPage(Constants.TUTORIAL_VIDEO_URL);
+  }
+
+  @FXML
   private void onEmailSizeComboBoxChanged() {
     controller.saveEmailSize(emailSizeComboBox.getValue().value);
   }

@@ -10,6 +10,7 @@ public final class Constants {
   public static final String PRIVACY_POLICY_URL = HOMEPAGE + "/privacy-policy.txt";
   public static final String TERMS_AND_CONDITIONS_URL = HOMEPAGE + "/terms-and-conditions.txt";
   public static final String DONATE_URL = HOMEPAGE + "/?action=buy_coffee";
+  public static final String TUTORIAL_VIDEO_URL = "https://unattach.app/tutorial-video";
   public static final String PRODUCT_NAME = "Unattach";
   public static final String VERSION = "2.4.0";
 }
