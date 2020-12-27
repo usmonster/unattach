@@ -143,7 +143,7 @@ public class MainViewController {
     controller = ControllerFactory.getDefaultController();
     emailMenuItem.setText("Signed in as " + controller.getEmailAddress() + ".");
     addMenuForHidingColumns();
-    if (!controller.getDeleteOriginal()) {
+    if (!controller.getConfig().getDeleteOriginal()) {
       onTrashOriginalMenuItemPressed();
     }
     List<CheckMenuItem> currencyMenuItems =
@@ -157,19 +157,19 @@ public class MainViewController {
     });
     donateMenu.setGraphic(new Label()); // This enables the CSS style for the menu.
     emailSizeComboBox.setItems(FXCollections.observableList(getEmailSizeOptions()));
-    int emailSize = controller.getEmailSize();
+    int emailSize = controller.getConfig().getEmailSize();
     int emailSizeIndex = IntStream.range(0, emailSizeComboBox.getItems().size())
         .filter(i -> emailSizeComboBox.getItems().get(i).value.equals(emailSize))
         .findFirst().orElse(1);
     emailSizeComboBox.getSelectionModel().select(emailSizeIndex);
-    searchQueryTextField.setText(controller.getSearchQuery());
+    searchQueryTextField.setText(controller.getConfig().getSearchQuery());
     searchProgressBarWithText.progressProperty().setValue(0);
     searchProgressBarWithText.textProperty().setValue("(Searching not started yet.)");
     toggleAllEmailsCheckBox.setTooltip(new Tooltip(SELECT_ALL_CAPTION));
     toggleAllEmailsCheckBox.selectedProperty()
         .addListener((checkbox, previous, current) -> onToggleAllEmailsCheckBoxChange());
     selectedTableColumn.setComparator((cb1, cb2) -> Boolean.compare(cb1.isSelected(), cb2.isSelected()));
-    targetDirectoryTextField.setText(controller.getTargetDirectory());
+    targetDirectoryTextField.setText(controller.getConfig().getTargetDirectory());
     processingProgressBarWithText.progressProperty().setValue(0);
     processingProgressBarWithText.textProperty().setValue("(Processing of emails not started yet.)");
     labelsListViewLabel.setText("Email labels:\n(If selecting multiple, results will match any.)");
@@ -208,7 +208,7 @@ public class MainViewController {
 
   private void selectSavedLabels(List<GmailLabel> labels) {
     Map<String, GmailLabel> idToIdLabel = labels.stream().collect(Collectors.toMap(GmailLabel::getId, Function.identity()));
-    controller.getLabelIds().stream().map(idToIdLabel::get).filter(Objects::nonNull).
+    controller.getConfig().getLabelIds().stream().map(idToIdLabel::get).filter(Objects::nonNull).
         forEach(labelsListView.getSelectionModel()::select);
   }
 
@@ -216,7 +216,7 @@ public class MainViewController {
     labelsListView.getSelectionModel().getSelectedItems().addListener((ListChangeListener<GmailLabel>) change -> {
       List<String> labelIds = labelsListView.getSelectionModel().getSelectedItems()
           .stream().map(GmailLabel::getId).collect(Collectors.toList());
-      controller.saveLabelIds(labelIds);
+      controller.getConfig().saveLabelIds(labelIds);
     });
   }
 
@@ -390,7 +390,7 @@ public class MainViewController {
       }
     } else {
       query = new StringBuilder(searchQueryTextField.getText());
-      controller.saveSearchQuery(searchQueryTextField.getText());
+      controller.getConfig().saveSearchQuery(searchQueryTextField.getText());
     }
     return query.toString();
   }
@@ -406,7 +406,7 @@ public class MainViewController {
     File newTargetDirectory = directoryChooser.showDialog(targetDirectoryTextField.getScene().getWindow());
     if (newTargetDirectory != null) {
       targetDirectoryTextField.setText(newTargetDirectory.getAbsolutePath());
-      controller.saveTargetDirectory(newTargetDirectory.getAbsolutePath());
+      controller.getConfig().saveTargetDirectory(newTargetDirectory.getAbsolutePath());
     }
   }
 
@@ -464,7 +464,7 @@ public class MainViewController {
     bytesProcessed = 0;
     allBytesToProcess = emailsToProcess.stream().mapToLong(email -> (long) email.getSizeInBytes()).sum();
     processingProgressBarWithText.progressProperty().setValue(0);
-    String filenameSchema = controller.getFilenameSchema();
+    String filenameSchema = controller.getConfig().getFilenameSchema();
     ProcessSettings processSettings = new ProcessSettings(processOption, targetDirectory, filenameSchema,
         addMetadataCheckMenuItem.isSelected());
     processEmail(emailsToProcess, 0, 0, processSettings);
@@ -485,7 +485,7 @@ public class MainViewController {
       processingProgressBarWithText.textProperty().setValue(
           String.format("Processing stopped (%s).", getProcessingStatusString(emailsToProcess, nextEmailIndex, failed)));
       resetControls();
-      int numberOfRuns = controller.incrementNumberOfRuns();
+      int numberOfRuns = controller.getConfig().incrementNumberOfRuns();
       if (enableScheduleCheckBox.isSelected()) {
         scheduleNextRun(processSettings.getProcessOption().getAction());
       } else if (numberOfRuns % 10 == 0) {
@@ -629,14 +629,14 @@ public class MainViewController {
   private void onDeleteOriginalMenuItemPressed() {
     deleteOriginalMenuItem.setSelected(true);
     trashOriginalMenuItem.setSelected(false);
-    controller.setDeleteOriginal(true);
+    controller.getConfig().setDeleteOriginal(true);
   }
 
   @FXML
   private void onTrashOriginalMenuItemPressed() {
     deleteOriginalMenuItem.setSelected(false);
     trashOriginalMenuItem.setSelected(true);
-    controller.setDeleteOriginal(false);
+    controller.getConfig().setDeleteOriginal(false);
   }
 
   @FXML
@@ -652,7 +652,7 @@ public class MainViewController {
       dialog.initModality(Modality.APPLICATION_MODAL);
       Scene scene = Scenes.loadScene("/filename-schema.view.fxml");
       FilenameSchemaController filenameSchemaController = (FilenameSchemaController) scene.getUserData();
-      filenameSchemaController.setSchema(controller.getFilenameSchema());
+      filenameSchemaController.setSchema(controller.getConfig().getFilenameSchema());
       dialog.setScene(scene);
       Scenes.showAndPreventMakingSmaller(dialog);
     } catch (IOException e) {
@@ -667,7 +667,7 @@ public class MainViewController {
 
   @FXML
   private void onEmailSizeComboBoxChanged() {
-    controller.saveEmailSize(emailSizeComboBox.getValue().value);
+    controller.getConfig().saveEmailSize(emailSizeComboBox.getValue().value);
   }
 
   @FXML

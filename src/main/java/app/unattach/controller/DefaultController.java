@@ -51,16 +51,6 @@ public class DefaultController implements Controller {
   }
 
   @Override
-  public String getTargetDirectory() {
-    return model.getTargetDirectory();
-  }
-
-  @Override
-  public int incrementNumberOfRuns() {
-    return model.incrementNumberOfRuns();
-  }
-
-  @Override
   public void donate(String item, int amount, String currency) {
     String uriString = Constants.DONATE_URL;
     uriString += "&coffee_type=" + item.replace(" ", "%20") + "&coffee_price=" + amount +
@@ -69,18 +59,20 @@ public class DefaultController implements Controller {
   }
 
   @Override
-  public boolean getDeleteOriginal() {
-    return model.getDeleteOriginal();
+  public Config getConfig() {
+    return model.getConfig();
   }
 
   @Override
   public String getOrCreateDownloadedLabelId() {
-    return getOrCreateLabelId(getDownloadedLabelId(), DEFAULT_DOWNLOADED_LABEL_NAME, this::saveDownloadedLabelId);
+    return getOrCreateLabelId(getConfig().getDownloadedLabelId(), DEFAULT_DOWNLOADED_LABEL_NAME,
+        getConfig()::saveDownloadedLabelId);
   }
 
   @Override
   public String getOrCreateRemovedLabelId() {
-    return getOrCreateLabelId(getRemovedLabelId(), DEFAULT_REMOVED_LABEL_NAME, this::saveRemovedLabelId);
+    return getOrCreateLabelId(getConfig().getRemovedLabelId(), DEFAULT_REMOVED_LABEL_NAME,
+        getConfig()::saveRemovedLabelId);
   }
 
   private String getOrCreateLabelId(String labelId, String defaultLabelName, Consumer<String> saveLabelId) {
@@ -109,20 +101,6 @@ public class DefaultController implements Controller {
     return model.getProcessTask(email, processSettings);
   }
 
-  private String getDownloadedLabelId() {
-    return model.getDownloadedLabelId();
-  }
-
-  @Override
-  public String getRemovedLabelId() {
-    return model.getRemovedLabelId();
-  }
-
-  @Override
-  public String getSearchQuery() {
-    return model.getSearchQuery();
-  }
-
   @Override
   public List<Email> getEmails() {
     return model.getEmails();
@@ -139,43 +117,8 @@ public class DefaultController implements Controller {
   }
 
   @Override
-  public void saveFilenameSchema(String filenameSchema) {
-    model.setFilenameSchema(filenameSchema);
-  }
-
-  @Override
-  public void saveLabelIds(List<String> labelIds) {
-    model.saveLabelIds(labelIds);
-  }
-
-  @Override
-  public void saveDownloadedLabelId(String downloadedLabelId) {
-    model.saveDownloadedLabelId(downloadedLabelId);
-  }
-
-  @Override
-  public void saveRemovedLabelId(String removedLabelId) {
-    model.saveRemovedLabelId(removedLabelId);
-  }
-
-  @Override
-  public void saveSearchQuery(String query) {
-    model.saveSearchQuery(query);
-  }
-
-  @Override
-  public void saveTargetDirectory(String path) {
-    model.saveTargetDirectory(path);
-  }
-
-  @Override
   public void openQueryLanguagePage() {
     openWebPage("https://support.google.com/mail/answer/7190");
-  }
-
-  @Override
-  public void setDeleteOriginal(boolean deleteOriginal) {
-    model.setDeleteOriginal(deleteOriginal);
   }
 
   @Override
@@ -190,11 +133,6 @@ public class DefaultController implements Controller {
   }
 
   @Override
-  public int getEmailSize() {
-    return model.getEmailSize();
-  }
-
-  @Override
   public SortedMap<String, String> getIdToLabel() {
     try {
       LOGGER.info("Getting email labels..");
@@ -205,16 +143,6 @@ public class DefaultController implements Controller {
       LOGGER.log(Level.SEVERE, "Getting email labels.. failed.", t);
       return null;
     }
-  }
-
-  @Override
-  public String getFilenameSchema() {
-    return model.getFilenameSchema();
-  }
-
-  @Override
-  public List<String> getLabelIds() {
-    return model.getLabelIds();
   }
 
   @Override
@@ -313,10 +241,5 @@ public class DefaultController implements Controller {
     } catch (Throwable t) {
       LOGGER.info("Unable to open a web page from within the application. " + manualInstructions);
     }
-  }
-
-  @Override
-  public void saveEmailSize(int emailSize) {
-    model.saveEmailSize(emailSize);
   }
 }

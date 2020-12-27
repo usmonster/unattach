@@ -75,7 +75,7 @@ public class GmailLabelController {
   @FXML
   private void onOkButtonPressed() {
     GmailLabel label = removeLabelComboBox.getSelectionModel().getSelectedItem();
-    controller.saveRemovedLabelId(label.getId());
+    controller.getConfig().saveRemovedLabelId(label.getId());
     okButton.getScene().getWindow().hide();
   }
 

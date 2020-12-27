@@ -4,17 +4,14 @@ import app.unattach.controller.LongTask;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Logger;
 
 public class MockModel implements Model {
   private static final Logger LOGGER = Logger.getLogger(MockModel.class.getName());
 
+  private final Config config = new BaseConfig();
   private final Random random = new Random(1337);
-  private int numberOfRuns = 0;
-  private String filenameSchema = FilenameFactory.DEFAULT_SCHEMA;
   private ArrayList<Email> emails = new ArrayList<>();
 
   @Override
@@ -25,6 +22,11 @@ public class MockModel implements Model {
   @Override
   public String createLabel(String name) {
     return "removed-label-id";
+  }
+
+  @Override
+  public Config getConfig() {
+    return config;
   }
 
   @Override
@@ -51,11 +53,6 @@ public class MockModel implements Model {
   }
 
   @Override
-  public boolean getDeleteOriginal() {
-    return true;
-  }
-
-  @Override
   public String getEmailAddress() {
     return "user@mock.com";
   }
@@ -63,21 +60,6 @@ public class MockModel implements Model {
   @Override
   public List<Email> getEmails() {
     return emails;
-  }
-
-  @Override
-  public int getEmailSize() {
-    return 1;
-  }
-
-  @Override
-  public String getFilenameSchema() {
-    return filenameSchema;
-  }
-
-  @Override
-  public List<String> getLabelIds() {
-    return Collections.emptyList();
   }
 
   @Override
@@ -101,54 +83,9 @@ public class MockModel implements Model {
   }
 
   @Override
-  public String getDownloadedLabelId() {
-    return "downloaded-label-id";
-  }
-
-  @Override
-  public String getRemovedLabelId() {
-    return "removed-label-id";
-  }
-
-  @Override
   public DefaultArtifactVersion getLatestVersion() {
     return new DefaultArtifactVersion(Constants.VERSION);
   }
-
-  @Override
-  public String getSearchQuery() {
-    return null;
-  }
-
-  @Override
-  public String getTargetDirectory() {
-    String userHome = System.getProperty("user.home");
-    Path defaultPath = Paths.get(userHome, "Downloads", Constants.PRODUCT_NAME);
-    return defaultPath.toString();
-  }
-
-  @Override
-  public int incrementNumberOfRuns() {
-    return ++numberOfRuns;
-  }
-
-  @Override
-  public void saveLabelIds(List<String> labelIds) {}
-
-  @Override
-  public void saveDownloadedLabelId(String downloadedLabelId) {}
-
-  @Override
-  public void saveRemovedLabelId(String removedLabelId) {}
-
-  @Override
-  public void saveSearchQuery(String query) {}
-
-  @Override
-  public void saveTargetDirectory(String path) {}
-
-  @Override
-  public void setDeleteOriginal(boolean deleteOriginal) {}
 
   @Override
   public void signIn() {
@@ -161,20 +98,12 @@ public class MockModel implements Model {
   }
 
   @Override
-  public void saveEmailSize(int emailSize) {}
-
-  @Override
   public void sendToServer(String contentDescription, String userEmail, String stackTraceText, String userText) {
     LOGGER.info("========== sendToServer ==========");
     LOGGER.info(userEmail);
     LOGGER.info(stackTraceText);
     LOGGER.info(userText);
     LOGGER.info("========== sendToServer ==========");
-  }
-
-  @Override
-  public void setFilenameSchema(String filenameSchema) {
-    this.filenameSchema = filenameSchema;
   }
 
   @Override

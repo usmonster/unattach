@@ -82,51 +82,6 @@ public class LiveModel implements Model {
   }
 
   @Override
-  public String getSearchQuery() {
-    return config.getSearchQuery();
-  }
-
-  @Override
-  public String getTargetDirectory() {
-    return config.getTargetDirectory();
-  }
-
-  @Override
-  public int incrementNumberOfRuns() {
-    return config.incrementNumberOfRuns();
-  }
-
-  @Override
-  public void saveLabelIds(List<String> labelIds) {
-    config.saveLabelIds(labelIds);
-  }
-
-  @Override
-  public void saveDownloadedLabelId(String downloadedLabelId) {
-    config.saveDownloadedLabelId(downloadedLabelId);
-  }
-
-  @Override
-  public void saveRemovedLabelId(String removedLabelId) {
-    config.saveRemovedLabelId(removedLabelId);
-  }
-
-  @Override
-  public void saveSearchQuery(String query) {
-    config.saveSearchQuery(query);
-  }
-
-  @Override
-  public void saveTargetDirectory(String path) {
-    config.saveTargetDirectory(path);
-  }
-
-  @Override
-  public void setDeleteOriginal(boolean deleteOriginal) {
-    config.setDeleteOriginal(deleteOriginal);
-  }
-
-  @Override
   public void signIn() throws IOException, GeneralSecurityException {
     configureService();
     try {
@@ -153,19 +108,9 @@ public class LiveModel implements Model {
   }
 
   @Override
-  public void saveEmailSize(int emailSize) {
-    config.saveEmailSize(emailSize);
-  }
-
-  @Override
   public void sendToServer(String contentDescription, String userEmail, String stackTraceText, String userText)
       throws IOException, InterruptedException {
     HttpClient.sendToServer(contentDescription, userEmail, stackTraceText, userText);
-  }
-
-  @Override
-  public void setFilenameSchema(String filenameSchema) {
-    config.saveFilenameSchema(filenameSchema);
   }
 
   @Override
@@ -189,33 +134,8 @@ public class LiveModel implements Model {
   }
 
   @Override
-  public int getEmailSize() {
-    return config.getEmailSize();
-  }
-
-  @Override
-  public String getFilenameSchema() {
-    return config.getFilenameSchema();
-  }
-
-  @Override
-  public List<String> getLabelIds() {
-    return config.getLabelIds();
-  }
-
-  @Override
   public LongTask<ProcessEmailResult> getProcessTask(Email email, ProcessSettings processSettings) {
     return new ProcessEmailTask(email, e -> processEmail(e, processSettings) /* 40 quota units */);
-  }
-
-  @Override
-  public String getDownloadedLabelId() {
-    return config.getDownloadedLabelId();
-  }
-
-  @Override
-  public String getRemovedLabelId() {
-    return config.getRemovedLabelId();
   }
 
   private ProcessEmailResult processEmail(Email email, ProcessSettings processSettings)
@@ -335,11 +255,6 @@ public class LiveModel implements Model {
     );
   }
 
-  @Override
-  public boolean getDeleteOriginal() {
-    return config.getDeleteOriginal();
-  }
-
   private List<Message> getEmailIds(String query) throws IOException, InterruptedException {
     List<Message> messages = new ArrayList<>();
     String pageToken = null;
@@ -385,6 +300,11 @@ public class LiveModel implements Model {
     labelIn.setColor(labelColor);
     Label labelOut = service.users().labels().create(USER, labelIn).execute();
     return labelOut.getId();
+  }
+
+  @Override
+  public Config getConfig() {
+    return config;
   }
 
   private static void getEmailMetadata(Gmail service, String messageId, BatchRequest batch,
