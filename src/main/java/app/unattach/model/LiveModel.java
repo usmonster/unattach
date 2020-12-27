@@ -181,7 +181,7 @@ public class LiveModel implements Model {
   private void backupEmail(Email email, ProcessSettings processSettings, MimeMessage mimeMessage)
           throws IOException, MessagingException {
     //noinspection ResultOfMethodCallIgnored
-    processSettings.targetDirectory.getParentFile().mkdirs();
+    processSettings.targetDirectory.mkdirs();
     String filename = email.getGmailId() + ".eml";
     mimeMessage.writeTo(new FileOutputStream(new File(processSettings.targetDirectory, filename)));
   }
