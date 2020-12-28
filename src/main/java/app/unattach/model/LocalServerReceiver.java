@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -124,11 +125,13 @@ class LocalServerReceiver implements VerificationCodeReceiver {
       boolean success = !request.getQueryString().contains("error=access_denied");
       response.setStatus(HttpServletResponse.SC_OK);
       response.setContentType("text/html");
-      InputStream in = getClass().getResourceAsStream(success ? "/success.html" : "/failure.html");
-      String html = IOUtils.toString(in, "UTF-8");
-      PrintWriter doc = response.getWriter();
-      doc.print(html);
-      doc.flush();
+      try (InputStream in = getClass().getResourceAsStream(success ? "/success.html" : "/failure.html")) {
+        String html = IOUtils.toString(in, StandardCharsets.UTF_8);
+        try (PrintWriter doc = response.getWriter()) {
+          doc.print(html);
+          doc.flush();
+        }
+      }
     }
   }
 }

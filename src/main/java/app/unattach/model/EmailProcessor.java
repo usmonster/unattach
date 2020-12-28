@@ -98,24 +98,25 @@ class EmailProcessor {
   }
 
   private void copyBodyPartToDisk(BodyPart bodyPart) throws IOException, MessagingException {
-    InputStream inputStream = bodyPart.getInputStream();
-    String originalFilename = getFilename(bodyPart);
-    if (originalFilename == null) {
-      return;
+    try (InputStream inputStream = bodyPart.getInputStream()) {
+      String originalFilename = getFilename(bodyPart);
+      if (originalFilename == null) {
+        return;
+      }
+      String normalizedFilename = filenameFactory.getFilename(email, fileCounter++, originalFilename);
+      if (processSettings.processOption.shouldDownload()) {
+        Path targetPath = Path.of(processSettings.targetDirectory.getAbsolutePath(), normalizedFilename);
+        File targetFile = targetPath.toFile();
+        //noinspection ResultOfMethodCallIgnored
+        targetFile.getParentFile().mkdirs();
+        Files.copy(inputStream, targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        //noinspection ResultOfMethodCallIgnored
+        targetFile.setLastModified(email.getTimestamp());
+      }
+      copiedBodyParts.add(bodyPart);
+      originalToNormalizedFilename.put(originalFilename, normalizedFilename);
+      LOGGER.info("Saved attachment " + originalFilename + " from " + email + " as " + normalizedFilename + ".");
     }
-    String normalizedFilename = filenameFactory.getFilename(email, fileCounter++, originalFilename);
-    if (processSettings.processOption.shouldDownload()) {
-      Path targetPath = Path.of(processSettings.targetDirectory.getAbsolutePath(), normalizedFilename);
-      File targetFile = targetPath.toFile();
-      //noinspection ResultOfMethodCallIgnored
-      targetFile.getParentFile().mkdirs();
-      Files.copy(inputStream, targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-      //noinspection ResultOfMethodCallIgnored
-      targetFile.setLastModified(email.getTimestamp());
-    }
-    copiedBodyParts.add(bodyPart);
-    originalToNormalizedFilename.put(originalFilename, normalizedFilename);
-    LOGGER.info("Saved attachment " + originalFilename + " from " + email + " as " + normalizedFilename + ".");
   }
 
   private String getFilename(BodyPart bodyPart) throws MessagingException, UnsupportedEncodingException {

@@ -7,6 +7,7 @@ import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.security.GeneralSecurityException;
 import java.util.List;
@@ -203,7 +204,7 @@ public class DefaultController implements Controller {
     try {
       if (SystemUtils.IS_OS_LINUX) {
         // Desktop.getDesktop().browse() only works on Linux with libgnome installed.
-        if (Runtime.getRuntime().exec(new String[] {"which", "xdg-open"}).getInputStream().read() != -1) {
+        if (hasXdgOpen()) {
           Runtime.getRuntime().exec(new String[] {"xdg-open", file.getAbsolutePath()});
         } else {
           LOGGER.log(Level.SEVERE, "Unable to open a file on this operating system.");
@@ -226,7 +227,7 @@ public class DefaultController implements Controller {
     try {
       if (SystemUtils.IS_OS_LINUX) {
         // Desktop.getDesktop().browse() only works on Linux with libgnome installed.
-        if (Runtime.getRuntime().exec(new String[] {"which", "xdg-open"}).getInputStream().read() != -1) {
+        if (hasXdgOpen()) {
           Runtime.getRuntime().exec(new String[] {"xdg-open", uriString});
         } else {
           LOGGER.log(Level.SEVERE, "Unable to open a web page on this operating system. " + manualInstructions);
@@ -240,6 +241,17 @@ public class DefaultController implements Controller {
       }
     } catch (Throwable t) {
       LOGGER.info("Unable to open a web page from within the application. " + manualInstructions);
+    }
+  }
+
+  private boolean hasXdgOpen() {
+    try {
+      Process process = Runtime.getRuntime().exec(new String[]{"which", "xdg-open"});
+      try (InputStream is = process.getInputStream()) {
+        return is.read() != -1;
+      }
+    } catch (Throwable t) {
+      return false;
     }
   }
 }

@@ -29,6 +29,7 @@ public class LiveModel implements Model {
   private final Config config;
   private GmailServiceLifecycleManager serviceLifecycleManager;
   private Gmail service;
+  private Session session;
   private List<Email> emails;
   private String emailAddress;
 
@@ -99,6 +100,8 @@ public class LiveModel implements Model {
     // 250 quota units / user / second
     // each set of requests should assume they start with clean quota
     service = serviceLifecycleManager.signIn();
+    Properties props = new Properties();
+    session = Session.getInstance(props);
   }
 
   @Override
@@ -173,9 +176,9 @@ public class LiveModel implements Model {
       throw new IOException("Unable to extract the contents of the email.");
     }
     byte[] emailBytes = decodeBase64(rawBefore);
-    Properties props = new Properties();
-    Session session = Session.getInstance(props);
-    return new MimeMessage(session, new ByteArrayInputStream(emailBytes));
+    try (InputStream is = new ByteArrayInputStream(emailBytes)) {
+      return new MimeMessage(session, is);
+    }
   }
 
   private void backupEmail(Email email, ProcessSettings processSettings, MimeMessage mimeMessage)
@@ -183,14 +186,17 @@ public class LiveModel implements Model {
     //noinspection ResultOfMethodCallIgnored
     processSettings.targetDirectory.mkdirs();
     String filename = email.getGmailId() + ".eml";
-    mimeMessage.writeTo(new FileOutputStream(new File(processSettings.targetDirectory, filename)));
+    try (OutputStream os = new FileOutputStream(new File(processSettings.targetDirectory, filename))) {
+      mimeMessage.writeTo(os);
+    }
   }
 
   private void updateRawMessage(Message message, MimeMessage mimeMessage) throws IOException, MessagingException {
-    ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-    mimeMessage.writeTo(buffer);
-    String raw = encodeBase64URLSafeString(buffer.toByteArray());
-    message.setRaw(raw);
+    try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
+      mimeMessage.writeTo(buffer);
+      String raw = encodeBase64URLSafeString(buffer.toByteArray());
+      message.setRaw(raw);
+    }
   }
 
   private void addLabel(String emailId, String labelId) throws IOException {
@@ -200,6 +206,7 @@ public class LiveModel implements Model {
     }
     ModifyMessageRequest modifyMessageRequest = new ModifyMessageRequest();
     modifyMessageRequest.setAddLabelIds(Collections.singletonList(labelId));
+    // 1 messages.modify == 5 quota units
     service.users().messages().modify(USER, emailId, modifyMessageRequest).execute();
   }
 

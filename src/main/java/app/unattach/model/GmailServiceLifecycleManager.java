@@ -16,7 +16,6 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
@@ -56,15 +55,15 @@ class GmailServiceLifecycleManager {
   }
 
   private Credential authorize() throws IOException {
-    InputStream in = getClass().getResourceAsStream("/credentials.json");
-    GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
-
-    GoogleAuthorizationCodeFlow flow =
-        new GoogleAuthorizationCodeFlow.Builder(
-            HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
-            .setDataStoreFactory(DATA_STORE_FACTORY)
-            .setAccessType("offline")
-            .build();
-    return new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
+    try (InputStreamReader reader = new InputStreamReader(getClass().getResourceAsStream("/credentials.json"))) {
+      GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, reader);
+      GoogleAuthorizationCodeFlow flow =
+          new GoogleAuthorizationCodeFlow.Builder(
+              HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
+              .setDataStoreFactory(DATA_STORE_FACTORY)
+              .setAccessType("offline")
+              .build();
+      return new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
+    }
   }
 }

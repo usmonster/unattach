@@ -16,10 +16,8 @@ public class FileConfig extends BaseConfig {
   public void loadConfig() {
     File configFile = getConfigPath().toFile();
     if (configFile.exists()) {
-      try {
-        FileInputStream in = new FileInputStream(configFile);
+      try (FileInputStream in = new FileInputStream(configFile)) {
         config.load(in);
-        in.close();
       } catch (IOException e) {
         LOGGER.log(Level.SEVERE, "Failed to load the config file.", e);
       }
@@ -28,11 +26,9 @@ public class FileConfig extends BaseConfig {
 
   @Override
   public void saveConfig() {
-    try {
-      File configFile = getConfigPath().toFile();
-      FileOutputStream out = new FileOutputStream(configFile);
+    File configFile = getConfigPath().toFile();
+    try (FileOutputStream out = new FileOutputStream(configFile)) {
       config.store(out, null);
-      out.close();
     } catch (IOException e) {
       LOGGER.log(Level.SEVERE, "Failed to save the config file.", e);
     }
