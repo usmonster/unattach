@@ -46,6 +46,8 @@ public class MainViewController {
   @FXML
   private MenuItem emailMenuItem;
   @FXML
+  private CheckMenuItem signInAutomaticallyCheckMenuItem;
+  @FXML
   private MenuItem signOutMenuItem;
   @FXML
   private CheckMenuItem addMetadataCheckMenuItem;
@@ -142,6 +144,7 @@ public class MainViewController {
   private void initialize() throws IOException {
     controller = ControllerFactory.getDefaultController();
     emailMenuItem.setText("Signed in as " + controller.getEmailAddress() + ".");
+    signInAutomaticallyCheckMenuItem.setSelected(controller.getConfig().getSignInAutomatically());
     addMenuForHidingColumns();
     if (!controller.getConfig().getDeleteOriginal()) {
       onTrashOriginalMenuItemPressed();
@@ -230,6 +233,17 @@ public class MainViewController {
   }
 
   @FXML
+  private void onSignOutButtonPressed() throws IOException {
+    controller.signOut();
+    Scenes.setScene(Scenes.SIGN_IN);
+  }
+
+  @FXML
+  private void onSignInAutomaticallyCheckMenuItemAction() {
+    controller.getConfig().saveSignInAutomatically(signInAutomaticallyCheckMenuItem.isSelected());
+  }
+
+  @FXML
   private void onAboutButtonPressed() {
     controller.openUnattachHomepage();
   }
@@ -245,12 +259,6 @@ public class MainViewController {
     } catch (Throwable t) {
       reportError("Unable to open feedback view.", t);
     }
-  }
-
-  @FXML
-  private void onSignOutButtonPressed() throws IOException {
-    controller.signOut();
-    Scenes.setScene(Scenes.SIGN_IN);
   }
 
   @FXML

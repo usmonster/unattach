@@ -17,6 +17,8 @@
       <MenuItem fx:id="signOutMenuItem" text="Sign out" onAction="#onSignOutButtonPressed"/>
     </Menu>
     <Menu text="Settings">
+      <CheckMenuItem fx:id="signInAutomaticallyCheckMenuItem" text="Sign in automatically"
+                     onAction="#onSignInAutomaticallyCheckMenuItemAction"/>
       <Menu fx:id="viewColumnMenu" text="View Column" />
       <CheckMenuItem fx:id="addMetadataCheckMenuItem" text="Add metadata about removed attachments" selected="true" />
       <Menu text="After inserting email copy without attachments .." >

@@ -1,5 +1,7 @@
 package app.unattach;
 
+import app.unattach.controller.Controller;
+import app.unattach.controller.ControllerFactory;
 import app.unattach.model.Constants;
 import app.unattach.view.Scenes;
 import javafx.application.Application;
@@ -18,8 +20,13 @@ public class MainFx extends Application {
       LogManager.getLogManager().readConfiguration(getClass().getResourceAsStream("/logging.properties"));
       LOGGER.info("Starting " + Constants.PRODUCT_NAME + " .. (max memory in bytes: " + Runtime.getRuntime().maxMemory() + ")");
       Scenes.init(stage);
-      Scenes.setScene(Scenes.SIGN_IN);
-//      Scenes.setScene(Scenes.MAIN);
+      Controller controller = ControllerFactory.getDefaultController();
+      if (controller.getConfig().getSignInAutomatically()) {
+        controller.signIn();
+        Scenes.setScene(Scenes.MAIN);
+      } else {
+        Scenes.setScene(Scenes.SIGN_IN);
+      }
     } catch (Throwable t) {
       LOGGER.log(Level.SEVERE, "Failed to start.", t);
     }
