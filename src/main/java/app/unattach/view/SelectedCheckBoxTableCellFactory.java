@@ -22,8 +22,6 @@ public class SelectedCheckBoxTableCellFactory implements Callback<TableColumn.Ce
       email.setStatus(targetStatus);
       cellDataFeatures.getTableView().refresh();
     });
-    cellDataFeatures.getTableView().editableProperty().addListener((observable, oldValue, newValue) ->
-        checkBox.setDisable(!newValue));
     return new SimpleObjectProperty<>(checkBox);
   }
 }

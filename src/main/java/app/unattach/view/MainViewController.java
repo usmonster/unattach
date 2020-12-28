@@ -8,6 +8,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.Observable;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -562,6 +563,7 @@ public class MainViewController {
     searchButton.setDisable(true);
     stopSearchButton.setDisable(true);
     resultsTable.setEditable(false);
+    setResultsTableCheckboxesEnabled(false);
     toggleAllEmailsCheckBox.setDisable(true);
     targetDirectoryTextField.setDisable(true);
     browseButton.setDisable(true);
@@ -577,6 +579,7 @@ public class MainViewController {
     searchButton.setDisable(false);
     stopSearchButton.setDisable(true);
     resultsTable.setEditable(true);
+    setResultsTableCheckboxesEnabled(true);
     toggleAllEmailsCheckBox.setDisable(false);
     toggleAllEmailsCheckBox.setSelected(false);
     targetDirectoryTextField.setDisable(false);
@@ -586,6 +589,13 @@ public class MainViewController {
     downloadAndDeleteButton.setDisable(false);
     deleteButton.setDisable(false);
     stopProcessingButton.setDisable(true);
+  }
+
+  private void setResultsTableCheckboxesEnabled(boolean enabled) {
+    for (int row = 0; row < resultsTable.getItems().size(); ++row) {
+      selectedTableColumn.getCellObservableValue(row).getValue().setDisable(!enabled);
+    }
+    resultsTable.refresh();
   }
 
   @FXML
