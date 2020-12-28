@@ -6,6 +6,7 @@ import app.unattach.model.Constants;
 import app.unattach.model.DonationOption;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -48,6 +49,7 @@ public class SignInViewController {
     DonationViewUtils.configureDonationControls(controller, donationOptions, buyCoffeeComboBox, currencyComboBox);
     signInMessageLabel.setText("The first time you sign in, you will be asked to give the app permissions to your Gmail.\n" +
             "Click on 'How Unattach Works' to see why this is required and how your privacy is protected.");
+    subscribeToUpdatesCheckBox.setSelected(controller.getConfig().getSubscribeToUpdates());
     Platform.runLater(() -> signInButton.requestFocus());
     Platform.runLater(this::checkLatestVersion);
   }
@@ -73,7 +75,7 @@ public class SignInViewController {
       @Override
       protected Void call() throws Exception {
         String emailAddress = controller.signIn();
-        if (subscribeToUpdatesCheckBox.isSelected()) {
+        if (controller.getConfig().getSubscribeToUpdates()) {
           LOGGER.info("Subscribing to updates..");
           controller.subscribe(emailAddress);
           LOGGER.info("Subscribing to updates.. successful.");
@@ -134,5 +136,10 @@ public class SignInViewController {
     termsAndConditionsButton.setDisable(false);
     signInButton.setDisable(false);
     subscribeToUpdatesCheckBox.setDisable(false);
+  }
+
+  @FXML
+  private void onSubscribeToUpdatesCheckBoxAction() {
+    controller.getConfig().saveSubscribeToUpdates(subscribeToUpdatesCheckBox.isSelected());
   }
 }

@@ -8,13 +8,14 @@ import java.util.Properties;
 
 public class BaseConfig implements Config {
   private static final String DELETE_ORIGINAL_PROPERTY = "delete_original";
-  private static final String EMAIL_SIZE_PROPERTY = "email_size";
-  private static final String LABEL_IDS_PROPERTY = "label_ids";
-  private static final String FILENAME_SCHEMA_PROPERTY = "filename_schema";
-  private static final String NUMBER_OF_RUNS_PROPERTY = "number_of_runs";
   private static final String DOWNLOADED_LABEL_ID_PROPERTY = "downloaded_label_id";
+  private static final String EMAIL_SIZE_PROPERTY = "email_size";
+  private static final String FILENAME_SCHEMA_PROPERTY = "filename_schema";
+  private static final String LABEL_IDS_PROPERTY = "label_ids";
+  private static final String NUMBER_OF_RUNS_PROPERTY = "number_of_runs";
   private static final String REMOVED_LABEL_ID_PROPERTY = "removed_label_id";
   private static final String SEARCH_QUERY_PROPERTY = "search_query";
+  private static final String SUBSCRIBE_TO_UPDATES_PROPERTY = "subscribe_to_updates";
   private static final String TARGET_DIRECTORY_PROPERTY = "target_directory";
 
   protected final Properties config;
@@ -68,6 +69,11 @@ public class BaseConfig implements Config {
   }
 
   @Override
+  public boolean getSubscribeToUpdates() {
+    return Boolean.parseBoolean(config.getProperty(SUBSCRIBE_TO_UPDATES_PROPERTY, "true"));
+  }
+
+  @Override
   public String getTargetDirectory() {
     return config.getProperty(TARGET_DIRECTORY_PROPERTY, getDefaultTargetDirectory());
   }
@@ -113,6 +119,12 @@ public class BaseConfig implements Config {
   @Override
   public void saveTargetDirectory(String path) {
     config.setProperty(TARGET_DIRECTORY_PROPERTY, path);
+    saveConfig();
+  }
+
+  @Override
+  public void saveSubscribeToUpdates(boolean subscribeToUpdates) {
+    config.setProperty(SUBSCRIBE_TO_UPDATES_PROPERTY, Boolean.toString(subscribeToUpdates));
     saveConfig();
   }
 

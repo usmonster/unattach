@@ -50,7 +50,8 @@
   <Label text="By using this app, you agree with its Terms and Conditions." styleClass="terms-and-conditions"/>
 
   <HBox spacing="50" alignment="CENTER">
-    <CheckBox fx:id="subscribeToUpdatesCheckBox" text="Subscribe to updates" selected="true"/>
+    <CheckBox fx:id="subscribeToUpdatesCheckBox" text="Subscribe to updates"
+              onAction="#onSubscribeToUpdatesCheckBoxAction" />
     <Region minWidth="50" HBox.hgrow="ALWAYS" />
     <Label fx:id="versionMessage" text="Checking for latest version.." />
   </HBox>

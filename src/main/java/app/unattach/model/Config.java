@@ -10,14 +10,16 @@ public interface Config {
   String getDownloadedLabelId();
   String getRemovedLabelId();
   String getSearchQuery();
+  boolean getSubscribeToUpdates();
   String getTargetDirectory();
   int incrementNumberOfRuns();
+  void saveDownloadedLabelId(String downloadedLabelId);
+  void saveEmailSize(int emailSize);
   void saveFilenameSchema(String schema);
   void saveLabelIds(List<String> labelIds);
-  void saveDownloadedLabelId(String downloadedLabelId);
   void saveRemovedLabelId(String removedLabelId);
   void saveSearchQuery(String query);
   void saveTargetDirectory(String path);
-  void saveEmailSize(int emailSize);
+  void saveSubscribeToUpdates(boolean subscribeToUpdates);
   void setDeleteOriginal(boolean deleteOriginal);
 }
