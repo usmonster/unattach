@@ -5,7 +5,7 @@ set -e -u -x -o pipefail
 mvn clean package
 
 VERSION=3.0.0
-DESCRIPTION="Easily download Gmail attachments in bulk, and optionally remove them."
+DESCRIPTION="Easily download and optionally remove Gmail attachments from many emails at once."
 VENDOR="Rok Strniša"
 COPYRIGHT="Copyright 2020, All rights reserved"
 MAIN_CLASS="app.unattach.Main"
