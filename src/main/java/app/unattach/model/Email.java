@@ -13,6 +13,7 @@ public class Email implements Observable {
   private final String uniqueId;
   private final SortedSet<String> labelIds;
   private final String from;
+  private final String to;
   private final String subject;
   private final long timestamp;
   private final Date date;
@@ -22,12 +23,13 @@ public class Email implements Observable {
 
   private final List<InvalidationListener> listeners = new ArrayList<>();
 
-  public Email(String gmailId, String uniqueId, List<String> labelIds, String from, String subject, long timestamp,
-               int sizeInBytes) {
+  public Email(String gmailId, String uniqueId, List<String> labelIds, String from, String to, String subject,
+               long timestamp, int sizeInBytes) {
     this.gmailId = gmailId;
     this.uniqueId = uniqueId;
     this.labelIds = Collections.unmodifiableSortedSet(labelIds == null ? Collections.emptySortedSet() : new TreeSet<>(labelIds));
     this.from = from;
+    this.to = to;
     this.subject = subject;
     this.timestamp = timestamp;
     this.date = new Date(timestamp);
@@ -67,6 +69,11 @@ public class Email implements Observable {
   @FXML
   public String getFrom() {
     return from;
+  }
+
+  @FXML
+  public String getTo() {
+    return to;
   }
 
   String getFromEmail() {

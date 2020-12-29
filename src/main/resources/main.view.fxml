@@ -119,7 +119,11 @@
               <PropertyValueFactory property="from"/>
             </cellValueFactory>
           </TableColumn>
-          <TableColumn text="Subject" styleClass="center-left">
+          <TableColumn text="To" styleClass="center-left">
+            <cellValueFactory>
+              <PropertyValueFactory property="to"/>
+            </cellValueFactory>
+          </TableColumn>          <TableColumn text="Subject" styleClass="center-left">
             <cellValueFactory>
               <PropertyValueFactory property="subject"/>
             </cellValueFactory>

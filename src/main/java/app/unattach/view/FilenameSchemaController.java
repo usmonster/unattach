@@ -14,7 +14,8 @@ import java.util.Arrays;
 
 public class FilenameSchemaController {
   private static final Email email = new Email("17b4aed892cc3f0b", "17b4aed892cc3f0b",
-          Arrays.asList("IMPORTANT", "SENT"), "\"John Doe\" <john.doe@example.com>", "Re: Holiday plans",
+          Arrays.asList("IMPORTANT", "SENT"), "\"John Doe\" <john.doe@example.com>",
+          "\"Jane Doe\" <jane.doe@example.com>", "Re: Holiday plans",
           1501597962321L, 1234567);
   private Controller controller;
 

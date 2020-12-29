@@ -243,9 +243,10 @@ public class LiveModel implements Model {
         String uniqueId = headerMap.get("message-id");
         List<String> labelIds = message.getLabelIds();
         String from = headerMap.get("from");
+        String to = headerMap.get("to");
         String subject = headerMap.get("subject");
         long timestamp = message.getInternalDate();
-        Email email = new Email(emailId, uniqueId, labelIds, from, subject, timestamp, message.getSizeEstimate());
+        Email email = new Email(emailId, uniqueId, labelIds, from, to, subject, timestamp, message.getSizeEstimate());
         emails.add(email);
       }
     };

@@ -6,8 +6,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class EmailTest {
   private Email getEmail(String from) {
-    return new Email("id3", "uid42", null, from, "subject", 1501545600000L,
-        32141);
+    return new Email("id3", "uid42", null, from, "to@example.com", "subject",
+        1501545600000L, 32141);
   }
 
   @Test

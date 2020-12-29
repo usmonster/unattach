@@ -45,7 +45,8 @@ public class MockModel implements Model {
         if (startIndexInclusive <= i && i < endIndexExclusive) {
           String emailId = String.valueOf(i);
           emails.add(new Email(emailId, emailId, Arrays.asList("INBOX", "IMPORTANT"),
-              "some@example.com", "Subject " + i, System.currentTimeMillis(),
+              "john.doe@example.com", "jane.doe@example.com",
+              "Subject " + i, System.currentTimeMillis(),
               i * (int) Math.pow(2, 20)));
         }
       }
