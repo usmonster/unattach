@@ -133,6 +133,11 @@
               <PropertyValueFactory property="sizeInMegaBytes"/>
             </cellValueFactory>
           </TableColumn>
+          <TableColumn text="Attachments" styleClass="center">
+            <cellValueFactory>
+              <PropertyValueFactory property="attachments"/>
+            </cellValueFactory>
+          </TableColumn>
           <TableColumn fx:id="selectedTableColumn" text="Selected" styleClass="center">
             <cellValueFactory>
               <SelectedCheckBoxTableCellFactory/>

@@ -18,13 +18,14 @@ public class Email implements Observable {
   private final long timestamp;
   private final Date date;
   private final int sizeInBytes;
+  private final List<String> attachments;
   private EmailStatus status;
   private String note;
 
   private final List<InvalidationListener> listeners = new ArrayList<>();
 
   public Email(String gmailId, String uniqueId, List<String> labelIds, String from, String to, String subject,
-               long timestamp, int sizeInBytes) {
+               long timestamp, int sizeInBytes, List<String> attachments) {
     this.gmailId = gmailId;
     this.uniqueId = uniqueId;
     this.labelIds = Collections.unmodifiableSortedSet(labelIds == null ? Collections.emptySortedSet() : new TreeSet<>(labelIds));
@@ -34,6 +35,7 @@ public class Email implements Observable {
     this.timestamp = timestamp;
     this.date = new Date(timestamp);
     this.sizeInBytes = sizeInBytes;
+    this.attachments = attachments;
     status = EmailStatus.IGNORED;
     note = "";
   }
@@ -106,6 +108,11 @@ public class Email implements Observable {
   @FXML
   public int getSizeInMegaBytes() {
     return sizeInBytes / Constants.BYTES_IN_MEGABYTE;
+  }
+
+  @FXML
+  public String getAttachments() {
+    return String.join(", ", attachments);
   }
 
   @FXML

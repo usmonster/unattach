@@ -47,7 +47,7 @@ public class MockModel implements Model {
           emails.add(new Email(emailId, emailId, Arrays.asList("INBOX", "IMPORTANT"),
               "john.doe@example.com", "jane.doe@example.com",
               "Subject " + i, System.currentTimeMillis(),
-              i * (int) Math.pow(2, 20)));
+              i * (int) Math.pow(2, 20), Collections.singletonList("data.zip")));
         }
       }
     });

@@ -7,6 +7,7 @@ import com.google.api.client.googleapis.json.GoogleJsonError;
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.model.*;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
 import javax.mail.MessagingException;
@@ -255,7 +256,10 @@ public class LiveModel implements Model {
         String to = headerMap.get("to");
         String subject = headerMap.get("subject");
         long timestamp = message.getInternalDate();
-        Email email = new Email(emailId, uniqueId, labelIds, from, to, subject, timestamp, message.getSizeEstimate());
+        List<String> attachments = message.getPayload().getParts().stream()
+            .map(MessagePart::getFilename).filter(StringUtils::isNotBlank).collect(Collectors.toList());
+        Email email = new Email(emailId, uniqueId, labelIds, from, to, subject, timestamp, message.getSizeEstimate(),
+            attachments);
         emails.add(email);
       }
     };
@@ -327,8 +331,8 @@ public class LiveModel implements Model {
   private static void getEmailMetadata(Gmail service, String messageId, BatchRequest batch,
                                        JsonBatchCallback<Message> callback) throws IOException {
     // 1 messages.get == 5 quota units
-    service.users().messages().get(LiveModel.USER, messageId).setFields("id,labelIds,internalDate,payload/headers,sizeEstimate")
-        .queue(batch, callback);
+    String fields = "id,labelIds,internalDate,payload/parts/filename,payload/headers,sizeEstimate";
+    service.users().messages().get(LiveModel.USER, messageId).setFields(fields).queue(batch, callback);
   }
 
   private static Map<String, String> getHeaderMap(Message message) {

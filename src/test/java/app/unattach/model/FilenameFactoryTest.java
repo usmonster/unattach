@@ -5,13 +5,14 @@ import org.junit.Test;
 import java.security.InvalidParameterException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class FilenameFactoryTest {
   private static final Email email = new Email("id3", "uid42", Arrays.asList("SENT", "IMPORTANT"),
       "\"Rok Strniša\" <rok.strnisa@gmail.com>", "to@example.com", "subject", 1501545600000L,
-      32141);
+      32141, Collections.singletonList("data.zip"));
 
   @Test
   public void testFromEmail() {
