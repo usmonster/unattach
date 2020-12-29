@@ -123,7 +123,8 @@
             <cellValueFactory>
               <PropertyValueFactory property="to"/>
             </cellValueFactory>
-          </TableColumn>          <TableColumn text="Subject" styleClass="center-left">
+          </TableColumn>
+          <TableColumn text="Subject" styleClass="center-left">
             <cellValueFactory>
               <PropertyValueFactory property="subject"/>
             </cellValueFactory>
@@ -133,7 +134,7 @@
               <PropertyValueFactory property="sizeInMegaBytes"/>
             </cellValueFactory>
           </TableColumn>
-          <TableColumn text="Attachments" styleClass="center">
+          <TableColumn text="Attachments">
             <cellValueFactory>
               <PropertyValueFactory property="attachments"/>
             </cellValueFactory>
