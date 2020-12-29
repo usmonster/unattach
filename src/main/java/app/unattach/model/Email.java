@@ -10,7 +10,7 @@ import java.util.*;
 
 public class Email implements Observable {
   private final String gmailId;
-  private final String uniqueId;
+  private String uniqueId;
   private final SortedSet<String> labelIds;
   private final String from;
   private final String to;
@@ -148,6 +148,10 @@ public class Email implements Observable {
   @Override
   public void removeListener(InvalidationListener listener) {
     listeners.remove(listener);
+  }
+
+  public void setUniqueId(String uniqueId) {
+    this.uniqueId = uniqueId;
   }
 
   @Override

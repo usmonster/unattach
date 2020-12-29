@@ -506,21 +506,28 @@ public class MainViewController {
     processingProgressBarWithText.textProperty().setValue(
         String.format("Processing selected emails (%s) ..", getProcessingStatusString(emailsToProcess, nextEmailIndex, failed)));
 
-    Task<Void> task = new Task<>() {
+    Task<ProcessEmailResult> task = new Task<>() {
       @Override
-      protected Void call() throws Exception {
+      protected ProcessEmailResult call() throws Exception {
         LongTask<ProcessEmailResult> longTask = controller.getProcessTask(email, processSettings);
-        while (!stopProcessingButtonPressed && longTask.hasMoreSteps()) {
-          longTask.takeStep();
+        // This is 'if' and not 'while', because longTask always has a single step.
+        if (!stopProcessingButtonPressed && longTask.hasMoreSteps()) {
+          return longTask.takeStep();
         }
         return null;
       }
 
       @Override
       protected void succeeded() {
-        bytesProcessed += email.getSizeInBytes();
-        processingProgressBarWithText.progressProperty().setValue(1.0 * bytesProcessed / allBytesToProcess);
-        resultsTable.refresh();
+        ProcessEmailResult processEmailResult = getValue();
+        if (processEmailResult != null) {
+          if (processEmailResult.getNewUniqueId() != null) {
+            email.setUniqueId(processEmailResult.getNewUniqueId());
+          }
+          bytesProcessed += email.getSizeInBytes();
+          processingProgressBarWithText.progressProperty().setValue(1.0 * bytesProcessed / allBytesToProcess);
+          resultsTable.refresh();
+        }
         processEmail(emailsToProcess, nextEmailIndex + 1, failed, processSettings);
       }
 

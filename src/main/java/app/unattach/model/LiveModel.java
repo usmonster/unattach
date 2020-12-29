@@ -145,6 +145,7 @@ public class LiveModel implements Model {
       throws IOException, MessagingException {
     Message message = getRawMessage(email.getGmailId()); // 5 quota units
     MimeMessage mimeMessage = getMimeMessage(message);
+    String newUniqueId = null;
     if (processSettings.processOption.shouldBackup()) {
       backupEmail(email, processSettings, mimeMessage);
     }
@@ -155,13 +156,16 @@ public class LiveModel implements Model {
     if (processSettings.processOption.shouldRemove() && !fileNames.isEmpty()) {
       updateRawMessage(message, mimeMessage);
       Message newMessage = insertSlimMessage(message); // 25 quota units
+      newMessage = getMetadataForNewMessage(newMessage); // 5 quota units
+      Map<String, String> headerMap = getHeaderMap(newMessage);
+      newUniqueId = headerMap.get("message-id");
       if (processSettings.processOption.shouldDownload()) {
         addLabel(newMessage.getId(), processSettings.processOption.getDownloadedLabelId());
       }
       addLabel(newMessage.getId(), processSettings.processOption.getRemovedLabelId());
       removeOriginalMessage(processSettings.processOption.shouldDeleteOriginal(), message.getId()); // 5-10 quota units
     }
-    return new ProcessEmailResult(fileNames);
+    return new ProcessEmailResult(newUniqueId, fileNames);
   }
 
   private Message getRawMessage(String emailId) throws IOException {
@@ -214,6 +218,11 @@ public class LiveModel implements Model {
     // 1 messages.insert == 25 quota units
     // upload limit = 500 MB / day / user
     return service.users().messages().insert(USER, message).setInternalDateSource("dateHeader").execute();
+  }
+
+  private Message getMetadataForNewMessage(Message newMessage) throws IOException {
+    // 1 messages.get == 5 quota units
+    return service.users().messages().get(LiveModel.USER, newMessage.getId()).setFields("id,payload/headers").execute();
   }
 
   private void removeOriginalMessage(boolean deleteOriginal, String emailId) throws IOException {

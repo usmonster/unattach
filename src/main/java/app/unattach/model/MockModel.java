@@ -76,7 +76,7 @@ public class MockModel implements Model {
   public LongTask<ProcessEmailResult> getProcessTask(Email email, ProcessSettings processSettings) {
     return new ProcessEmailTask(email, e -> {
       if (random.nextBoolean()) {
-        return new ProcessEmailResult(Collections.singleton(e.getGmailId()));
+        return new ProcessEmailResult("mock-new-unique-id", Collections.singleton(e.getGmailId()));
       } else {
         throw new IOException("Something went wrong.");
       }
