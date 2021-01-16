@@ -256,11 +256,23 @@ public class LiveModel implements Model {
         String to = headerMap.get("to");
         String subject = headerMap.get("subject");
         long timestamp = message.getInternalDate();
-        List<String> attachments = message.getPayload().getParts().stream()
-            .map(MessagePart::getFilename).filter(StringUtils::isNotBlank).collect(Collectors.toList());
-        Email email = new Email(emailId, uniqueId, labelIds, from, to, subject, timestamp, message.getSizeEstimate(),
-            attachments);
-        emails.add(email);
+        List<MessagePart> messageParts = message.getPayload().getParts();
+        if (messageParts != null) { // Means, this is not a blank message
+          List<String> attachments = messageParts.stream()
+                  .map(MessagePart::getFilename).filter(StringUtils::isNotBlank).collect(Collectors.toList());
+          Email email = new Email(emailId, uniqueId, labelIds, from, to, subject, timestamp, message.getSizeEstimate(),
+                  attachments);
+          emails.add(email);
+        }
+        else {
+          LOGGER.log(Level.WARNING, "Skipping message as GMail returned no parts:\n" +
+                  "\tGMail-ID: " + emailId + "\n" +
+                  "\tMessage-ID: " + uniqueId + "\n" +
+                  "\tFrom: " + from + "\n" +
+                  "\tTo: " + to + "\n" +
+                  "\tSubject: " + subject + "\n" +
+                  "\tDate: " + new Date(timestamp));
+        }
       }
     };
 
