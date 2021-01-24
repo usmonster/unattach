@@ -4,6 +4,7 @@ import app.unattach.controller.Controller;
 import app.unattach.controller.ControllerFactory;
 import app.unattach.controller.LongTask;
 import app.unattach.model.*;
+import app.unattach.model.service.GmailServiceException;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
@@ -54,7 +55,7 @@ public class MainViewController {
   @FXML
   private Menu viewColumnMenu;
   @FXML
-  private CheckMenuItem deleteOriginalMenuItem;
+  private CheckMenuItem permanentlyDeleteOriginalMenuItem;
   @FXML
   private CheckMenuItem trashOriginalMenuItem;
   @FXML
@@ -141,7 +142,7 @@ public class MainViewController {
   private Timeline timeline;
 
   @FXML
-  private void initialize() throws IOException {
+  private void initialize() throws GmailServiceException {
     controller = ControllerFactory.getDefaultController();
     emailMenuItem.setText("Signed in as " + controller.getEmailAddress() + ".");
     signInAutomaticallyCheckMenuItem.setSelected(controller.getConfig().getSignInAutomatically());
@@ -311,7 +312,7 @@ public class MainViewController {
         boolean successful = false;
         try {
           updateMessage(String.format("Finished obtaining email metadata (%s).", getStatusString()));
-          List<Email> emails = controller.getEmails();
+          List<Email> emails = controller.getSearchResults();
           ObservableList<Email> observableEmails = FXCollections.observableList(emails, email -> new Observable[]{email});
           resultsTable.setItems(observableEmails);
           updateResultsCaption();
@@ -441,21 +442,21 @@ public class MainViewController {
 
   @FXML
   private void onDownloadAndDeleteButtonPressed() {
-    boolean deleteOriginal = deleteOriginalMenuItem.isSelected();
+    boolean permanentlyDeleteOriginal = permanentlyDeleteOriginalMenuItem.isSelected();
     String downloadedLabelId = controller.getOrCreateDownloadedLabelId();
     String removedLabelId = controller.getOrCreateRemovedLabelId();
     ProcessOption processOption = new ProcessOption(Action.DOWNLOAD_AND_DELETE, backupCheckBox.isSelected(),
-        true, true, deleteOriginal, downloadedLabelId, removedLabelId);
+        true, true, permanentlyDeleteOriginal, downloadedLabelId, removedLabelId);
     processEmails(processOption);
   }
 
   @FXML
   private void onDeleteButtonPressed() {
-    boolean deleteOriginal = deleteOriginalMenuItem.isSelected();
+    boolean permanentlyDeleteOriginal = permanentlyDeleteOriginalMenuItem.isSelected();
     String downloadedLabelId = controller.getOrCreateDownloadedLabelId();
     String removedLabelId = controller.getOrCreateRemovedLabelId();
     ProcessOption processOption = new ProcessOption(Action.DELETE, backupCheckBox.isSelected(),
-        false, true, deleteOriginal, downloadedLabelId, removedLabelId);
+        false, true, permanentlyDeleteOriginal, downloadedLabelId, removedLabelId);
     processEmails(processOption);
   }
 
@@ -648,14 +649,14 @@ public class MainViewController {
 
   @FXML
   private void onDeleteOriginalMenuItemPressed() {
-    deleteOriginalMenuItem.setSelected(true);
+    permanentlyDeleteOriginalMenuItem.setSelected(true);
     trashOriginalMenuItem.setSelected(false);
     controller.getConfig().setDeleteOriginal(true);
   }
 
   @FXML
   private void onTrashOriginalMenuItemPressed() {
-    deleteOriginalMenuItem.setSelected(false);
+    permanentlyDeleteOriginalMenuItem.setSelected(false);
     trashOriginalMenuItem.setSelected(true);
     controller.getConfig().setDeleteOriginal(false);
   }

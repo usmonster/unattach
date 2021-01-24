@@ -15,7 +15,7 @@ public class MockModel implements Model {
   private ArrayList<Email> emails = new ArrayList<>();
 
   @Override
-  public void clearPreviousSearch() {
+  public void clearPreviousSearchResults() {
     emails = new ArrayList<>();
   }
 
@@ -59,7 +59,7 @@ public class MockModel implements Model {
   }
 
   @Override
-  public List<Email> getEmails() {
+  public List<Email> getSearchResults() {
     return emails;
   }
 

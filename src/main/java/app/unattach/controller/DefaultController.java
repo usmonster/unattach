@@ -1,15 +1,15 @@
 package app.unattach.controller;
 
 import app.unattach.model.*;
+import app.unattach.model.service.GmailServiceException;
+import app.unattach.model.service.GmailServiceManagerException;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
 import java.awt.*;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.security.GeneralSecurityException;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
@@ -30,7 +30,7 @@ public class DefaultController implements Controller {
 
   @Override
   public void clearPreviousSearch() {
-    model.clearPreviousSearch();
+    model.clearPreviousSearchResults();
   }
 
   @Override
@@ -44,11 +44,6 @@ public class DefaultController implements Controller {
       LOGGER.log(Level.SEVERE, "Creating label " + name + ".. failed.", t);
       return null;
     }
-  }
-
-  @Override
-  public GetEmailMetadataTask getSearchTask(String query) throws IOException, InterruptedException {
-    return model.getSearchTask(query);
   }
 
   @Override
@@ -103,8 +98,13 @@ public class DefaultController implements Controller {
   }
 
   @Override
-  public List<Email> getEmails() {
-    return model.getEmails();
+  public List<Email> getSearchResults() {
+    return model.getSearchResults();
+  }
+
+  @Override
+  public GetEmailMetadataTask getSearchTask(String query) throws GmailServiceException {
+    return model.getSearchTask(query);
   }
 
   @Override
@@ -123,13 +123,13 @@ public class DefaultController implements Controller {
   }
 
   @Override
-  public String signIn() throws IOException, GeneralSecurityException {
+  public String signIn() throws GmailServiceManagerException, GmailServiceException {
       model.signIn();
       return model.getEmailAddress();
   }
 
   @Override
-  public String getEmailAddress() throws IOException {
+  public String getEmailAddress() throws GmailServiceException {
     return model.getEmailAddress();
   }
 

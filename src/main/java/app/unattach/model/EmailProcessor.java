@@ -1,5 +1,6 @@
 package app.unattach.model;
 
+import app.unattach.model.attachmentstorage.UserStorage;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -14,10 +15,8 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.logging.Logger;
@@ -25,6 +24,7 @@ import java.util.logging.Logger;
 class EmailProcessor {
   private static final Logger LOGGER = Logger.getLogger(EmailProcessor.class.getName());
 
+  private final UserStorage userStorage;
   private final Email email;
   private final ProcessSettings processSettings;
   private final FilenameFactory filenameFactory;
@@ -34,7 +34,8 @@ class EmailProcessor {
   private BodyPart mainTextBodyPart;
   private BodyPart mainHtmlBodyPart;
 
-  private EmailProcessor(Email email, ProcessSettings processSettings) {
+  private EmailProcessor(UserStorage userStorage, Email email, ProcessSettings processSettings) {
+    this.userStorage = userStorage;
     this.email = email;
     this.processSettings = processSettings;
     filenameFactory = new FilenameFactory(processSettings.filenameSchema);
@@ -42,9 +43,10 @@ class EmailProcessor {
     originalToNormalizedFilename = new TreeMap<>();
   }
 
-  static Set<String> process(Email email, MimeMessage mimeMessage, ProcessSettings processSettings)
+  static Set<String> process(UserStorage userStorage, Email email, MimeMessage mimeMessage,
+                             ProcessSettings processSettings)
       throws IOException, MessagingException {
-    EmailProcessor processor = new EmailProcessor(email, processSettings);
+    EmailProcessor processor = new EmailProcessor(userStorage, email, processSettings);
     processor.exploreContent(mimeMessage.getContent());
     processor.removeCopiedBodyParts();
     if (processSettings.addMetadata) {
@@ -83,7 +85,7 @@ class EmailProcessor {
 
   private void handleBodyPart(BodyPart bodyPart) throws MessagingException, IOException {
     if (isDownloadableBodyPart(bodyPart)) {
-      copyBodyPartToDisk(bodyPart);
+      saveBodyPartToStorage(bodyPart);
     } else {
       if (bodyPart.isMimeType("text/plain") && mainTextBodyPart == null) {
         mainTextBodyPart = bodyPart;
@@ -97,21 +99,15 @@ class EmailProcessor {
     return bodyPart.getDisposition() != null;
   }
 
-  private void copyBodyPartToDisk(BodyPart bodyPart) throws IOException, MessagingException {
+  private void saveBodyPartToStorage(BodyPart bodyPart) throws IOException, MessagingException {
+    String originalFilename = getFilename(bodyPart);
+    if (originalFilename == null) {
+      return;
+    }
+    String normalizedFilename = filenameFactory.getFilename(email, fileCounter++, originalFilename);
     try (InputStream inputStream = bodyPart.getInputStream()) {
-      String originalFilename = getFilename(bodyPart);
-      if (originalFilename == null) {
-        return;
-      }
-      String normalizedFilename = filenameFactory.getFilename(email, fileCounter++, originalFilename);
       if (processSettings.processOption.shouldDownload()) {
-        Path targetPath = Path.of(processSettings.targetDirectory.getAbsolutePath(), normalizedFilename);
-        File targetFile = targetPath.toFile();
-        //noinspection ResultOfMethodCallIgnored
-        targetFile.getParentFile().mkdirs();
-        Files.copy(inputStream, targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-        //noinspection ResultOfMethodCallIgnored
-        targetFile.setLastModified(email.getTimestamp());
+        userStorage.saveAttachment(inputStream, processSettings.targetDirectory, normalizedFilename, email.getTimestamp());
       }
       copiedBodyParts.add(bodyPart);
       originalToNormalizedFilename.put(originalFilename, normalizedFilename);

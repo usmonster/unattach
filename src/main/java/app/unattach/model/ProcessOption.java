@@ -7,17 +7,17 @@ public class ProcessOption {
   private final boolean backup;
   private final boolean download;
   private final boolean remove;
-  private final boolean deleteOriginal;
+  private final boolean permanentlyDeleteOriginal;
   private final String downloadedLabelId;
   private final String removedLabelId;
 
-  public ProcessOption(Action action, boolean backup, boolean download, boolean remove, boolean deleteOriginal,
-                       String downloadedLabelId, String removedLabelId) {
+  public ProcessOption(Action action, boolean backup, boolean download, boolean remove,
+                       boolean permanentlyDeleteOriginal, String downloadedLabelId, String removedLabelId) {
     this.action = action;
     this.backup = backup;
     this.download = download;
     this.remove = remove;
-    this.deleteOriginal = deleteOriginal;
+    this.permanentlyDeleteOriginal = permanentlyDeleteOriginal;
     this.downloadedLabelId = downloadedLabelId;
     this.removedLabelId = removedLabelId;
   }
@@ -38,8 +38,8 @@ public class ProcessOption {
     return remove;
   }
 
-  boolean shouldDeleteOriginal() {
-    return deleteOriginal;
+  boolean shouldPermanentlyDeleteOriginal() {
+    return permanentlyDeleteOriginal;
   }
 
   public String getDownloadedLabelId() {

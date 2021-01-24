@@ -14,4 +14,8 @@ public class ProcessEmailResult {
   public String getNewUniqueId() {
     return newUniqueId;
   }
+
+  public Set<String> getFilenames() {
+    return filenames;
+  }
 }
