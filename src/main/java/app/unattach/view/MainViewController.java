@@ -8,7 +8,6 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.Observable;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -494,11 +493,8 @@ public class MainViewController {
       processingProgressBarWithText.textProperty().setValue(
           String.format("Processing stopped (%s).", getProcessingStatusString(emailsToProcess, nextEmailIndex, failed)));
       resetControls();
-      int numberOfRuns = controller.getConfig().incrementNumberOfRuns();
       if (enableScheduleCheckBox.isSelected()) {
         scheduleNextRun(processSettings.getProcessOption().getAction());
-      } else if (numberOfRuns % 10 == 0) {
-        showThankYouDialog();
       }
       return;
     }
@@ -732,6 +728,7 @@ public class MainViewController {
     return selectedCurrencyMenu.isEmpty() ? null : selectedCurrencyMenu.get().getText();
   }
 
+  @SuppressWarnings("unused")
   private void showThankYouDialog() {
     try {
       Stage dialog = Scenes.createNewStage("Thank you");
