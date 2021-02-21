@@ -729,22 +729,6 @@ public class MainViewController {
     return selectedCurrencyMenu.isEmpty() ? null : selectedCurrencyMenu.get().getText();
   }
 
-  @SuppressWarnings("unused")
-  private void showThankYouDialog() {
-    try {
-      Stage dialog = Scenes.createNewStage("Thank you");
-      dialog.initOwner(root.getScene().getWindow());
-      dialog.initModality(Modality.APPLICATION_MODAL);
-      Scene scene = Scenes.loadScene("/thank-you.view.fxml");
-      ThankYouViewController thankYouViewController = (ThankYouViewController) scene.getUserData();
-      thankYouViewController.setOnSubmitFeedbackCallback(this::onFeedbackMenuItemPressed);
-      dialog.setScene(scene);
-      Scenes.showAndPreventMakingSmaller(dialog);
-    } catch (IOException e) {
-      LOGGER.log(Level.SEVERE, "Failed to open the thank you dialog.", e);
-    }
-  }
-
   private void onEnableScheduleCheckBoxChange() {
     boolean enabled = enableScheduleCheckBox.isSelected();
     schedulePeriodPrefixLabel.setDisable(!enabled);

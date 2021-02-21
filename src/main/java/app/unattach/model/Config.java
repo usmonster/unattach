@@ -13,7 +13,6 @@ public interface Config {
   boolean getSignInAutomatically();
   boolean getSubscribeToUpdates();
   String getTargetDirectory();
-  int incrementNumberOfRuns();
   void saveDownloadedLabelId(String downloadedLabelId);
   void saveEmailSize(int emailSize);
   void saveFilenameSchema(String schema);

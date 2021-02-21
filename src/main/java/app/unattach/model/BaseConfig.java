@@ -12,7 +12,6 @@ public class BaseConfig implements Config {
   private static final String EMAIL_SIZE_PROPERTY = "email_size";
   private static final String FILENAME_SCHEMA_PROPERTY = "filename_schema";
   private static final String LABEL_IDS_PROPERTY = "label_ids";
-  private static final String NUMBER_OF_RUNS_PROPERTY = "number_of_runs";
   private static final String REMOVED_LABEL_ID_PROPERTY = "removed_label_id";
   private static final String SEARCH_QUERY_PROPERTY = "search_query";
   private static final String SIGN_IN_AUTOMATICALLY_PROPERTY = "sign_in_automatically";
@@ -50,10 +49,6 @@ public class BaseConfig implements Config {
     return Arrays.asList(config.getProperty(LABEL_IDS_PROPERTY, "").split(","));
   }
 
-  private int getNumberOfRuns() {
-    return Integer.parseInt(config.getProperty(NUMBER_OF_RUNS_PROPERTY, "0"));
-  }
-
   @Override
   public String getDownloadedLabelId() {
     return config.getProperty(DOWNLOADED_LABEL_ID_PROPERTY);
@@ -82,14 +77,6 @@ public class BaseConfig implements Config {
   @Override
   public String getTargetDirectory() {
     return config.getProperty(TARGET_DIRECTORY_PROPERTY, getDefaultTargetDirectory());
-  }
-
-  @Override
-  public int incrementNumberOfRuns() {
-    int numberOfRuns = getNumberOfRuns() + 1;
-    config.setProperty(NUMBER_OF_RUNS_PROPERTY, Integer.toString(numberOfRuns));
-    saveConfig();
-    return numberOfRuns;
   }
 
   @Override
