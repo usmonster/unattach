@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class GmailServiceTest {
+public class GmailServiceTest {
   private Controller controller;
 
   @BeforeEach
@@ -115,7 +115,6 @@ class GmailServiceTest {
     // Check that the email ID has changed and that right attachments were found.
     HashSet<String> expectedAttachments = Sets.newHashSet("logo-256.png");
     assertNotNull(result.newUniqueId());
-    String newEmailId = result.newUniqueId();
     assertEquals(expectedAttachments, result.filenames());
 
     // Check that the attachments were correctly backed up.
