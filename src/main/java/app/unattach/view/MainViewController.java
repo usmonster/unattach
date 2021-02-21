@@ -163,7 +163,7 @@ public class MainViewController {
     emailSizeComboBox.setItems(FXCollections.observableList(getEmailSizeOptions()));
     int emailSize = controller.getConfig().getEmailSize();
     int emailSizeIndex = IntStream.range(0, emailSizeComboBox.getItems().size())
-        .filter(i -> emailSizeComboBox.getItems().get(i).value.equals(emailSize))
+        .filter(i -> emailSizeComboBox.getItems().get(i).value().equals(emailSize))
         .findFirst().orElse(1);
     emailSizeComboBox.getSelectionModel().select(emailSizeIndex);
     searchQueryTextField.setText(controller.getConfig().getSearchQuery());
@@ -179,7 +179,7 @@ public class MainViewController {
     labelsListViewLabel.setText("Email labels:\n(If selecting multiple, results will match any.)");
     labelsListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
     List<GmailLabel> labels = controller.getIdToLabel().entrySet().stream()
-        .map(e -> new GmailLabel(e.getKey(), e.getValue())).sorted(Comparator.comparing(GmailLabel::getName))
+        .map(e -> new GmailLabel(e.getKey(), e.getValue())).sorted(Comparator.comparing(GmailLabel::name))
         .collect(Collectors.toList());
     labelsListView.setItems(FXCollections.observableList(labels));
     selectSavedLabels(labels);
@@ -211,7 +211,7 @@ public class MainViewController {
   }
 
   private void selectSavedLabels(List<GmailLabel> labels) {
-    Map<String, GmailLabel> idToIdLabel = labels.stream().collect(Collectors.toMap(GmailLabel::getId, Function.identity()));
+    Map<String, GmailLabel> idToIdLabel = labels.stream().collect(Collectors.toMap(GmailLabel::id, Function.identity()));
     controller.getConfig().getLabelIds().stream().map(idToIdLabel::get).filter(Objects::nonNull).
         forEach(labelsListView.getSelectionModel()::select);
   }
@@ -219,7 +219,7 @@ public class MainViewController {
   private void saveLabelsOnChange() {
     labelsListView.getSelectionModel().getSelectedItems().addListener((ListChangeListener<GmailLabel>) change -> {
       List<String> labelIds = labelsListView.getSelectionModel().getSelectedItems()
-          .stream().map(GmailLabel::getId).collect(Collectors.toList());
+          .stream().map(GmailLabel::id).collect(Collectors.toList());
       controller.getConfig().saveLabelIds(labelIds);
     });
   }
@@ -291,7 +291,7 @@ public class MainViewController {
         updateMessage(String.format("Obtaining email metadata (%s) ..", getStatusString()));
         while (!stopSearchButtonPressed && longTask.hasMoreSteps()) {
           GetEmailMetadataTask.Result result = longTask.takeStep();
-          currentBatch.set(result.currentBatchNumber);
+          currentBatch.set(result.currentBatchNumber());
           updateProgress(currentBatch.get(), numberOfBatches.get());
           updateMessage(String.format("Obtaining email metadata (%s) ..", getStatusString()));
         }
@@ -388,12 +388,12 @@ public class MainViewController {
   private String getQuery() {
     StringBuilder query = new StringBuilder();
     if (basicSearchTab.isSelected()) {
-      int minEmailSizeInMb = emailSizeComboBox.getSelectionModel().getSelectedItem().value;
+      int minEmailSizeInMb = emailSizeComboBox.getSelectionModel().getSelectedItem().value();
       query.append(String.format("has:attachment size:%dm", minEmailSizeInMb));
       ObservableList<GmailLabel> labels = labelsListView.getSelectionModel().getSelectedItems();
       if (!labels.isEmpty()) {
         query.append(" {");
-        query.append(labels.stream().map(label -> String.format("label:\"%s\"", label.getName()))
+        query.append(labels.stream().map(label -> String.format("label:\"%s\"", label.name()))
                 .collect(Collectors.joining(" ")));
         query.append("}");
       }
@@ -435,8 +435,8 @@ public class MainViewController {
   @FXML
   private void onDownloadButtonPressed() {
     String downloadedLabelId = controller.getOrCreateDownloadedLabelId();
-    ProcessOption processOption = new ProcessOption(Action.DOWNLOAD, backupCheckBox.isSelected(), true,
-        false, false, downloadedLabelId, null);
+    ProcessOption processOption = new ProcessOption(Action.DOWNLOAD, backupCheckBox.isSelected(),
+        false, downloadedLabelId, null);
     processEmails(processOption);
   }
 
@@ -446,7 +446,7 @@ public class MainViewController {
     String downloadedLabelId = controller.getOrCreateDownloadedLabelId();
     String removedLabelId = controller.getOrCreateRemovedLabelId();
     ProcessOption processOption = new ProcessOption(Action.DOWNLOAD_AND_DELETE, backupCheckBox.isSelected(),
-        true, true, permanentlyDeleteOriginal, downloadedLabelId, removedLabelId);
+        permanentlyDeleteOriginal, downloadedLabelId, removedLabelId);
     processEmails(processOption);
   }
 
@@ -456,7 +456,7 @@ public class MainViewController {
     String downloadedLabelId = controller.getOrCreateDownloadedLabelId();
     String removedLabelId = controller.getOrCreateRemovedLabelId();
     ProcessOption processOption = new ProcessOption(Action.DELETE, backupCheckBox.isSelected(),
-        false, true, permanentlyDeleteOriginal, downloadedLabelId, removedLabelId);
+        permanentlyDeleteOriginal, downloadedLabelId, removedLabelId);
     processEmails(processOption);
   }
 
@@ -495,7 +495,7 @@ public class MainViewController {
           String.format("Processing stopped (%s).", getProcessingStatusString(emailsToProcess, nextEmailIndex, failed)));
       resetControls();
       if (enableScheduleCheckBox.isSelected()) {
-        scheduleNextRun(processSettings.getProcessOption().getAction());
+        scheduleNextRun(processSettings.processOption().action());
       }
       return;
     }
@@ -518,8 +518,8 @@ public class MainViewController {
       protected void succeeded() {
         ProcessEmailResult processEmailResult = getValue();
         if (processEmailResult != null) {
-          if (processEmailResult.getNewUniqueId() != null) {
-            email.setUniqueId(processEmailResult.getNewUniqueId());
+          if (processEmailResult.newUniqueId() != null) {
+            email.setUniqueId(processEmailResult.newUniqueId());
           }
           bytesProcessed += email.getSizeInBytes();
           processingProgressBarWithText.progressProperty().setValue(1.0 * bytesProcessed / allBytesToProcess);
@@ -689,7 +689,7 @@ public class MainViewController {
 
   @FXML
   private void onEmailSizeComboBoxChanged() {
-    controller.getConfig().saveEmailSize(emailSizeComboBox.getValue().value);
+    controller.getConfig().saveEmailSize(emailSizeComboBox.getValue().value());
   }
 
   @FXML
@@ -755,7 +755,7 @@ public class MainViewController {
     stopAnyRunningSchedule();
     stopScheduleButton.setDisable(false);
     SchedulePeriod schedulePeriod = schedulePeriodComboBox.getSelectionModel().getSelectedItem();
-    LocalDateTime nextRunTime = LocalDateTime.now().plusSeconds(schedulePeriod.getSeconds());
+    LocalDateTime nextRunTime = LocalDateTime.now().plusSeconds(schedulePeriod.seconds());
     timeline = new Timeline(new KeyFrame(Duration.ZERO, event -> {
       LocalDateTime now = LocalDateTime.now();
       if (now.isAfter(nextRunTime)) {

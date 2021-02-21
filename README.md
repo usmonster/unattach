@@ -7,7 +7,7 @@ See [homepage](https://unattach.app/) for more info.
 * [PRIVACY](PRIVACY)
 
 ## Dependencies
-* Install [Java 14](https://www.oracle.com/java/technologies/javase-downloads.html).
+* Install [Java 15](https://www.oracle.com/java/technologies/javase-downloads.html).
 * Install [Maven](https://maven.apache.org/download.cgi).
 
 ## Build & Run

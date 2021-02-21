@@ -65,18 +65,18 @@ class ServiceTest {
   @Test
   void testSearch(@TempDir Path tempDir) throws GmailServiceException, LongTaskException, IOException {
     Email email = searchForEmailsThroughController("simple attachment").get(0);
-    // TODO: make it work with backup and remove
+    // TODO: make it work with backupEmail and remove
     String downloadedLabelId = controller.getOrCreateDownloadedLabelId();
     String removedLabelId = controller.getOrCreateRemovedLabelId();
     ProcessOption processOption = new ProcessOption(Action.DOWNLOAD, false, true,
-        false, true, downloadedLabelId, removedLabelId);
+        downloadedLabelId, removedLabelId);
     String filenameSchema = "${ATTACHMENT_NAME}";
     ProcessSettings processSettings =
         new ProcessSettings(processOption, tempDir.toFile(), filenameSchema, true);
     LongTask<ProcessEmailResult> task = controller.getProcessTask(email, processSettings);
     ProcessEmailResult result = task.takeStep();
-    assertNull(result.getNewUniqueId());
-    assertEquals(Sets.newHashSet("logo-256.png"), result.getFilenames());
+    assertNull(result.newUniqueId());
+    assertEquals(Sets.newHashSet("logo-256.png"), result.filenames());
     Map<String, byte[]> subPathToAttachment = userStorage.getSubPathToAttachment();
     byte[] returnedBytes = subPathToAttachment.get("logo-256.png");
     byte[] targetBytes = FileUtils.readFileToByteArray(new File("test-store/logo-256.png"));

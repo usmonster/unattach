@@ -229,7 +229,6 @@
         </CheckBox>
         <Label fx:id="schedulePeriodPrefixLabel" text="Run current search and last action every" disable="true"/>
         <ComboBox fx:id="schedulePeriodComboBox" disable="true"/>
-        <Label text="."/>
       </HBox>
       <HBox alignment="CENTER" spacing="10">
         <Label fx:id="scheduleTimeLabel"/>

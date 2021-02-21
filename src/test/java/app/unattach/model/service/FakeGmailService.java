@@ -1,6 +1,5 @@
 package app.unattach.model.service;
 
-import app.unattach.model.GmailUtils;
 import com.google.api.client.googleapis.batch.json.JsonBatchCallback;
 import com.google.api.services.gmail.model.Label;
 import com.google.api.services.gmail.model.Message;
@@ -92,7 +91,7 @@ public class FakeGmailService implements GmailService {
   public List<Message> search(String query) throws GmailServiceException {
     List<Message> result = new ArrayList<>();
     for (Message message : idToMessage.values()) {
-      Map<String, String> headerMap = GmailUtils.getHeaderMap(message);
+      Map<String, String> headerMap = GmailService.getHeaderMap(message);
       if (headerMap.get("subject").toLowerCase().contains(query.toLowerCase())) {
         result.add(filterKeys(message, "id", "internalDate", "labelIds", "payload", "sizeEstimate"));
       }

@@ -4,10 +4,9 @@ import com.google.api.client.googleapis.batch.json.JsonBatchCallback;
 import com.google.api.services.gmail.model.Label;
 import com.google.api.services.gmail.model.ListLabelsResponse;
 import com.google.api.services.gmail.model.Message;
+import com.google.api.services.gmail.model.MessagePartHeader;
 
-import java.util.List;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 
 public interface GmailService {
   void addLabel(String messageIds, String labelId) throws GmailServiceException;
@@ -20,6 +19,15 @@ public interface GmailService {
   Message getRawMessage(String messageId) throws GmailServiceException;
   Message insertMessage(Message message) throws GmailServiceException;
   List<Message> search(String query) throws GmailServiceException;
+
+  static Map<String, String> getHeaderMap(Message message) {
+    List<MessagePartHeader> headers = message.getPayload().getHeaders();
+    Map<String, String> headerMap = new HashMap<>(headers.size());
+    for (MessagePartHeader header : headers) {
+      headerMap.put(header.getName().toLowerCase(), header.getValue());
+    }
+    return headerMap;
+  }
 
   static SortedMap<String, String> labelsResponseToMap(ListLabelsResponse response) {
     SortedMap<String, String> labelToId = new TreeMap<>();

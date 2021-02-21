@@ -147,14 +147,14 @@ public class LiveModel implements Model {
 //    System.out.println("===============================");
     MimeMessage mimeMessage = getMimeMessage(message);
     String newUniqueId = null;
-    if (processSettings.processOption.shouldBackup()) {
+    if (processSettings.processOption().backupEmail()) {
       backupEmail(email, processSettings, mimeMessage);
     }
     Set<String> fileNames = EmailProcessor.process(userStorage, email, mimeMessage, processSettings);
-    if (processSettings.processOption.shouldDownload() && !processSettings.processOption.shouldRemove()) {
-      service.addLabel(message.getId(), processSettings.processOption.getDownloadedLabelId());
+    if (processSettings.processOption().shouldDownload() && !processSettings.processOption().shouldRemove()) {
+      service.addLabel(message.getId(), processSettings.processOption().downloadedLabelId());
     }
-    if (processSettings.processOption.shouldRemove() && !fileNames.isEmpty()) {
+    if (processSettings.processOption().shouldRemove() && !fileNames.isEmpty()) {
       updateRawMessage(message, mimeMessage);
       Message newMessage = service.insertMessage(message); // 25 quota units
       System.out.println(new ArrayList<>(newMessage.keySet()));
@@ -164,14 +164,14 @@ public class LiveModel implements Model {
 //      System.out.println(message.toPrettyString());
 //      TestStore.mergeMessage(newMessage);
 //      System.out.println("===============================");
-      Map<String, String> headerMap = GmailUtils.getHeaderMap(newMessage);
+      Map<String, String> headerMap = GmailService.getHeaderMap(newMessage);
       newUniqueId = headerMap.get("message-id");
-      if (processSettings.processOption.shouldDownload()) {
-        service.addLabel(newMessage.getId(), processSettings.processOption.getDownloadedLabelId());
+      if (processSettings.processOption().shouldDownload()) {
+        service.addLabel(newMessage.getId(), processSettings.processOption().downloadedLabelId());
       }
-      service.addLabel(newMessage.getId(), processSettings.processOption.getRemovedLabelId());
+      service.addLabel(newMessage.getId(), processSettings.processOption().removedLabelId());
       // 5-10 quota units
-      service.deleteMessage(message.getId(), processSettings.processOption.shouldPermanentlyDeleteOriginal());
+      service.deleteMessage(message.getId(), processSettings.processOption().permanentlyDeleteOriginal());
     }
     return new ProcessEmailResult(newUniqueId, fileNames);
   }
@@ -190,7 +190,7 @@ public class LiveModel implements Model {
   private void backupEmail(Email email, ProcessSettings processSettings, MimeMessage mimeMessage)
           throws IOException, MessagingException {
     String filename = email.getGmailId() + ".eml";
-    userStorage.saveMessage(mimeMessage, processSettings.targetDirectory, filename);
+    userStorage.saveMessage(mimeMessage, processSettings.targetDirectory(), filename);
   }
 
   private void updateRawMessage(Message message, MimeMessage mimeMessage) throws IOException, MessagingException {
@@ -219,7 +219,7 @@ public class LiveModel implements Model {
 //        System.out.println(new ArrayList<>(message.keySet()));
 //        TestStore.mergeMessage(message);
 //        System.out.println("===============================");
-        Map<String, String> headerMap = GmailUtils.getHeaderMap(message);
+        Map<String, String> headerMap = GmailService.getHeaderMap(message);
         String emailId = message.getId();
         String uniqueId = headerMap.get("message-id");
         List<String> labelIds = message.getLabelIds();

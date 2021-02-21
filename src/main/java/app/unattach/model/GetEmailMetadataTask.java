@@ -12,13 +12,7 @@ public class GetEmailMetadataTask implements LongTask<GetEmailMetadataTask.Resul
     void getEmailMetadata(int startIndexInclusive, int endIndexExclusive) throws IOException, GmailServiceException;
   }
 
-  public static class Result {
-    public final int currentBatchNumber;
-
-    Result(int currentBatchNumber) {
-      this.currentBatchNumber = currentBatchNumber;
-    }
-  }
+  public static record Result(int currentBatchNumber) {}
 
   private final List<String> emailIds;
   // (maximum batch size = 100)

@@ -9,7 +9,6 @@ import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeUtility;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -38,7 +37,7 @@ class EmailProcessor {
     this.userStorage = userStorage;
     this.email = email;
     this.processSettings = processSettings;
-    filenameFactory = new FilenameFactory(processSettings.filenameSchema);
+    filenameFactory = new FilenameFactory(processSettings.filenameSchema());
     copiedBodyParts = new LinkedList<>();
     originalToNormalizedFilename = new TreeMap<>();
   }
@@ -49,7 +48,7 @@ class EmailProcessor {
     EmailProcessor processor = new EmailProcessor(userStorage, email, processSettings);
     processor.exploreContent(mimeMessage.getContent());
     processor.removeCopiedBodyParts();
-    if (processSettings.addMetadata) {
+    if (processSettings.addMetadata()) {
       processor.addReferencesToContent();
     }
     mimeMessage.saveChanges();
@@ -57,8 +56,7 @@ class EmailProcessor {
   }
 
   private void exploreContent(Object content) throws MessagingException, IOException {
-    if (content instanceof Multipart) {
-      Multipart multipart = (Multipart) content;
+    if (content instanceof Multipart multipart) {
       for (int i = 0; i < multipart.getCount(); ++i) {
         BodyPart bodyPart = multipart.getBodyPart(i);
         handleBodyPart(bodyPart);
@@ -106,8 +104,8 @@ class EmailProcessor {
     }
     String normalizedFilename = filenameFactory.getFilename(email, fileCounter++, originalFilename);
     try (InputStream inputStream = bodyPart.getInputStream()) {
-      if (processSettings.processOption.shouldDownload()) {
-        userStorage.saveAttachment(inputStream, processSettings.targetDirectory, normalizedFilename, email.getTimestamp());
+      if (processSettings.processOption().shouldDownload()) {
+        userStorage.saveAttachment(inputStream, processSettings.targetDirectory(), normalizedFilename, email.getTimestamp());
       }
       copiedBodyParts.add(bodyPart);
       originalToNormalizedFilename.put(originalFilename, normalizedFilename);
@@ -165,7 +163,7 @@ class EmailProcessor {
       String originalFilename = entry.getKey();
       String normalizedFilename = entry.getValue();
       newText.append(" - ").append(originalFilename);
-      if (processSettings.processOption.shouldDownload()) {
+      if (processSettings.processOption().shouldDownload()) {
         newText.append(" (filename: ").append(normalizedFilename).append(")");
       }
       newText.append("\n");
@@ -174,9 +172,9 @@ class EmailProcessor {
     newText.append(" - Made with:                 ").append(Constants.PRODUCT_NAME + " " +
         Constants.VERSION).append("\n");
     newText.append(" - Date and time:             ").append(dateTimeString).append("\n");
-    if (processSettings.processOption.shouldDownload()) {
+    if (processSettings.processOption().shouldDownload()) {
       newText.append(" - Download target hostname:  ").append(hostname).append("\n");
-      newText.append(" - Download target directory: ").append(processSettings.targetDirectory.getAbsolutePath()).append("\n");
+      newText.append(" - Download target directory: ").append(processSettings.targetDirectory().getAbsolutePath()).append("\n");
     }
     return newText.toString();
   }
@@ -184,13 +182,13 @@ class EmailProcessor {
   private String generateHtmlSuffix(String html, Map<String, String> originalToNormalizedFilename,
                                     String dateTimeString, String hostname) {
     StringBuilder suffix = new StringBuilder("<hr /><p>Previous attachments:<ul>\n");
-    String targetDirectoryAbsolutePath = processSettings.targetDirectory.getAbsolutePath();
+    String targetDirectoryAbsolutePath = processSettings.targetDirectory().getAbsolutePath();
     for (Map.Entry<String, String> entry : originalToNormalizedFilename.entrySet()) {
       String originalFilename = entry.getKey();
       String normalizedFilename = entry.getValue();
       suffix.append("<li>");
       suffix.append(originalFilename);
-      if (processSettings.processOption.shouldDownload()) {
+      if (processSettings.processOption().shouldDownload()) {
         suffix.append(" (");
         Path normalisedPath = Paths.get(targetDirectoryAbsolutePath, normalizedFilename);
         suffix.append("filename: ").append(normalisedPath).append(", ");
@@ -204,7 +202,7 @@ class EmailProcessor {
     suffix.append("<li>Made with: ").append("<a href='" + Constants.HOMEPAGE + "'>" + Constants.PRODUCT_NAME + "</a> " +
         Constants.VERSION).append("</li>\n");
     suffix.append("<li>Date and time: ").append(dateTimeString).append("</li>\n");
-    if (processSettings.processOption.shouldDownload()) {
+    if (processSettings.processOption().shouldDownload()) {
       suffix.append("<li>Download target host name: ").append(hostname).append("</li>\n");
       suffix.append("<li>Download target directory: ").append(targetDirectoryAbsolutePath).append("</li>\n");
       suffix.append("<li><i>File links only work in native email apps (e.g. Mail, Outlook) on the target host.</i></li>\n");

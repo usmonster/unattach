@@ -10,6 +10,7 @@ import java.awt.*;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
@@ -17,16 +18,10 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class DefaultController implements Controller {
+public record DefaultController(Model model) implements Controller {
   private static final Logger LOGGER = Logger.getLogger(DefaultController.class.getName());
   private static final String DEFAULT_DOWNLOADED_LABEL_NAME = "Unattach - Downloaded";
   private static final String DEFAULT_REMOVED_LABEL_NAME = "Unattach - Removed";
-
-  private final Model model;
-
-  DefaultController(Model model) {
-    this.model = model;
-  }
 
   @Override
   public void clearPreviousSearch() {
@@ -50,7 +45,7 @@ public class DefaultController implements Controller {
   public void donate(String item, int amount, String currency) {
     String uriString = Constants.DONATE_URL;
     uriString += "&coffee_type=" + item.replace(" ", "%20") + "&coffee_price=" + amount +
-            "&currency=" + currency;
+        "&currency=" + currency;
     openWebPage(uriString);
   }
 
@@ -124,8 +119,8 @@ public class DefaultController implements Controller {
 
   @Override
   public String signIn() throws GmailServiceManagerException, GmailServiceException {
-      model.signIn();
-      return model.getEmailAddress();
+    model.signIn();
+    return model.getEmailAddress();
   }
 
   @Override
@@ -142,7 +137,7 @@ public class DefaultController implements Controller {
       return idToLabel;
     } catch (Throwable t) {
       LOGGER.log(Level.SEVERE, "Getting email labels.. failed.", t);
-      return null;
+      return Collections.emptySortedMap();
     }
   }
 
@@ -205,7 +200,7 @@ public class DefaultController implements Controller {
       if (SystemUtils.IS_OS_LINUX) {
         // Desktop.getDesktop().browse() only works on Linux with libgnome installed.
         if (hasXdgOpen()) {
-          Runtime.getRuntime().exec(new String[] {"xdg-open", file.getAbsolutePath()});
+          Runtime.getRuntime().exec(new String[]{"xdg-open", file.getAbsolutePath()});
         } else {
           LOGGER.log(Level.SEVERE, "Unable to open a file on this operating system.");
         }
@@ -228,7 +223,7 @@ public class DefaultController implements Controller {
       if (SystemUtils.IS_OS_LINUX) {
         // Desktop.getDesktop().browse() only works on Linux with libgnome installed.
         if (hasXdgOpen()) {
-          Runtime.getRuntime().exec(new String[] {"xdg-open", uriString});
+          Runtime.getRuntime().exec(new String[]{"xdg-open", uriString});
         } else {
           LOGGER.log(Level.SEVERE, "Unable to open a web page on this operating system. " + manualInstructions);
         }
