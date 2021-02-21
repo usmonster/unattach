@@ -3,10 +3,16 @@ package app.unattach.model.service;
 import com.google.api.client.googleapis.batch.json.JsonBatchCallback;
 import com.google.api.services.gmail.model.Label;
 import com.google.api.services.gmail.model.Message;
+import com.google.api.services.gmail.model.MessagePart;
+import com.google.api.services.gmail.model.MessagePartHeader;
 import org.json.JSONObject;
 
+import javax.mail.Header;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class FakeGmailService implements GmailService {
   private final String emailAddress;
@@ -26,7 +32,13 @@ public class FakeGmailService implements GmailService {
 
   @Override
   public void addLabel(String messageIds, String labelId) {
-    idToMessage.get(messageIds).getLabelIds().add(labelId);
+    Message message = idToMessage.get(messageIds);
+    List<String> labelIds = message.getLabelIds();
+    if (labelIds == null) {
+      labelIds = new ArrayList<>();
+      message.setLabelIds(labelIds);
+    }
+    labelIds.add(labelId);
   }
 
   @Override
@@ -68,9 +80,8 @@ public class FakeGmailService implements GmailService {
   }
 
   @Override
-  public Message getUniqueIdAndHeaders(Message message) throws GmailServiceException {
-    return filterKeys(message,
-        "historyId", "id", "internalDate", "labelIds", "raw", "sizeEstimate", "snippet", "threadId");
+  public Message getUniqueIdAndHeaders(String messageId) throws GmailServiceException {
+    return filterKeys(idToMessage.get(messageId), "id", "payload");
   }
 
   @Override
@@ -83,8 +94,28 @@ public class FakeGmailService implements GmailService {
   public Message insertMessage(Message message) throws GmailServiceException {
     String afterId = beforeIdToAfterId.get(message.getId());
     Message afterMessage = message.clone().setId(afterId);
+    try {
+      MimeMessage mimeMessage = GmailService.getMimeMessage(afterMessage);
+      List<MessagePartHeader> messagePartHeaders = Collections.list(mimeMessage.getAllHeaders()).stream()
+          .map(this::headerToMessagePartHeader).collect(Collectors.toList());
+      MessagePart payload = new MessagePart();
+      payload.setHeaders(messagePartHeaders);
+      MessagePart part = new MessagePart();
+      part.setFilename("");
+      payload.setParts(Collections.singletonList(part));
+      afterMessage.setPayload(payload);
+    } catch (MessagingException | IOException e) {
+      throw new GmailServiceException(e);
+    }
     idToMessage.put(afterId, afterMessage);
     return filterKeys(afterMessage, "id", "labelIds", "threadId");
+  }
+
+  private MessagePartHeader headerToMessagePartHeader(Header header) {
+    MessagePartHeader messagePartHeader = new MessagePartHeader();
+    messagePartHeader.setName(header.getName());
+    messagePartHeader.setValue(header.getValue());
+    return messagePartHeader;
   }
 
   @Override

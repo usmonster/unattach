@@ -24,11 +24,6 @@ public record DefaultController(Model model) implements Controller {
   private static final String DEFAULT_REMOVED_LABEL_NAME = "Unattach - Removed";
 
   @Override
-  public void clearPreviousSearch() {
-    model.clearPreviousSearchResults();
-  }
-
-  @Override
   public String createLabel(String name) {
     try {
       LOGGER.info("Creating label " + name + "..");

@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.SortedMap;
 
 public interface Model {
-  void clearPreviousSearchResults();
   String createLabel(String name) throws GmailServiceException;
   Config getConfig();
   String getEmailAddress() throws GmailServiceException;

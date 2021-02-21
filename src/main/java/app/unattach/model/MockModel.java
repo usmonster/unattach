@@ -15,11 +15,6 @@ public class MockModel implements Model {
   private ArrayList<Email> emails = new ArrayList<>();
 
   @Override
-  public void clearPreviousSearchResults() {
-    emails = new ArrayList<>();
-  }
-
-  @Override
   public String createLabel(String name) {
     return "removed-label-id";
   }

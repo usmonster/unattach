@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.SortedMap;
 
 public interface Controller {
-  void clearPreviousSearch();
   String createLabel(String name);
   void donate(String item, int amount, String currency);
   Config getConfig();
@@ -30,5 +29,5 @@ public interface Controller {
   String signIn() throws GmailServiceManagerException, GmailServiceException;
   void signOut();
   void sendToServer(String contentDescription, String exceptionText, String userText);
-  void subscribe(String emailAddress) throws Exception;
+  void subscribe(String emailAddress);
 }

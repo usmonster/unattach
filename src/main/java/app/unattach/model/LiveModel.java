@@ -14,7 +14,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
 import javax.mail.MessagingException;
-import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
 import java.io.*;
 import java.util.*;
@@ -22,7 +21,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.codec.binary.Base64.decodeBase64;
 import static org.apache.commons.codec.binary.Base64.encodeBase64URLSafeString;
 
 public class LiveModel implements Model {
@@ -32,7 +30,6 @@ public class LiveModel implements Model {
   private final UserStorage userStorage;
   private final GmailServiceManager gmailServiceManager;
   private GmailService service;
-  private Session session;
   private List<Email> searchResults;
   private String emailAddress;
 
@@ -76,8 +73,7 @@ public class LiveModel implements Model {
     clearPreviousSearchResults();
   }
 
-  @Override
-  public void clearPreviousSearchResults() {
+  private void clearPreviousSearchResults() {
     searchResults = new ArrayList<>();
   }
 
@@ -103,8 +99,6 @@ public class LiveModel implements Model {
     // 250 quota units / user / second
     // each set of requests should assume they start with clean quota
     service = gmailServiceManager.signIn();
-    Properties props = new Properties();
-    session = Session.getInstance(props);
   }
 
   @Override
@@ -140,12 +134,8 @@ public class LiveModel implements Model {
   private ProcessEmailResult processEmail(Email email, ProcessSettings processSettings)
       throws IOException, MessagingException, GmailServiceException {
     Message message = service.getRawMessage(email.getGmailId()); // 5 quota units
-//    System.out.println("===============================");
-//    System.out.println(new ArrayList<>(message.keySet()));
-//    System.out.println(message.toPrettyString());
-//    TestStore.mergeMessage(message);
-//    System.out.println("===============================");
-    MimeMessage mimeMessage = getMimeMessage(message);
+    GmailService.trackInDebugMode(LOGGER, message);
+    MimeMessage mimeMessage = GmailService.getMimeMessage(message);
     String newUniqueId = null;
     if (processSettings.processOption().backupEmail()) {
       backupEmail(email, processSettings, mimeMessage);
@@ -157,13 +147,8 @@ public class LiveModel implements Model {
     if (processSettings.processOption().shouldRemove() && !fileNames.isEmpty()) {
       updateRawMessage(message, mimeMessage);
       Message newMessage = service.insertMessage(message); // 25 quota units
-      System.out.println(new ArrayList<>(newMessage.keySet()));
-      newMessage = service.getUniqueIdAndHeaders(newMessage); // 5 quota units
-//      System.out.println("===============================");
-//      System.out.println(new ArrayList<>(message.keySet()));
-//      System.out.println(message.toPrettyString());
-//      TestStore.mergeMessage(newMessage);
-//      System.out.println("===============================");
+      newMessage = service.getUniqueIdAndHeaders(newMessage.getId()); // 5 quota units
+      GmailService.trackInDebugMode(LOGGER, newMessage);
       Map<String, String> headerMap = GmailService.getHeaderMap(newMessage);
       newUniqueId = headerMap.get("message-id");
       if (processSettings.processOption().shouldDownload()) {
@@ -174,17 +159,6 @@ public class LiveModel implements Model {
       service.deleteMessage(message.getId(), processSettings.processOption().permanentlyDeleteOriginal());
     }
     return new ProcessEmailResult(newUniqueId, fileNames);
-  }
-
-  private MimeMessage getMimeMessage(Message message) throws MessagingException, IOException {
-    String rawBefore = message.getRaw();
-    if (rawBefore == null) {
-      throw new IOException("Unable to extract the contents of the email.");
-    }
-    byte[] emailBytes = decodeBase64(rawBefore);
-    try (InputStream is = new ByteArrayInputStream(emailBytes)) {
-      return new MimeMessage(session, is);
-    }
   }
 
   private void backupEmail(Email email, ProcessSettings processSettings, MimeMessage mimeMessage)
@@ -203,6 +177,7 @@ public class LiveModel implements Model {
 
   @Override
   public GetEmailMetadataTask getSearchTask(String query) throws GmailServiceException {
+    clearPreviousSearchResults();
     List<Message> messages = service.search(query);
     ArrayList<String> emailIdsToProcess =
         messages.stream().map(Message::getId).collect(Collectors.toCollection(ArrayList::new));
@@ -214,11 +189,8 @@ public class LiveModel implements Model {
       }
 
       @Override
-      public void onSuccess(Message message, HttpHeaders httpHeaders) throws IOException {
-//        System.out.println("===============================");
-//        System.out.println(new ArrayList<>(message.keySet()));
-//        TestStore.mergeMessage(message);
-//        System.out.println("===============================");
+      public void onSuccess(Message message, HttpHeaders httpHeaders) {
+        GmailService.trackInDebugMode(LOGGER, message);
         Map<String, String> headerMap = GmailService.getHeaderMap(message);
         String emailId = message.getId();
         String uniqueId = headerMap.get("message-id");
@@ -228,21 +200,20 @@ public class LiveModel implements Model {
         String subject = headerMap.get("subject");
         long timestamp = message.getInternalDate();
         List<MessagePart> messageParts = message.getPayload().getParts();
-        if (messageParts != null) { // Means, this is not a blank message
+        if (messageParts == null) {
+          LOGGER.log(Level.WARNING, "Skipping message as GMail returned no parts:\n" +
+              "\tGMail-ID: " + emailId + "\n" +
+              "\tMessage-ID: " + uniqueId + "\n" +
+              "\tFrom: " + from + "\n" +
+              "\tTo: " + to + "\n" +
+              "\tSubject: " + subject + "\n" +
+              "\tDate: " + new Date(timestamp));
+        } else {
           List<String> attachments = messageParts.stream()
                   .map(MessagePart::getFilename).filter(StringUtils::isNotBlank).collect(Collectors.toList());
           Email email = new Email(emailId, uniqueId, labelIds, from, to, subject, timestamp, message.getSizeEstimate(),
                   attachments);
           searchResults.add(email);
-        }
-        else {
-          LOGGER.log(Level.WARNING, "Skipping message as GMail returned no parts:\n" +
-                  "\tGMail-ID: " + emailId + "\n" +
-                  "\tMessage-ID: " + uniqueId + "\n" +
-                  "\tFrom: " + from + "\n" +
-                  "\tTo: " + to + "\n" +
-                  "\tSubject: " + subject + "\n" +
-                  "\tDate: " + new Date(timestamp));
         }
       }
     };

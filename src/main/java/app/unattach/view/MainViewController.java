@@ -272,7 +272,6 @@ public class MainViewController {
     resultsSubView.setText("Results");
     stopSearchButton.setDisable(false);
     stopSearchButtonPressed = false;
-    controller.clearPreviousSearch();
     resultsTable.setItems(FXCollections.emptyObservableList());
     AtomicInteger currentBatch = new AtomicInteger();
     AtomicInteger numberOfBatches = new AtomicInteger();

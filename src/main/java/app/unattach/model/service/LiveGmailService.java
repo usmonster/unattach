@@ -1,7 +1,6 @@
 package app.unattach.model.service;
 
 import app.unattach.model.LiveModel;
-import app.unattach.model.TestStore;
 import com.google.api.client.googleapis.batch.BatchRequest;
 import com.google.api.client.googleapis.batch.json.JsonBatchCallback;
 import com.google.api.services.gmail.Gmail;
@@ -13,15 +12,9 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class LiveGmailService implements GmailService {
+public record LiveGmailService(Gmail gmail) implements GmailService {
   private static final Logger LOGGER = Logger.getLogger(LiveModel.class.getName());
   private static final String USER = "me";
-
-  private final Gmail gmail;
-
-  public LiveGmailService(Gmail gmail) {
-    this.gmail = gmail;
-  }
 
   @Override
   public void addLabel(String messageIds, String labelId) throws GmailServiceException {
@@ -95,10 +88,7 @@ public class LiveGmailService implements GmailService {
     try {
       // 1 labels.get == 1 quota unit
       ListLabelsResponse response = gmail.users().labels().list(USER).setFields("labels/id,labels/name").execute();
-//      System.out.println("===============================");
-//      System.out.println(response.toPrettyString());
-//      TestStore.saveLabels(response);
-//      System.out.println("===============================");
+      GmailService.trackInDebugMode(LOGGER, response);
       return GmailService.labelsResponseToMap(response);
     } catch (IOException e) {
       throw new GmailServiceException(e);
@@ -106,10 +96,10 @@ public class LiveGmailService implements GmailService {
   }
 
   @Override
-  public Message getUniqueIdAndHeaders(Message message) throws GmailServiceException {
+  public Message getUniqueIdAndHeaders(String messageId) throws GmailServiceException {
     try {
       // 1 messages.get == 5 quota units
-      return gmail.users().messages().get(USER, message.getId()).setFields("id,payload/headers").execute();
+      return gmail.users().messages().get(USER, messageId).setFields("id,payload/headers").execute();
     } catch (IOException e) {
       throw new GmailServiceException(e);
     }
