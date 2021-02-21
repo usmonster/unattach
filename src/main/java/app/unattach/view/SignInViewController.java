@@ -3,19 +3,15 @@ package app.unattach.view;
 import app.unattach.controller.Controller;
 import app.unattach.controller.ControllerFactory;
 import app.unattach.model.Constants;
-import app.unattach.model.DonationOption;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,10 +19,6 @@ public class SignInViewController {
   private static final Logger LOGGER = Logger.getLogger(SignInViewController.class.getName());
 
   private Controller controller;
-  @FXML
-  private ComboBox<DonationOption> buyCoffeeComboBox;
-  @FXML
-  private ComboBox<String> currencyComboBox;
   @FXML
   private Label signInMessageLabel;
   @FXML
@@ -45,8 +37,6 @@ public class SignInViewController {
   @FXML
   public void initialize() {
     controller = ControllerFactory.getDefaultController();
-    List<DonationOption> donationOptions = DonationViewUtils.getDonationOptions();
-    DonationViewUtils.configureDonationControls(controller, donationOptions, buyCoffeeComboBox, currencyComboBox);
     signInMessageLabel.setText("The first time you sign in, you will be asked to give the app permissions to your Gmail.\n" +
             "Click on 'How Unattach Works' to see why this is required and how your privacy is protected.");
     subscribeToUpdatesCheckBox.setSelected(controller.getConfig().getSubscribeToUpdates());

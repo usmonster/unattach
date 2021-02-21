@@ -21,7 +21,7 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ServiceTest {
+class GmailServiceTest {
   private FakeUserStorage userStorage;
   private Controller controller;
 
