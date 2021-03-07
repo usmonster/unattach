@@ -1,6 +1,6 @@
 package app.unattach.model;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.security.InvalidParameterException;
 import java.text.SimpleDateFormat;
@@ -83,9 +83,11 @@ public class FilenameFactoryTest {
     testGetFilename("${LABELS}", "a%b@.jpg", "IMPORTANT_SENT");
   }
 
-  @Test(expected = InvalidParameterException.class)
+  @Test
   public void testUnknownPlaceholder() {
-    testGetFilename("${FOO}", "a%b@.jpg", "a%b@.jpg");
+    assertThrows(InvalidParameterException.class, () ->
+        testGetFilename("${FOO}", "a%b@.jpg", "a%b@.jpg")
+    );
   }
 
   private static void testGetFilename(String schema, String attachmentName, String expectedFilename) {
