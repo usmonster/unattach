@@ -19,10 +19,6 @@ See [homepage](https://unattach.app/) for more info.
   when the Gmail API client library unpacks the downloaded email in local memory using a third-party JSON library, which
   appears to sometimes make inefficient use of the available memory. If this happens, the original email will remain
   intact, the memory will be recovered, and the processing will continue with the next email.
-* The maximum number of search results is 500 despite the requested limit being much higher. This appears to be a
-  restriction within the Gmail API service. If (downloading and) removing attachments through the Schedule feature,
-  this limitation is not an issue, since a subsequent search will return different results. If only downloading
-  attachments, a workaround is to manually add date ranges in the advanced search query.
 
 ## Contributions
 Feel free to

@@ -134,8 +134,8 @@ public record LiveGmailService(Gmail gmail) implements GmailService {
       String pageToken = null;
       do {
         // 1 messages.list == 5 quota units
-        Gmail.Users.Messages.List request = gmail.users().messages().list(USER).setFields("messages/id").setQ(query)
-            .setMaxResults(100000L).setPageToken(pageToken);
+        Gmail.Users.Messages.List request = gmail.users().messages().list(USER).setFields("messages/id,nextPageToken")
+            .setQ(query).setMaxResults(100000L).setPageToken(pageToken);
         ListMessagesResponse response = request.execute();
         if (response == null) {
           break;
