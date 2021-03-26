@@ -178,7 +178,7 @@ public class MainViewController {
     processingProgressBarWithText.progressProperty().setValue(0);
     processingProgressBarWithText.textProperty().setValue("(Processing of emails not started yet.)");
     labelsListViewLabel.setText("""
-        Your Gmail labels:
+        Your Gmail labels (optional):
         - Each result will have at least one selected label.
         - Select no labels to ignore this filter.
         - %s-click on a label to unselect it.""".formatted(SystemUtils.IS_OS_MAC ? "⌘" : "Ctrl"));
