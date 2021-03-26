@@ -547,7 +547,7 @@ public class MainViewController {
 
   private String getProcessingStatusString(List<Email> emailsToProcess, int nextEmailIndex, int failed) {
     return String.format("processed %d of %d, %dMB / %dMB, %d%% by size, %d failed",
-        nextEmailIndex - failed, emailsToProcess.size(), toMegaBytes(bytesProcessed), toMegaBytes(allBytesToProcess),
+        nextEmailIndex, emailsToProcess.size(), toMegaBytes(bytesProcessed), toMegaBytes(allBytesToProcess),
         allBytesToProcess == 0 ? 0 : 100 * bytesProcessed / allBytesToProcess, failed);
   }
 
