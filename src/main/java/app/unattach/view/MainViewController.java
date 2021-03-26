@@ -22,6 +22,7 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
@@ -176,7 +177,11 @@ public class MainViewController {
     targetDirectoryTextField.setText(controller.getConfig().getTargetDirectory());
     processingProgressBarWithText.progressProperty().setValue(0);
     processingProgressBarWithText.textProperty().setValue("(Processing of emails not started yet.)");
-    labelsListViewLabel.setText("Email labels:\n(If selecting multiple, results will match any.)");
+    labelsListViewLabel.setText("""
+        Your Gmail labels:
+        - Each result will have at least one selected label.
+        - Select no labels to ignore this filter.
+        - %s-click on a label to unselect it.""".formatted(SystemUtils.IS_OS_MAC ? "⌘" : "Ctrl"));
     labelsListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
     List<GmailLabel> labels = controller.getIdToLabel().entrySet().stream()
         .map(e -> new GmailLabel(e.getKey(), e.getValue())).sorted(Comparator.comparing(GmailLabel::name))
