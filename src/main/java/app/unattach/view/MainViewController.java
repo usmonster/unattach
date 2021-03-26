@@ -285,19 +285,19 @@ public class MainViewController {
       @Override
       protected Void call() throws Exception {
         updateProgress(0, 1);
-        updateMessage("Obtaining email metadata ..");
+        updateMessage("Getting info about emails...");
         String query = getQuery();
-        LOGGER.info("Obtaining email metadata (query: " + query + ") ..");
+        LOGGER.info("Getting info about emails (query: " + query + ")...");
         GetEmailMetadataTask longTask = controller.getSearchTask(query);
         currentBatch.set(0);
         numberOfBatches.set(longTask.getNumberOfSteps());
         updateProgress(currentBatch.get(), numberOfBatches.get());
-        updateMessage(String.format("Obtaining email metadata (%s) ..", getStatusString()));
+        updateMessage(String.format("Getting info about emails (%s)...", getStatusString()));
         while (!stopSearchButtonPressed && longTask.hasMoreSteps()) {
           GetEmailMetadataTask.Result result = longTask.takeStep();
           currentBatch.set(result.currentBatchNumber());
           updateProgress(currentBatch.get(), numberOfBatches.get());
-          updateMessage(String.format("Obtaining email metadata (%s) ..", getStatusString()));
+          updateMessage(String.format("Getting info about emails (%s)...", getStatusString()));
         }
         return null;
       }
@@ -315,7 +315,7 @@ public class MainViewController {
       protected void succeeded() {
         boolean successful = false;
         try {
-          updateMessage(String.format("Finished obtaining email metadata (%s).", getStatusString()));
+          updateMessage(String.format("Finished getting info about emails (%s).", getStatusString()));
           List<Email> emails = controller.getSearchResults();
           ObservableList<Email> observableEmails = FXCollections.observableList(emails, email -> new Observable[]{email});
           resultsTable.setItems(observableEmails);
@@ -323,7 +323,7 @@ public class MainViewController {
           observableEmails.addListener((ListChangeListener<? super Email>) change -> updateResultsCaption());
           successful = true;
         } catch (Throwable t) {
-          String message = "Failed to process email metadata.";
+          String message = "Failed to get email info.";
           updateMessage(message);
           reportError(message, t);
         } finally {
@@ -336,7 +336,7 @@ public class MainViewController {
 
       @Override
       protected void failed() {
-        String message = "Failed to obtain email metadata.";
+        String message = "Failed to get email info.";
         updateMessage(message);
         reportError(message, getException());
         resetControls();
