@@ -31,7 +31,7 @@ public class BaseConfig implements Config {
 
   @Override
   public int getEmailSize() {
-    return Integer.parseInt(config.getProperty(EMAIL_SIZE_PROPERTY, "1"));
+    return Integer.parseInt(config.getProperty(EMAIL_SIZE_PROPERTY, "5"));
   }
 
   @Override
