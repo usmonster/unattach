@@ -2,7 +2,7 @@ package app.unattach.model;
 
 public enum EmailStatus {
   FAILED,
-  IGNORED,
+  NOT_SELECTED,
   PROCESSED,
   TO_PROCESS
 }

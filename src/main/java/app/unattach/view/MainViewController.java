@@ -373,9 +373,9 @@ public class MainViewController {
 
   @FXML
   private void onToggleAllEmailsCheckBoxChange() {
-    EmailStatus targetStatus = toggleAllEmailsCheckBox.isSelected() ? EmailStatus.TO_PROCESS : EmailStatus.IGNORED;
+    EmailStatus targetStatus = toggleAllEmailsCheckBox.isSelected() ? EmailStatus.TO_PROCESS : EmailStatus.NOT_SELECTED;
     resultsTable.getItems().forEach(email -> {
-      if (email.getStatus() == EmailStatus.IGNORED || email.getStatus() == EmailStatus.TO_PROCESS) {
+      if (email.getStatus() == EmailStatus.NOT_SELECTED || email.getStatus() == EmailStatus.TO_PROCESS) {
         email.setStatus(targetStatus);
       }
     });

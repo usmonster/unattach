@@ -19,7 +19,7 @@ public class SelectedCheckBoxTableCellFactory
     checkBox.setDisable(!enabled);
     checkBox.selectedProperty().setValue(email.isSelected());
     checkBox.selectedProperty().addListener((observableValue, oldValue, newValue) -> {
-      EmailStatus targetStatus = newValue ? EmailStatus.TO_PROCESS : EmailStatus.IGNORED;
+      EmailStatus targetStatus = newValue ? EmailStatus.TO_PROCESS : EmailStatus.NOT_SELECTED;
       email.setStatus(targetStatus);
       cellDataFeatures.getTableView().refresh();
     });

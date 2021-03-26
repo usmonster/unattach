@@ -36,7 +36,7 @@ public class Email implements Observable {
     this.date = new Date(timestamp);
     this.sizeInBytes = sizeInBytes;
     this.attachments = attachments;
-    status = EmailStatus.IGNORED;
+    status = EmailStatus.NOT_SELECTED;
     note = "";
   }
 
