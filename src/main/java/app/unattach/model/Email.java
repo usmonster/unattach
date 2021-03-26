@@ -20,7 +20,7 @@ public class Email implements Observable {
   private final int sizeInBytes;
   private final List<String> attachments;
   private EmailStatus status;
-  private String note;
+  private String processLog;
 
   private final List<InvalidationListener> listeners = new ArrayList<>();
 
@@ -28,7 +28,8 @@ public class Email implements Observable {
                long timestamp, int sizeInBytes, List<String> attachments) {
     this.gmailId = gmailId;
     this.uniqueId = uniqueId;
-    this.labelIds = Collections.unmodifiableSortedSet(labelIds == null ? Collections.emptySortedSet() : new TreeSet<>(labelIds));
+    this.labelIds = Collections.unmodifiableSortedSet(labelIds == null ?
+        Collections.emptySortedSet() : new TreeSet<>(labelIds));
     this.from = from;
     this.to = to;
     this.subject = subject;
@@ -37,7 +38,7 @@ public class Email implements Observable {
     this.sizeInBytes = sizeInBytes;
     this.attachments = attachments;
     status = EmailStatus.NOT_SELECTED;
-    note = "";
+    processLog = "";
   }
 
   @FXML
@@ -138,13 +139,14 @@ public class Email implements Observable {
   }
 
   @FXML
-  public String getNote() {
-    return note;
+  @SuppressWarnings("unused")
+  public String getProcessLog() {
+    return processLog;
   }
 
   @FXML
-  public void setNote(String note) {
-    this.note = note;
+  public void setProcessLog(String processLog) {
+    this.processLog = processLog;
   }
 
   @Override
@@ -173,7 +175,7 @@ public class Email implements Observable {
             ", date=" + date +
             ", sizeInBytes=" + sizeInBytes +
             ", status=" + status +
-            ", note='" + note + '\'' +
+            ", processLog='" + processLog + '\'' +
             '}';
   }
 }

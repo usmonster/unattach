@@ -535,7 +535,7 @@ public class MainViewController {
       @Override
       protected void failed() {
         email.setStatus(EmailStatus.FAILED);
-        email.setNote(getException().getMessage());
+        email.setProcessLog(getException().getMessage());
         resultsTable.refresh();
         reportError("Failed to process selected emails.", getException());
         processEmail(emailsToProcess, nextEmailIndex + 1, failed + 1, processSettings);

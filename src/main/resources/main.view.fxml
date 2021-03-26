@@ -152,9 +152,9 @@
               <PropertyValueFactory property="status"/>
             </cellValueFactory>
           </TableColumn>
-          <TableColumn text="Note" styleClass="center-left">
+          <TableColumn text="Process Log" styleClass="center-left">
             <cellValueFactory>
-              <PropertyValueFactory property="note"/>
+              <PropertyValueFactory property="processLog"/>
             </cellValueFactory>
           </TableColumn>
         </columns>
