@@ -3,6 +3,7 @@ package app.unattach.view;
 import app.unattach.controller.Controller;
 import app.unattach.controller.ControllerFactory;
 import app.unattach.model.Constants;
+import app.unattach.utils.Logger;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -12,11 +13,9 @@ import javafx.scene.control.Label;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class SignInViewController {
-  private static final Logger LOGGER = Logger.getLogger(SignInViewController.class.getName());
+  private static final Logger logger = Logger.get();
 
   private Controller controller;
   @FXML
@@ -66,9 +65,9 @@ public class SignInViewController {
       protected Void call() throws Exception {
         String emailAddress = controller.signIn();
         if (controller.getConfig().getSubscribeToUpdates()) {
-          LOGGER.info("Subscribing to updates..");
+          logger.info("Subscribing to updates..");
           controller.subscribe(emailAddress);
-          LOGGER.info("Subscribing to updates.. successful.");
+          logger.info("Subscribing to updates.. successful.");
         }
         return null;
       }
@@ -78,7 +77,7 @@ public class SignInViewController {
         try {
           Scenes.setScene(Scenes.MAIN);
         } catch (IOException e) {
-          LOGGER.log(Level.SEVERE, "Failed to load the main view.", e);
+          logger.error("Failed to load the main view.", e);
           e.printStackTrace();
         } finally {
           resetControls();
@@ -87,12 +86,12 @@ public class SignInViewController {
 
       @Override
       protected void cancelled() {
-        LOGGER.log(Level.WARNING, "Signing in cancelled.");
+        logger.warn("Signing in cancelled.");
       }
 
       @Override
       protected void failed() {
-        LOGGER.log(Level.SEVERE, "Failed to process sign in button click.", getException());
+        logger.error("Failed to process sign in button click.", getException());
         resetControls();
       }
     };

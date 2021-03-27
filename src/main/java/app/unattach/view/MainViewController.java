@@ -5,6 +5,7 @@ import app.unattach.controller.ControllerFactory;
 import app.unattach.controller.LongTask;
 import app.unattach.model.*;
 import app.unattach.model.service.GmailServiceException;
+import app.unattach.utils.Logger;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
@@ -32,13 +33,11 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class MainViewController {
-  private static final Logger LOGGER = Logger.getLogger(MainViewController.class.getName());
+  private static final Logger logger = Logger.get();
 
   private Controller controller;
   @FXML
@@ -311,7 +310,7 @@ public class MainViewController {
         updateProgress(0, 1);
         updateMessage("Getting info about emails...");
         String query = getQuery();
-        LOGGER.info("Getting info about emails (query: " + query + ")...");
+        logger.info("Getting info about emails (query: " + query + ")...");
         GetEmailMetadataTask longTask = controller.getSearchTask(query);
         currentBatch.set(0);
         numberOfBatches.set(longTask.getNumberOfSteps());
@@ -390,7 +389,7 @@ public class MainViewController {
   }
 
   private void reportError(String message, Throwable t) {
-    LOGGER.log(Level.SEVERE, message, t);
+    logger.error(message, t);
     String stackTraceText = ExceptionUtils.getStackTrace(t);
     controller.sendToServer("stack trace", stackTraceText, null);
   }
@@ -451,7 +450,7 @@ public class MainViewController {
   private void onOpenButtonPressed() {
     File targetDirectory = getTargetDirectory();
     if (targetDirectory.mkdirs()) {
-      LOGGER.info("Created directory \"" + targetDirectory.getAbsolutePath() + "\".");
+      logger.info("Created directory \"" + targetDirectory.getAbsolutePath() + "\".");
     }
     controller.openFile(targetDirectory);
   }
@@ -656,7 +655,7 @@ public class MainViewController {
       File homeFile = new File(home);
       File[] logFiles = homeFile.listFiles(file -> {
         String name = file.getName();
-        return name.startsWith(".unattach-") && name.endsWith(".log");
+        return name.startsWith(".unattach") && name.endsWith(".log");
       });
       long latestTimestamp = 0;
       File latest = null;
@@ -706,7 +705,7 @@ public class MainViewController {
       dialog.setScene(scene);
       Scenes.showAndPreventMakingSmaller(dialog);
     } catch (IOException e) {
-      LOGGER.log(Level.SEVERE, "Failed to open the file name scheme dialog.", e);
+      logger.error("Failed to open the file name scheme dialog.", e);
     }
   }
 
@@ -730,7 +729,7 @@ public class MainViewController {
       dialog.setScene(scene);
       Scenes.showAndPreventMakingSmaller(dialog);
     } catch (IOException e) {
-      LOGGER.log(Level.SEVERE, "Failed to open the gmail label dialog.", e);
+      logger.error("Failed to open the gmail label dialog.", e);
     }
   }
 

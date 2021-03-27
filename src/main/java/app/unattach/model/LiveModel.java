@@ -6,6 +6,7 @@ import app.unattach.model.service.GmailService;
 import app.unattach.model.service.GmailServiceException;
 import app.unattach.model.service.GmailServiceManager;
 import app.unattach.model.service.GmailServiceManagerException;
+import app.unattach.utils.Logger;
 import com.google.api.client.googleapis.batch.json.JsonBatchCallback;
 import com.google.api.client.googleapis.json.GoogleJsonError;
 import com.google.api.client.http.HttpHeaders;
@@ -17,14 +18,12 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.io.*;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.codec.binary.Base64.encodeBase64URLSafeString;
 
 public class LiveModel implements Model {
-  private static final Logger LOGGER = Logger.getLogger(LiveModel.class.getName());
+  private static final Logger logger = Logger.get();
 
   private final Config config;
   private final UserStorage userStorage;
@@ -89,7 +88,7 @@ public class LiveModel implements Model {
       // Test call to the service. This can fail due to token issues.
       getEmailAddress();
     } catch (GmailServiceException e) {
-      LOGGER.log(Level.WARNING, "Initial signing in failed. Explicitly signing out and retrying..", e);
+      logger.warn("Initial signing in failed. Explicitly signing out and retrying..", e);
       signOut();
       configureService();
     }
@@ -134,7 +133,7 @@ public class LiveModel implements Model {
   private ProcessEmailResult processEmail(Email email, ProcessSettings processSettings)
       throws IOException, MessagingException, GmailServiceException {
     Message message = service.getRawMessage(email.getGmailId()); // 5 quota units
-    GmailService.trackInDebugMode(LOGGER, message);
+    GmailService.trackInDebugMode(logger, message);
     MimeMessage mimeMessage = GmailService.getMimeMessage(message);
     String newUniqueId = null;
     if (processSettings.processOption().backupEmail()) {
@@ -148,7 +147,7 @@ public class LiveModel implements Model {
       updateRawMessage(message, mimeMessage);
       Message newMessage = service.insertMessage(message); // 25 quota units
       newMessage = service.getUniqueIdAndHeaders(newMessage.getId()); // 5 quota units
-      GmailService.trackInDebugMode(LOGGER, newMessage);
+      GmailService.trackInDebugMode(logger, newMessage);
       Map<String, String> headerMap = GmailService.getHeaderMap(newMessage);
       newUniqueId = headerMap.get("message-id");
       if (processSettings.processOption().shouldDownload()) {
@@ -190,7 +189,7 @@ public class LiveModel implements Model {
 
       @Override
       public void onSuccess(Message message, HttpHeaders httpHeaders) {
-        GmailService.trackInDebugMode(LOGGER, message);
+        GmailService.trackInDebugMode(logger, message);
         Map<String, String> headerMap = GmailService.getHeaderMap(message);
         String emailId = message.getId();
         String uniqueId = headerMap.get("message-id");
@@ -201,7 +200,7 @@ public class LiveModel implements Model {
         long timestamp = message.getInternalDate();
         List<MessagePart> messageParts = message.getPayload().getParts();
         if (messageParts == null) {
-          LOGGER.log(Level.WARNING, "Skipping message as GMail returned no parts:\n" +
+          logger.warn("Skipping message as GMail returned no parts:\n" +
               "\tGMail-ID: " + emailId + "\n" +
               "\tMessage-ID: " + uniqueId + "\n" +
               "\tFrom: " + from + "\n" +

@@ -2,6 +2,7 @@ package app.unattach.model.service;
 
 import app.unattach.model.Constants;
 import app.unattach.model.TestStore;
+import app.unattach.utils.Logger;
 import com.google.api.client.googleapis.batch.json.JsonBatchCallback;
 import com.google.api.services.gmail.model.Label;
 import com.google.api.services.gmail.model.ListLabelsResponse;
@@ -15,8 +16,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static org.apache.commons.codec.binary.Base64.decodeBase64;
 
@@ -70,7 +69,7 @@ public interface GmailService {
         TestStore.mergeMessage(message);
         logger.info("===============================");
       } catch (IOException e) {
-        logger.log(Level.SEVERE, "Failed to track message.", e);
+        logger.error("Failed to track message.", e);
       }
     }
   }
@@ -83,7 +82,7 @@ public interface GmailService {
         TestStore.saveLabels(response);
         logger.info("===============================");
       } catch (IOException e) {
-        logger.log(Level.SEVERE, "Failed to track labels.", e);
+        logger.error("Failed to track labels.", e);
       }
     }
   }

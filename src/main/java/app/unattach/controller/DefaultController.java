@@ -3,6 +3,7 @@ package app.unattach.controller;
 import app.unattach.model.*;
 import app.unattach.model.service.GmailServiceException;
 import app.unattach.model.service.GmailServiceManagerException;
+import app.unattach.utils.Logger;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
@@ -15,23 +16,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.function.Consumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public record DefaultController(Model model) implements Controller {
-  private static final Logger LOGGER = Logger.getLogger(DefaultController.class.getName());
+  private static final Logger logger = Logger.get();
   private static final String DEFAULT_DOWNLOADED_LABEL_NAME = "Unattach - Downloaded";
   private static final String DEFAULT_REMOVED_LABEL_NAME = "Unattach - Removed";
 
   @Override
   public String createLabel(String name) {
     try {
-      LOGGER.info("Creating label " + name + "..");
+      logger.info("Creating label " + name + "..");
       String id = model.createLabel(name);
-      LOGGER.info("Creating label " + name + ".. successful.");
+      logger.info("Creating label " + name + ".. successful.");
       return id;
     } catch (Throwable t) {
-      LOGGER.log(Level.SEVERE, "Creating label " + name + ".. failed.", t);
+      logger.error("Creating label " + name + ".. failed.", t);
       return null;
     }
   }
@@ -67,7 +66,7 @@ public record DefaultController(Model model) implements Controller {
       if (idToLabel.containsKey(labelId)) {
         return labelId;
       }
-      LOGGER.log(Level.SEVERE, "Couldn't find the label ID in the user config within Gmail label IDs: " + labelId);
+      logger.error("Couldn't find the label ID in the user config within Gmail label IDs: " + labelId);
     }
     for (Map.Entry<String, String> entry : idToLabel.entrySet()) {
       String id = entry.getKey();
@@ -126,12 +125,12 @@ public record DefaultController(Model model) implements Controller {
   @Override
   public SortedMap<String, String> getIdToLabel() {
     try {
-      LOGGER.info("Getting email labels..");
+      logger.info("Getting email labels..");
       SortedMap<String, String> idToLabel = model.getIdToLabel();
-      LOGGER.info("Getting email labels.. successful.");
+      logger.info("Getting email labels.. successful.");
       return idToLabel;
     } catch (Throwable t) {
-      LOGGER.log(Level.SEVERE, "Getting email labels.. failed.", t);
+      logger.error("Getting email labels.. failed.", t);
       return Collections.emptySortedMap();
     }
   }
@@ -139,16 +138,16 @@ public record DefaultController(Model model) implements Controller {
   @Override
   public DefaultArtifactVersion getLatestVersion() {
     try {
-      LOGGER.info("Getting latest version..");
+      logger.info("Getting latest version..");
       DefaultArtifactVersion latestVersion = model.getLatestVersion();
       if (latestVersion == null) {
-        LOGGER.log(Level.SEVERE, "Getting latest version.. failed.");
+        logger.error("Getting latest version.. failed.");
       } else {
-        LOGGER.info("Getting latest version.. successful.");
+        logger.info("Getting latest version.. successful.");
       }
       return latestVersion;
     } catch (Throwable t) {
-      LOGGER.log(Level.SEVERE, "Getting latest version.. failed.", t);
+      logger.error("Getting latest version.. failed.", t);
       return null;
     }
   }
@@ -156,36 +155,36 @@ public record DefaultController(Model model) implements Controller {
   @Override
   public void signOut() {
     try {
-      LOGGER.info("Signing out..");
+      logger.info("Signing out..");
       model.signOut();
-      LOGGER.info("Signing out.. successful.");
+      logger.info("Signing out.. successful.");
     } catch (Throwable t) {
-      LOGGER.log(Level.SEVERE, "Signing out.. failed.", t);
+      logger.error("Signing out.. failed.", t);
     }
   }
 
   @Override
   public void sendToServer(String contentDescription, String stackTraceText, String userText) {
     try {
-      LOGGER.info("Sending " + contentDescription + " ..");
+      logger.info("Sending " + contentDescription + " ..");
       String userEmail = model.getEmailAddress();
       model.sendToServer(contentDescription, userEmail, stackTraceText, userText);
-      LOGGER.info("Sending " + contentDescription + " .. successful. Thanks!");
+      logger.info("Sending " + contentDescription + " .. successful. Thanks!");
     } catch (Throwable t) {
       String logMessage = "Failed to send " + contentDescription + " to the server. " +
           "Please consider sending an email to " + Constants.CONTACT_EMAIL + " instead.";
-      LOGGER.log(Level.SEVERE, logMessage, t);
+      logger.error(logMessage, t);
     }
   }
 
   @Override
   public void subscribe(String emailAddress) {
     try {
-      LOGGER.info("Subscribing with " + emailAddress + " ..");
+      logger.info("Subscribing with " + emailAddress + " ..");
       model.subscribe(emailAddress);
-      LOGGER.info("Subscription successful.");
+      logger.info("Subscription successful.");
     } catch (Throwable t) {
-      LOGGER.log(Level.SEVERE, "Failed to subscribe.", t);
+      logger.error("Failed to subscribe.", t);
     }
   }
 
@@ -197,17 +196,17 @@ public record DefaultController(Model model) implements Controller {
         if (hasXdgOpen()) {
           Runtime.getRuntime().exec(new String[]{"xdg-open", file.getAbsolutePath()});
         } else {
-          LOGGER.log(Level.SEVERE, "Unable to open a file on this operating system.");
+          logger.error("Unable to open a file on this operating system.");
         }
       } else {
         if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.OPEN)) {
           Desktop.getDesktop().open(file);
         } else {
-          LOGGER.log(Level.SEVERE, "Unable to open a file on this operating system.");
+          logger.error("Unable to open a file on this operating system.");
         }
       }
     } catch (Throwable t) {
-      LOGGER.log(Level.SEVERE, "Failed to open a file.", t);
+      logger.error("Failed to open a file.", t);
     }
   }
 
@@ -220,17 +219,17 @@ public record DefaultController(Model model) implements Controller {
         if (hasXdgOpen()) {
           Runtime.getRuntime().exec(new String[]{"xdg-open", uriString});
         } else {
-          LOGGER.log(Level.SEVERE, "Unable to open a web page on this operating system. " + manualInstructions);
+          logger.error("Unable to open a web page on this operating system. " + manualInstructions);
         }
       } else {
         if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
           Desktop.getDesktop().browse(URI.create(uriString));
         } else {
-          LOGGER.log(Level.SEVERE, "Unable to open a web page on this operating system. " + manualInstructions);
+          logger.error("Unable to open a web page on this operating system. " + manualInstructions);
         }
       }
     } catch (Throwable t) {
-      LOGGER.info("Unable to open a web page from within the application. " + manualInstructions);
+      logger.info("Unable to open a web page from within the application. " + manualInstructions);
     }
   }
 

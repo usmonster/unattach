@@ -1,16 +1,16 @@
 package app.unattach.model;
 
+import app.unattach.utils.Logger;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class FileConfig extends BaseConfig {
-  private static final Logger LOGGER = Logger.getLogger(FileConfig.class.getName());
+  private static final Logger logger = Logger.get();
 
   @Override
   public void loadConfig() {
@@ -19,7 +19,7 @@ public class FileConfig extends BaseConfig {
       try (FileInputStream in = new FileInputStream(configFile)) {
         config.load(in);
       } catch (IOException e) {
-        LOGGER.log(Level.SEVERE, "Failed to load the config file.", e);
+        logger.error("Failed to load the config file.", e);
       }
     }
   }
@@ -30,7 +30,7 @@ public class FileConfig extends BaseConfig {
     try (FileOutputStream out = new FileOutputStream(configFile)) {
       config.store(out, null);
     } catch (IOException e) {
-      LOGGER.log(Level.SEVERE, "Failed to save the config file.", e);
+      logger.error("Failed to save the config file.", e);
     }
   }
 

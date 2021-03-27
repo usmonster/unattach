@@ -1,14 +1,14 @@
 package app.unattach.model;
 
 import app.unattach.controller.LongTask;
+import app.unattach.utils.Logger;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.logging.Logger;
 
 public class MockModel implements Model {
-  private static final Logger LOGGER = Logger.getLogger(MockModel.class.getName());
+  private static final Logger logger = Logger.get();
 
   private final Config config = new BaseConfig();
   private final Random random = new Random(1337);
@@ -85,25 +85,25 @@ public class MockModel implements Model {
 
   @Override
   public void signIn() {
-    LOGGER.info("signIn");
+    logger.info("signIn");
   }
 
   @Override
   public void signOut() {
-    LOGGER.info("signOut");
+    logger.info("signOut");
   }
 
   @Override
   public void sendToServer(String contentDescription, String userEmail, String stackTraceText, String userText) {
-    LOGGER.info("========== sendToServer ==========");
-    LOGGER.info(userEmail);
-    LOGGER.info(stackTraceText);
-    LOGGER.info(userText);
-    LOGGER.info("========== sendToServer ==========");
+    logger.info("========== sendToServer ==========");
+    logger.info(userEmail);
+    logger.info(stackTraceText);
+    logger.info(userText);
+    logger.info("========== sendToServer ==========");
   }
 
   @Override
   public void subscribe(String emailAddress) {
-    LOGGER.info("subscribe: " + emailAddress);
+    logger.info("subscribe: " + emailAddress);
   }
 }

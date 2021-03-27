@@ -1,6 +1,7 @@
 package app.unattach.model;
 
 import app.unattach.model.attachmentstorage.UserStorage;
+import app.unattach.utils.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -18,10 +19,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.OffsetDateTime;
 import java.util.*;
-import java.util.logging.Logger;
 
 class EmailProcessor {
-  private static final Logger LOGGER = Logger.getLogger(EmailProcessor.class.getName());
+  private static final Logger logger = Logger.get();
 
   private final UserStorage userStorage;
   private final Email email;
@@ -69,7 +69,7 @@ class EmailProcessor {
   private void fixInvalidContentType(BodyPart bodyPart) throws MessagingException {
     String[] contentTypes = bodyPart.getHeader("Content-Type");
     if (contentTypes == null) {
-      LOGGER.warning("No Content-Type header found.");
+      logger.warn("No Content-Type header found.");
       return;
     }
     if (contentTypes.length == 1) {
@@ -109,7 +109,7 @@ class EmailProcessor {
       }
       copiedBodyParts.add(bodyPart);
       originalToNormalizedFilename.put(originalFilename, normalizedFilename);
-      LOGGER.info("Saved attachment " + originalFilename + " from " + email + " as " + normalizedFilename + ".");
+      logger.info("Saved attachment " + originalFilename + " from " + email + " as " + normalizedFilename + ".");
     }
   }
 

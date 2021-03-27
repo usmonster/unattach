@@ -1,6 +1,6 @@
 package app.unattach.model.service;
 
-import app.unattach.model.LiveModel;
+import app.unattach.utils.Logger;
 import com.google.api.client.googleapis.batch.BatchRequest;
 import com.google.api.client.googleapis.batch.json.JsonBatchCallback;
 import com.google.api.services.gmail.Gmail;
@@ -9,17 +9,15 @@ import com.google.api.services.gmail.model.*;
 import java.io.IOException;
 import java.lang.Thread;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public record LiveGmailService(Gmail gmail) implements GmailService {
-  private static final Logger LOGGER = Logger.getLogger(LiveModel.class.getName());
+  private static final Logger logger = Logger.get();
   private static final String USER = "me";
 
   @Override
   public void addLabel(String messageIds, String labelId) throws GmailServiceException {
     if (labelId == null) {
-      LOGGER.log(Level.WARNING, "Cannot add a label, because it was not specified.");
+      logger.warn("Cannot add a label, because it was not specified.");
       return;
     }
     try {
@@ -88,7 +86,7 @@ public record LiveGmailService(Gmail gmail) implements GmailService {
     try {
       // 1 labels.get == 1 quota unit
       ListLabelsResponse response = gmail.users().labels().list(USER).setFields("labels/id,labels/name").execute();
-      GmailService.trackInDebugMode(LOGGER, response);
+      GmailService.trackInDebugMode(logger, response);
       return GmailService.labelsResponseToMap(response);
     } catch (IOException e) {
       throw new GmailServiceException(e);
