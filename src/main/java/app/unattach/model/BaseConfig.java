@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Properties;
 
 public class BaseConfig implements Config {
+  private static final String DATE_FORMAT_PROPERTY = "date_format";
   private static final String DELETE_ORIGINAL_PROPERTY = "delete_original";
   private static final String DOWNLOADED_LABEL_ID_PROPERTY = "downloaded_label_id";
   private static final String EMAIL_SIZE_PROPERTY = "email_size";
@@ -32,6 +33,11 @@ public class BaseConfig implements Config {
   @Override
   public int getEmailSize() {
     return Integer.parseInt(config.getProperty(EMAIL_SIZE_PROPERTY, "5"));
+  }
+
+  @Override
+  public String getDateFormat() {
+    return config.getProperty(DATE_FORMAT_PROPERTY, DateFormat.ISO_8601_DATE.getPattern());
   }
 
   @Override
@@ -77,6 +83,12 @@ public class BaseConfig implements Config {
   @Override
   public String getTargetDirectory() {
     return config.getProperty(TARGET_DIRECTORY_PROPERTY, getDefaultTargetDirectory());
+  }
+
+  @Override
+  public void saveDateFormat(String pattern) {
+    config.setProperty(DATE_FORMAT_PROPERTY, pattern);
+    saveConfig();
   }
 
   @Override
@@ -134,7 +146,7 @@ public class BaseConfig implements Config {
   }
 
   @Override
-  public void setDeleteOriginal(boolean deleteOriginal) {
+  public void saveDeleteOriginal(boolean deleteOriginal) {
     config.setProperty(DELETE_ORIGINAL_PROPERTY, Boolean.toString(deleteOriginal));
     saveConfig();
   }

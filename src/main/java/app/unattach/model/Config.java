@@ -4,6 +4,7 @@ import java.util.List;
 
 public interface Config {
   int getEmailSize();
+  String getDateFormat();
   boolean getDeleteOriginal();
   String getFilenameSchema();
   List<String> getLabelIds();
@@ -13,6 +14,8 @@ public interface Config {
   boolean getSignInAutomatically();
   boolean getSubscribeToUpdates();
   String getTargetDirectory();
+  void saveDateFormat(String pattern);
+  void saveDeleteOriginal(boolean deleteOriginal);
   void saveDownloadedLabelId(String downloadedLabelId);
   void saveEmailSize(int emailSize);
   void saveFilenameSchema(String schema);
@@ -22,5 +25,4 @@ public interface Config {
   void saveSignInAutomatically(boolean signInAutomatically);
   void saveSubscribeToUpdates(boolean subscribeToUpdates);
   void saveTargetDirectory(String path);
-  void setDeleteOriginal(boolean deleteOriginal);
 }

@@ -56,6 +56,8 @@ public class MainViewController {
   @FXML
   private Menu viewColumnMenu;
   @FXML
+  private Menu dateFormatMenu;
+  @FXML
   private CheckMenuItem permanentlyDeleteOriginalMenuItem;
   @FXML
   private CheckMenuItem trashOriginalMenuItem;
@@ -148,6 +150,7 @@ public class MainViewController {
     emailMenuItem.setText("Signed in as " + controller.getEmailAddress() + ".");
     signInAutomaticallyCheckMenuItem.setSelected(controller.getConfig().getSignInAutomatically());
     addMenuForHidingColumns();
+    addMenuForDateFormats();
     if (!controller.getConfig().getDeleteOriginal()) {
       onTrashOriginalMenuItemPressed();
     }
@@ -213,6 +216,27 @@ public class MainViewController {
       menuItem.setOnAction(event -> column.setVisible(menuItem.isSelected()));
       viewColumnMenu.getItems().add(menuItem);
     });
+  }
+
+  private void addMenuForDateFormats() {
+    String pattern = controller.getConfig().getDateFormat();
+    for (DateFormat dateFormat : DateFormat.values()) {
+      CheckMenuItem menuItem = new CheckMenuItem(dateFormat.getPattern());
+      if (dateFormat.getPattern().equals(pattern)) {
+        menuItem.setSelected(true);
+      }
+      menuItem.setOnAction(this::onDateFormatMenuItemPressed);
+      dateFormatMenu.getItems().add(menuItem);
+    }
+  }
+
+  private void onDateFormatMenuItemPressed(ActionEvent event) {
+    dateFormatMenu.getItems().stream().map(CheckMenuItem.class::cast).forEach(e -> e.setSelected(false));
+    CheckMenuItem checkMenuItem = (CheckMenuItem) event.getSource();
+    checkMenuItem.setSelected(true);
+    String pattern = checkMenuItem.getText();
+    controller.getConfig().saveDateFormat(pattern);
+    resultsTable.refresh();
   }
 
   private void selectSavedLabels(List<GmailLabel> labels) {
@@ -655,14 +679,14 @@ public class MainViewController {
   private void onDeleteOriginalMenuItemPressed() {
     permanentlyDeleteOriginalMenuItem.setSelected(true);
     trashOriginalMenuItem.setSelected(false);
-    controller.getConfig().setDeleteOriginal(true);
+    controller.getConfig().saveDeleteOriginal(true);
   }
 
   @FXML
   private void onTrashOriginalMenuItemPressed() {
     permanentlyDeleteOriginalMenuItem.setSelected(false);
     trashOriginalMenuItem.setSelected(true);
-    controller.getConfig().setDeleteOriginal(false);
+    controller.getConfig().saveDeleteOriginal(false);
   }
 
   @FXML

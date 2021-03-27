@@ -9,6 +9,7 @@
 <?import app.unattach.view.ProgressBarWithText?>
 <?import app.unattach.view.LinkButtonTableCellFactory?>
 <?import app.unattach.view.SelectedCheckBoxTableCellFactory?>
+<?import app.unattach.view.DateTableCellFactory?>
 <VBox xmlns:fx="http://javafx.com/fxml" fx:controller="app.unattach.view.MainViewController" fx:id="root">
   <MenuBar>
     <Menu text="Account">
@@ -19,7 +20,8 @@
     <Menu text="Settings">
       <CheckMenuItem fx:id="signInAutomaticallyCheckMenuItem" text="Sign in automatically"
                      onAction="#onSignInAutomaticallyCheckMenuItemAction"/>
-      <Menu fx:id="viewColumnMenu" text="View Column" />
+      <Menu fx:id="viewColumnMenu" text="View Column"/>
+      <Menu fx:id="dateFormatMenu" text="Date Format"/>
       <CheckMenuItem fx:id="addMetadataCheckMenuItem" text="Add metadata about removed attachments" selected="true" />
       <Menu text="After inserting email copy without attachments .." >
         <CheckMenuItem fx:id="permanentlyDeleteOriginalMenuItem" text="Permanently delete original email" selected="true"
@@ -111,7 +113,7 @@
           </TableColumn>
           <TableColumn text="Date" styleClass="center">
             <cellValueFactory>
-              <PropertyValueFactory property="date"/>
+              <DateTableCellFactory/>
             </cellValueFactory>
           </TableColumn>
           <TableColumn text="From" styleClass="center-left">
