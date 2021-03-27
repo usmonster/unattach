@@ -67,7 +67,7 @@ public class SignInViewController {
         if (controller.getConfig().getSubscribeToUpdates()) {
           logger.info("Subscribing to updates..");
           controller.subscribe(emailAddress);
-          logger.info("Subscribing to updates.. successful.");
+          logger.info("Subscribing to updates... successful.");
         }
         return null;
       }

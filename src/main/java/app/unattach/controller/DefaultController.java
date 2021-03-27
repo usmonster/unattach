@@ -27,10 +27,10 @@ public record DefaultController(Model model) implements Controller {
     try {
       logger.info("Creating label " + name + "..");
       String id = model.createLabel(name);
-      logger.info("Creating label " + name + ".. successful.");
+      logger.info("Creating label " + name + "... successful.");
       return id;
     } catch (Throwable t) {
-      logger.error("Creating label " + name + ".. failed.", t);
+      logger.error("Creating label " + name + "... failed.", t);
       return null;
     }
   }
@@ -125,12 +125,12 @@ public record DefaultController(Model model) implements Controller {
   @Override
   public SortedMap<String, String> getIdToLabel() {
     try {
-      logger.info("Getting email labels..");
+      logger.info("Getting email labels...");
       SortedMap<String, String> idToLabel = model.getIdToLabel();
-      logger.info("Getting email labels.. successful.");
+      logger.info("Getting email labels... successful.");
       return idToLabel;
     } catch (Throwable t) {
-      logger.error("Getting email labels.. failed.", t);
+      logger.error("Getting email labels... failed.", t);
       return Collections.emptySortedMap();
     }
   }
@@ -141,13 +141,13 @@ public record DefaultController(Model model) implements Controller {
       logger.info("Getting latest version..");
       DefaultArtifactVersion latestVersion = model.getLatestVersion();
       if (latestVersion == null) {
-        logger.error("Getting latest version.. failed.");
+        logger.error("Getting latest version... failed.");
       } else {
-        logger.info("Getting latest version.. successful.");
+        logger.info("Getting latest version... successful.");
       }
       return latestVersion;
     } catch (Throwable t) {
-      logger.error("Getting latest version.. failed.", t);
+      logger.error("Getting latest version... failed.", t);
       return null;
     }
   }
@@ -157,9 +157,9 @@ public record DefaultController(Model model) implements Controller {
     try {
       logger.info("Signing out..");
       model.signOut();
-      logger.info("Signing out.. successful.");
+      logger.info("Signing out... successful.");
     } catch (Throwable t) {
-      logger.error("Signing out.. failed.", t);
+      logger.error("Signing out... failed.", t);
     }
   }
 
@@ -169,7 +169,7 @@ public record DefaultController(Model model) implements Controller {
       logger.info("Sending " + contentDescription + " ..");
       String userEmail = model.getEmailAddress();
       model.sendToServer(contentDescription, userEmail, stackTraceText, userText);
-      logger.info("Sending " + contentDescription + " .. successful. Thanks!");
+      logger.info("Sending " + contentDescription + "... successful. Thanks!");
     } catch (Throwable t) {
       String logMessage = "Failed to send " + contentDescription + " to the server. " +
           "Please consider sending an email to " + Constants.CONTACT_EMAIL + " instead.";

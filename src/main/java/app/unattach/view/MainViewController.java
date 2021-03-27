@@ -310,7 +310,6 @@ public class MainViewController {
         updateProgress(0, 1);
         updateMessage("Getting info about emails...");
         String query = getQuery();
-        logger.info("Getting info about emails (query: " + query + ")...");
         GetEmailMetadataTask longTask = controller.getSearchTask(query);
         currentBatch.set(0);
         numberOfBatches.set(longTask.getNumberOfSteps());
@@ -338,7 +337,9 @@ public class MainViewController {
       protected void succeeded() {
         boolean successful = false;
         try {
-          updateMessage(String.format("Finished getting info about emails (%s).", getStatusString()));
+          String message = "Finished getting info about emails (%s).".formatted(getStatusString());
+          logger.info(message);
+          updateMessage(message);
           List<Email> emails = controller.getSearchResults();
           ObservableList<Email> observableEmails = FXCollections.observableList(emails, email -> new Observable[]{email});
           resultsTable.setItems(observableEmails);
@@ -493,6 +494,8 @@ public class MainViewController {
       showNoEmailsAlert();
       return;
     }
+    logger.info("Processing %d emails with %s and filename schema '%s'...", emailsToProcess.size(), processOption,
+        controller.getConfig().getFilenameSchema());
     disableControls();
     stopProcessingButton.setDisable(false);
     stopProcessingButtonPressed = false;
@@ -517,9 +520,11 @@ public class MainViewController {
   }
 
   private void processEmail(List<Email> emailsToProcess, int nextEmailIndex, int failed, ProcessSettings processSettings) {
+    String processingStatusString = getProcessingStatusString(emailsToProcess, nextEmailIndex, failed);
     if (stopProcessingButtonPressed || nextEmailIndex >= emailsToProcess.size()) {
-      processingProgressBarWithText.textProperty().setValue(
-          String.format("Processing stopped (%s).", getProcessingStatusString(emailsToProcess, nextEmailIndex, failed)));
+      String message = "Processing stopped (%s).".formatted(processingStatusString);
+      logger.info(message);
+      processingProgressBarWithText.textProperty().setValue(message);
       resetControls();
       if (enableScheduleCheckBox.isSelected()) {
         scheduleNextRun(processSettings.processOption().action());
@@ -527,8 +532,9 @@ public class MainViewController {
       return;
     }
     Email email = emailsToProcess.get(nextEmailIndex);
+    logger.info("Processing email with subject '%s'...", email.getSubject());
     processingProgressBarWithText.textProperty().setValue(
-        String.format("Processing selected emails (%s) ..", getProcessingStatusString(emailsToProcess, nextEmailIndex, failed)));
+        "Processing selected emails (%s) ..".formatted(processingStatusString));
 
     Task<ProcessEmailResult> task = new Task<>() {
       @Override

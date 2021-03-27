@@ -8,13 +8,15 @@ import app.unattach.view.Scenes;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
+import static app.unattach.model.Constants.PRODUCT_NAME;
+
 public class MainFx extends Application {
   private static final Logger logger = Logger.get();
 
   @Override
   public void start(Stage stage) {
     try {
-      logger.info("Starting " + Constants.PRODUCT_NAME + " .. (max memory in bytes: " + Runtime.getRuntime().maxMemory() + ")");
+      logger.info("Starting %s... (max memory in bytes: %d)", PRODUCT_NAME, Runtime.getRuntime().maxMemory());
       Scenes.init(stage);
       Controller controller = ControllerFactory.getDefaultController();
       if (controller.getConfig().getSignInAutomatically()) {

@@ -109,7 +109,8 @@ class EmailProcessor {
       }
       copiedBodyParts.add(bodyPart);
       originalToNormalizedFilename.put(originalFilename, normalizedFilename);
-      logger.info("Saved attachment " + originalFilename + " from " + email + " as " + normalizedFilename + ".");
+      logger.info("Saved attachment %s from email with subject '%s' to file %s.", originalFilename, email.getSubject(),
+          normalizedFilename);
     }
   }
 

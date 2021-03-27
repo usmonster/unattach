@@ -83,12 +83,14 @@ public class LiveModel implements Model {
 
   @Override
   public void signIn() throws GmailServiceManagerException {
+    logger.info("Signing in...");
     configureService();
     try {
       // Test call to the service. This can fail due to token issues.
-      getEmailAddress();
+      String emailAddress = getEmailAddress();
+      logger.info("Signed in as %s.", emailAddress);
     } catch (GmailServiceException e) {
-      logger.warn("Initial signing in failed. Explicitly signing out and retrying..", e);
+      logger.warn("Initial signing in failed. Explicitly signing out and retrying...", e);
       signOut();
       configureService();
     }
@@ -102,6 +104,7 @@ public class LiveModel implements Model {
 
   @Override
   public void signOut() throws GmailServiceManagerException {
+    logger.info("Signing out...");
     gmailServiceManager.signOut();
     reset();
   }
@@ -176,8 +179,10 @@ public class LiveModel implements Model {
 
   @Override
   public GetEmailMetadataTask getSearchTask(String query) throws GmailServiceException {
+    logger.info("Searching with query '%s'...", query);
     clearPreviousSearchResults();
     List<Message> messages = service.search(query);
+    logger.info("Found %d results.", messages.size());
     ArrayList<String> emailIdsToProcess =
         messages.stream().map(Message::getId).collect(Collectors.toCollection(ArrayList::new));
 
@@ -218,6 +223,7 @@ public class LiveModel implements Model {
     };
 
     return new GetEmailMetadataTask(emailIdsToProcess, (startIndexInclusive, endIndexExclusive) -> {
+        logger.info("Getting info about emails with index [%d, %d)...", startIndexInclusive, endIndexExclusive);
         List<String> emailIds = emailIdsToProcess.subList(startIndexInclusive, endIndexExclusive);
         service.batchGetMetadata(emailIds, perEmailCallback);
       }
