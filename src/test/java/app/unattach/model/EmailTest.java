@@ -22,7 +22,7 @@ public class EmailTest {
 
   @Test
   void getFromName() {
-    assertEquals("_", getEmail("rok.strnisa@gmail.com").getFromName());
+    assertEquals("", getEmail("rok.strnisa@gmail.com").getFromName());
     assertEquals("Rok Strniša", getEmail("Rok Strniša <rok.strnisa@gmail.com>").getFromName());
     assertEquals("Rok Strniša", getEmail("\"Rok Strniša\" <rok.strnisa@gmail.com>").getFromName());
   }

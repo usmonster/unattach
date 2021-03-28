@@ -93,7 +93,7 @@ public class Email implements Observable {
     if (from.endsWith(">")) {
       return StringUtils.strip(from.substring(0, from.lastIndexOf('<')), " \"");
     } else {
-      return "_";
+      return "";
     }
   }
 

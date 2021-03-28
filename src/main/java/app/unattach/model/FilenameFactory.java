@@ -19,8 +19,10 @@ public class FilenameFactory {
 
   public String getFilename(Email email, int bodyPartIndex, String attachmentName) {
     String template = schema;
+    String name_or_email = email.getFromName().isEmpty() ? email.getFromEmail() : email.getFromName();
     template = replaceRawAndNormalised(template, "FROM_EMAIL", email.getFromEmail(), FilenameFactory::simpleTrim);
     template = replaceRawAndNormalised(template, "FROM_NAME", email.getFromName(), FilenameFactory::simpleTrim);
+    template = replaceRawAndNormalised(template, "FROM_NAME_OR_EMAIL", name_or_email, FilenameFactory::simpleTrim);
     template = replaceRawAndNormalised(template, "SUBJECT", email.getSubject(), FilenameFactory::simpleTrim);
     template = replaceRawAndNormalised(template, "TIMESTAMP", String.valueOf(email.getTimestamp()), FilenameFactory::simpleTrim);
     template = replaceRawAndNormalised(template, "DATE", email.getDateIso8601(), FilenameFactory::simpleTrim);

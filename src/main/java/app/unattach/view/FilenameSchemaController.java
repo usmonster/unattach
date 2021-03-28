@@ -45,6 +45,7 @@ public class FilenameSchemaController {
             "The available schema variables are:\n" +
             "- FROM_EMAIL, e.g. " + getSchemaVariableExample("FROM_EMAIL") + "\n" +
             "- FROM_NAME, e.g. " + getSchemaVariableExample("FROM_NAME") + "\n" +
+            "- FROM_NAME_OR_EMAIL, i.e. FROM_NAME if non-empty, otherwise FROM_EMAIL\n" +
             "- SUBJECT, e.g. " + getSchemaVariableExample("SUBJECT") + "\n" +
             "- TIMESTAMP, e.g. " + getSchemaVariableExample("TIMESTAMP") + "\n" +
             "- DATE, e.g. " + getSchemaVariableExample("DATE") + "\n" +

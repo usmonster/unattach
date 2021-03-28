@@ -1,5 +1,6 @@
 package app.unattach.model;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.security.InvalidParameterException;
@@ -10,9 +11,12 @@ import java.util.Collections;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class FilenameFactoryTest {
-  private static final Email email = new Email("id3", "uid42", Arrays.asList("SENT", "IMPORTANT"),
-      "\"Rok Strniša\" <rok.strnisa@gmail.com>", "to@example.com", "subject", 1501545600000L,
-      32141, Collections.singletonList("data.zip"));
+  private Email email;
+
+  @BeforeEach
+  public void setUp() {
+    email = createEmail("\"Rok Strniša\" <rok.strnisa@gmail.com>");
+  }
 
   @Test
   public void testFromEmail() {
@@ -24,6 +28,15 @@ public class FilenameFactoryTest {
   public void testFromName() {
     testGetFilename("${FROM_NAME}", "a%b@.jpg", "Rok_Strni_a");
     testGetFilename("${FROM_NAME:3}", "a%b@.jpg", "Rok");
+  }
+
+  @Test
+  public void testFromNameOrEmail() {
+    testGetFilename("${FROM_NAME_OR_EMAIL}", "a%b@.jpg", "Rok_Strni_a");
+    testGetFilename("${FROM_NAME_OR_EMAIL:3}", "a%b@.jpg", "Rok");
+    email = createEmail("rok.strnisa@gmail.com");
+    testGetFilename("${FROM_NAME_OR_EMAIL}", "a%b@.jpg", "rok.strnisa@gmail.com");
+    testGetFilename("${FROM_NAME_OR_EMAIL:5}", "a%b@.jpg", "rok.s");
   }
 
   @Test
@@ -90,7 +103,13 @@ public class FilenameFactoryTest {
     );
   }
 
-  private static void testGetFilename(String schema, String attachmentName, String expectedFilename) {
+  private static Email createEmail(String from) {
+    return new Email("id3", "uid42", Arrays.asList("SENT", "IMPORTANT"),
+        from, "to@example.com", "subject", 1501545600000L,
+        32141, Collections.singletonList("data.zip"));
+  }
+
+  private void testGetFilename(String schema, String attachmentName, String expectedFilename) {
     FilenameFactory filenameFactory = new FilenameFactory(schema);
     String actualFilename = filenameFactory.getFilename(email, 234, attachmentName);
     assertEquals(expectedFilename, actualFilename);
