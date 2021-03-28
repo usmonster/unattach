@@ -55,6 +55,8 @@ public class FilenameSchemaController {
             "- LABELS, e.g. " + getSchemaVariableExample("LABELS") + "\n\n" +
             "There are also RAW_ (e.g. RAW_SUBJECT) variants of the above variables, but they are not recommended,\n" +
             "since they may contain symbols not suitable for file names.\n\n" +
+            "We highly recommend ending your schema with ${ATTACHMENT_NAME}, so that the operating system correctly\n" +
+            "recognises the attachment type.\n\n" +
             "Additionally, you can set the maximum length for each variable's expansion. For example, to use\n" +
             "up to 5 characters of the SUBJECT, use ${SUBJECT:5}. For attachment name variables, the extension\n" +
             "of the file is preserved."
@@ -65,7 +67,11 @@ public class FilenameSchemaController {
       try {
         String filename = filenameFactory.getFilename(email, 3, "the beach.jpg");
         filenameExampleLabel.setText(filename);
-        errorLabel.setText("");
+        if (schema.endsWith("${ATTACHMENT_NAME}")) {
+          errorLabel.setText("");
+        } else {
+          errorLabel.setText("The schema doesn't end with ${ATTACHMENT_NAME}.");
+        }
         okButton.setDisable(false);
       } catch (Throwable t) {
         filenameExampleLabel.setText("");
