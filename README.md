@@ -3,8 +3,10 @@
 See [homepage](https://unattach.app/) for more info.
 
 ## Legal
-* [LICENSE](LICENSE)
-* [PRIVACY](PRIVACY)
+* [LICENSE](LICENSE).
+  * tl;dr: No sharing. For personal use only. Can contribute via PRs to this repo.
+* [PRIVACY](PRIVACY).
+  * tl;dr: Your personal data flows only between Google servers and your computer.
 
 ## Dependencies
 * Install [Java 15](https://www.oracle.com/java/technologies/javase-downloads.html).
