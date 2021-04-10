@@ -65,7 +65,7 @@ public class SignInViewController {
       protected Void call() throws Exception {
         String emailAddress = controller.signIn();
         if (controller.getConfig().getSubscribeToUpdates()) {
-          logger.info("Subscribing to updates..");
+          logger.info("Subscribing to updates...");
           controller.subscribe(emailAddress);
           logger.info("Subscribing to updates... successful.");
         }

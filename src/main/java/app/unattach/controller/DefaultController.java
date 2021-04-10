@@ -25,7 +25,7 @@ public record DefaultController(Model model) implements Controller {
   @Override
   public String createLabel(String name) {
     try {
-      logger.info("Creating label " + name + "..");
+      logger.info("Creating label " + name + "...");
       String id = model.createLabel(name);
       logger.info("Creating label " + name + "... successful.");
       return id;
@@ -138,7 +138,7 @@ public record DefaultController(Model model) implements Controller {
   @Override
   public DefaultArtifactVersion getLatestVersion() {
     try {
-      logger.info("Getting latest version..");
+      logger.info("Getting latest version...");
       DefaultArtifactVersion latestVersion = model.getLatestVersion();
       if (latestVersion == null) {
         logger.error("Getting latest version... failed.");
@@ -155,7 +155,7 @@ public record DefaultController(Model model) implements Controller {
   @Override
   public void signOut() {
     try {
-      logger.info("Signing out..");
+      logger.info("Signing out...");
       model.signOut();
       logger.info("Signing out... successful.");
     } catch (Throwable t) {
@@ -166,7 +166,7 @@ public record DefaultController(Model model) implements Controller {
   @Override
   public void sendToServer(String contentDescription, String stackTraceText, String userText) {
     try {
-      logger.info("Sending " + contentDescription + " ..");
+      logger.info("Sending " + contentDescription + "...");
       String userEmail = model.getEmailAddress();
       model.sendToServer(contentDescription, userEmail, stackTraceText, userText);
       logger.info("Sending " + contentDescription + "... successful. Thanks!");
@@ -180,7 +180,7 @@ public record DefaultController(Model model) implements Controller {
   @Override
   public void subscribe(String emailAddress) {
     try {
-      logger.info("Subscribing with " + emailAddress + " ..");
+      logger.info("Subscribing with " + emailAddress + "...");
       model.subscribe(emailAddress);
       logger.info("Subscription successful.");
     } catch (Throwable t) {

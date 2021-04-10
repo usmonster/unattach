@@ -23,14 +23,14 @@
       <Menu fx:id="viewColumnMenu" text="View Column"/>
       <Menu fx:id="dateFormatMenu" text="Date Format"/>
       <CheckMenuItem fx:id="addMetadataCheckMenuItem" text="Add metadata about removed attachments" selected="true" />
-      <Menu text="After inserting email copy without attachments .." >
+      <Menu text="After inserting email copy without attachments..." >
         <CheckMenuItem fx:id="permanentlyRemoveOriginalMenuItem" text="Permanently remove original email" selected="true"
                        onAction="#onRemoveOriginalMenuItemPressed" />
         <CheckMenuItem fx:id="trashOriginalMenuItem" text="Trash original email (doesn't free space)"
                        onAction="#onTrashOriginalMenuItemPressed" />
       </Menu>
-      <MenuItem text="File name schema .." onAction="#onFilenameSchemaMenuItemPressed" />
-      <MenuItem text="Gmail labels .." onAction="#onGmailLabelMenuItemPressed" />
+      <MenuItem text="File name schema..." onAction="#onFilenameSchemaMenuItemPressed" />
+      <MenuItem text="Gmail labels..." onAction="#onGmailLabelMenuItemPressed" />
       <Menu fx:id="donationCurrencyMenu" text="Donation currency" />
     </Menu>
     <Menu text="Help">

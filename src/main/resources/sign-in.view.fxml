@@ -42,7 +42,7 @@
     <CheckBox fx:id="subscribeToUpdatesCheckBox" text="Subscribe to updates"
               onAction="#onSubscribeToUpdatesCheckBoxAction" />
     <Region minWidth="50" HBox.hgrow="ALWAYS" />
-    <Label fx:id="versionMessage" text="Checking for latest version.." />
+    <Label fx:id="versionMessage" text="Checking for latest version..." />
   </HBox>
 
   <stylesheets>

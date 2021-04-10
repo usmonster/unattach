@@ -534,7 +534,7 @@ public class MainViewController {
     Email email = emailsToProcess.get(nextEmailIndex);
     logger.info("Processing email with subject '%s'...", email.getSubject());
     processingProgressBarWithText.textProperty().setValue(
-        "Processing selected emails (%s) ..".formatted(processingStatusString));
+        "Processing selected emails (%s)...".formatted(processingStatusString));
 
     Task<ProcessEmailResult> task = new Task<>() {
       @Override
