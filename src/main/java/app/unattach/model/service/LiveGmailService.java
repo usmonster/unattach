@@ -56,9 +56,9 @@ public record LiveGmailService(Gmail gmail) implements GmailService {
   }
 
   @Override
-  public void deleteMessage(String messageId, boolean permanentlyDelete) throws GmailServiceException {
+  public void removeMessage(String messageId, boolean permanentlyRemove) throws GmailServiceException {
     try {
-      if (permanentlyDelete) {
+      if (permanentlyRemove) {
         // 1 messages.delete == 10 quota units
         gmail.users().messages().delete(USER, messageId).execute();
       } else {

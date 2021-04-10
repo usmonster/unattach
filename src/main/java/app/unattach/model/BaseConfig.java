@@ -8,7 +8,7 @@ import java.util.Properties;
 
 public class BaseConfig implements Config {
   private static final String DATE_FORMAT_PROPERTY = "date_format";
-  private static final String DELETE_ORIGINAL_PROPERTY = "delete_original";
+  private static final String REMOVE_ORIGINAL_PROPERTY = "remove_original";
   private static final String DOWNLOADED_LABEL_ID_PROPERTY = "downloaded_label_id";
   private static final String EMAIL_SIZE_PROPERTY = "email_size";
   private static final String FILENAME_SCHEMA_PROPERTY = "filename_schema";
@@ -41,8 +41,8 @@ public class BaseConfig implements Config {
   }
 
   @Override
-  public boolean getDeleteOriginal() {
-    return Boolean.parseBoolean(config.getProperty(DELETE_ORIGINAL_PROPERTY, "true"));
+  public boolean getRemoveOriginal() {
+    return Boolean.parseBoolean(config.getProperty(REMOVE_ORIGINAL_PROPERTY, "true"));
   }
 
   @Override
@@ -146,8 +146,8 @@ public class BaseConfig implements Config {
   }
 
   @Override
-  public void saveDeleteOriginal(boolean deleteOriginal) {
-    config.setProperty(DELETE_ORIGINAL_PROPERTY, Boolean.toString(deleteOriginal));
+  public void saveRemoveOriginal(boolean removeOriginal) {
+    config.setProperty(REMOVE_ORIGINAL_PROPERTY, Boolean.toString(removeOriginal));
     saveConfig();
   }
 

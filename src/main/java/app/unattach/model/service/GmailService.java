@@ -23,7 +23,7 @@ public interface GmailService {
   void addLabel(String messageIds, String labelId) throws GmailServiceException;
   void batchGetMetadata(List<String> messageIds, JsonBatchCallback<Message> callback) throws GmailServiceException;
   Label createLabel(Label labelIn) throws GmailServiceException;
-  void deleteMessage(String messageId, boolean permanentlyDelete) throws GmailServiceException;
+  void removeMessage(String messageId, boolean permanentlyRemove) throws GmailServiceException;
   String getEmailAddress() throws GmailServiceException;
   SortedMap<String, String> getIdToLabel() throws GmailServiceException;
   Message getUniqueIdAndHeaders(String messageId) throws GmailServiceException;

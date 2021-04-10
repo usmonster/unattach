@@ -24,8 +24,8 @@
       <Menu fx:id="dateFormatMenu" text="Date Format"/>
       <CheckMenuItem fx:id="addMetadataCheckMenuItem" text="Add metadata about removed attachments" selected="true" />
       <Menu text="After inserting email copy without attachments .." >
-        <CheckMenuItem fx:id="permanentlyDeleteOriginalMenuItem" text="Permanently delete original email" selected="true"
-                       onAction="#onDeleteOriginalMenuItemPressed" />
+        <CheckMenuItem fx:id="permanentlyRemoveOriginalMenuItem" text="Permanently remove original email" selected="true"
+                       onAction="#onRemoveOriginalMenuItemPressed" />
         <CheckMenuItem fx:id="trashOriginalMenuItem" text="Trash original email (doesn't free space)"
                        onAction="#onTrashOriginalMenuItemPressed" />
       </Menu>
@@ -196,17 +196,17 @@
           </tooltip>
         </Button>
         <Region HBox.hgrow="ALWAYS"/>
-        <Button fx:id="downloadAndDeleteButton" text="Download and delete attachments"
-                onAction="#onDownloadAndDeleteButtonPressed" styleClass="primary">
+        <Button fx:id="downloadAndRemoveButton" text="Download and remove attachments"
+                onAction="#onDownloadAndRemoveButtonPressed" styleClass="primary">
           <tooltip>
-            <Tooltip text="Download attachments to the specified directory and delete them from the emails."/>
+            <Tooltip text="Download attachments to the specified directory and remove them from the emails."/>
           </tooltip>
         </Button>
         <Region HBox.hgrow="ALWAYS"/>
-        <Button fx:id="deleteButton" text="Delete attachments" onAction="#onDeleteButtonPressed"
+        <Button fx:id="removeButton" text="Remove attachments" onAction="#onRemoveButtonPressed"
                 styleClass="primary">
           <tooltip>
-            <Tooltip text="Delete attachments from the emails."/>
+            <Tooltip text="Remove attachments from the emails."/>
           </tooltip>
         </Button>
         <Region HBox.hgrow="ALWAYS"/>

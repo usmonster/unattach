@@ -64,7 +64,7 @@ public class FakeGmailService implements GmailService {
   }
 
   @Override
-  public void deleteMessage(String messageId, boolean permanentlyDelete) {
+  public void removeMessage(String messageId, boolean permanentlyRemove) {
     // TODO: implement 'trash'
     idToMessage.remove(messageId);
   }

@@ -5,7 +5,7 @@ import java.util.List;
 public interface Config {
   int getEmailSize();
   String getDateFormat();
-  boolean getDeleteOriginal();
+  boolean getRemoveOriginal();
   String getFilenameSchema();
   List<String> getLabelIds();
   String getDownloadedLabelId();
@@ -15,7 +15,7 @@ public interface Config {
   boolean getSubscribeToUpdates();
   String getTargetDirectory();
   void saveDateFormat(String pattern);
-  void saveDeleteOriginal(boolean deleteOriginal);
+  void saveRemoveOriginal(boolean removeOriginal);
   void saveDownloadedLabelId(String downloadedLabelId);
   void saveEmailSize(int emailSize);
   void saveFilenameSchema(String schema);

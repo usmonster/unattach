@@ -158,7 +158,7 @@ public class LiveModel implements Model {
       }
       service.addLabel(newMessage.getId(), processSettings.processOption().removedLabelId());
       // 5-10 quota units
-      service.deleteMessage(message.getId(), processSettings.processOption().permanentlyDeleteOriginal());
+      service.removeMessage(message.getId(), processSettings.processOption().permanentlyRemoveOriginal());
     }
     return new ProcessEmailResult(newUniqueId, fileNames);
   }

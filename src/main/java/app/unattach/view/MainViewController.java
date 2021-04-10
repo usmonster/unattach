@@ -57,7 +57,7 @@ public class MainViewController {
   @FXML
   private Menu dateFormatMenu;
   @FXML
-  private CheckMenuItem permanentlyDeleteOriginalMenuItem;
+  private CheckMenuItem permanentlyRemoveOriginalMenuItem;
   @FXML
   private CheckMenuItem trashOriginalMenuItem;
   @FXML
@@ -118,9 +118,9 @@ public class MainViewController {
   @FXML
   private Button downloadButton;
   @FXML
-  private Button downloadAndDeleteButton;
+  private Button downloadAndRemoveButton;
   @FXML
-  private Button deleteButton;
+  private Button removeButton;
   @FXML
   private Button stopProcessingButton;
   @FXML
@@ -150,7 +150,7 @@ public class MainViewController {
     signInAutomaticallyCheckMenuItem.setSelected(controller.getConfig().getSignInAutomatically());
     addMenuForHidingColumns();
     addMenuForDateFormats();
-    if (!controller.getConfig().getDeleteOriginal()) {
+    if (!controller.getConfig().getRemoveOriginal()) {
       onTrashOriginalMenuItemPressed();
     }
     List<CheckMenuItem> currencyMenuItems =
@@ -469,22 +469,22 @@ public class MainViewController {
   }
 
   @FXML
-  private void onDownloadAndDeleteButtonPressed() {
-    boolean permanentlyDeleteOriginal = permanentlyDeleteOriginalMenuItem.isSelected();
+  private void onDownloadAndRemoveButtonPressed() {
+    boolean permanentlyRemoveOriginal = permanentlyRemoveOriginalMenuItem.isSelected();
     String downloadedLabelId = controller.getOrCreateDownloadedLabelId();
     String removedLabelId = controller.getOrCreateRemovedLabelId();
-    ProcessOption processOption = new ProcessOption(Action.DOWNLOAD_AND_DELETE, backupCheckBox.isSelected(),
-        permanentlyDeleteOriginal, downloadedLabelId, removedLabelId);
+    ProcessOption processOption = new ProcessOption(Action.DOWNLOAD_AND_REMOVE, backupCheckBox.isSelected(),
+        permanentlyRemoveOriginal, downloadedLabelId, removedLabelId);
     processEmails(processOption);
   }
 
   @FXML
-  private void onDeleteButtonPressed() {
-    boolean permanentlyDeleteOriginal = permanentlyDeleteOriginalMenuItem.isSelected();
+  private void onRemoveButtonPressed() {
+    boolean permanentlyRemoveOriginal = permanentlyRemoveOriginalMenuItem.isSelected();
     String downloadedLabelId = controller.getOrCreateDownloadedLabelId();
     String removedLabelId = controller.getOrCreateRemovedLabelId();
-    ProcessOption processOption = new ProcessOption(Action.DELETE, backupCheckBox.isSelected(),
-        permanentlyDeleteOriginal, downloadedLabelId, removedLabelId);
+    ProcessOption processOption = new ProcessOption(Action.REMOVE, backupCheckBox.isSelected(),
+        permanentlyRemoveOriginal, downloadedLabelId, removedLabelId);
     processEmails(processOption);
   }
 
@@ -606,8 +606,8 @@ public class MainViewController {
     browseButton.setDisable(true);
     backupCheckBox.setDisable(true);
     downloadButton.setDisable(true);
-    downloadAndDeleteButton.setDisable(true);
-    deleteButton.setDisable(true);
+    downloadAndRemoveButton.setDisable(true);
+    removeButton.setDisable(true);
     stopProcessingButton.setDisable(true);
   }
 
@@ -623,8 +623,8 @@ public class MainViewController {
     browseButton.setDisable(false);
     backupCheckBox.setDisable(false);
     downloadButton.setDisable(false);
-    downloadAndDeleteButton.setDisable(false);
-    deleteButton.setDisable(false);
+    downloadAndRemoveButton.setDisable(false);
+    removeButton.setDisable(false);
     stopProcessingButton.setDisable(true);
   }
 
@@ -681,17 +681,17 @@ public class MainViewController {
   }
 
   @FXML
-  private void onDeleteOriginalMenuItemPressed() {
-    permanentlyDeleteOriginalMenuItem.setSelected(true);
+  private void onRemoveOriginalMenuItemPressed() {
+    permanentlyRemoveOriginalMenuItem.setSelected(true);
     trashOriginalMenuItem.setSelected(false);
-    controller.getConfig().saveDeleteOriginal(true);
+    controller.getConfig().saveRemoveOriginal(true);
   }
 
   @FXML
   private void onTrashOriginalMenuItemPressed() {
-    permanentlyDeleteOriginalMenuItem.setSelected(false);
+    permanentlyRemoveOriginalMenuItem.setSelected(false);
     trashOriginalMenuItem.setSelected(true);
-    controller.getConfig().saveDeleteOriginal(false);
+    controller.getConfig().saveRemoveOriginal(false);
   }
 
   @FXML
@@ -796,8 +796,8 @@ public class MainViewController {
       toggleAllEmailsCheckBox.setSelected(true);
       switch (action) {
         case DOWNLOAD -> onDownloadButtonPressed();
-        case DELETE -> onDeleteButtonPressed();
-        case DOWNLOAD_AND_DELETE -> onDownloadAndDeleteButtonPressed();
+        case REMOVE -> onRemoveButtonPressed();
+        case DOWNLOAD_AND_REMOVE -> onDownloadAndRemoveButtonPressed();
       }
     });
   }

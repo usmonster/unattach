@@ -106,7 +106,7 @@ public class GmailServiceTest {
   void test_getProcessTask_SHOULD_download_backup_and_update_WHEN_downloading_and_deleting(@TempDir Path tempDir)
       throws GmailServiceException, LongTaskException, IOException, MessagingException {
     final String query = "simple attachment";
-    List<ProcessEmailResult> results = processEmails(tempDir, query, Action.DOWNLOAD_AND_DELETE);
+    List<ProcessEmailResult> results = processEmails(tempDir, query, Action.DOWNLOAD_AND_REMOVE);
 
     // Check that there was only one result.
     assertEquals(1, results.size());
