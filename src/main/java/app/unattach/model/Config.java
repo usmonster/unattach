@@ -1,8 +1,10 @@
 package app.unattach.model;
 
 import java.util.List;
+import java.util.Set;
 
 public interface Config {
+  Set<String> getPropertyNames();
   int getEmailSize();
   String getDateFormat();
   boolean getRemoveOriginal();

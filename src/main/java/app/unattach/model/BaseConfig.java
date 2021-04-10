@@ -5,6 +5,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 public class BaseConfig implements Config {
   private static final String DATE_FORMAT_PROPERTY = "date_format";
@@ -19,6 +20,20 @@ public class BaseConfig implements Config {
   private static final String SUBSCRIBE_TO_UPDATES_PROPERTY = "subscribe_to_updates";
   private static final String TARGET_DIRECTORY_PROPERTY = "target_directory";
 
+  private static final Set<String> PROPERTY_NAMES = Set.of(
+      DATE_FORMAT_PROPERTY,
+      REMOVE_ORIGINAL_PROPERTY,
+      DOWNLOADED_LABEL_ID_PROPERTY,
+      EMAIL_SIZE_PROPERTY,
+      FILENAME_SCHEMA_PROPERTY,
+      LABEL_IDS_PROPERTY,
+      REMOVED_LABEL_ID_PROPERTY,
+      SEARCH_QUERY_PROPERTY,
+      SIGN_IN_AUTOMATICALLY_PROPERTY,
+      SUBSCRIBE_TO_UPDATES_PROPERTY,
+      TARGET_DIRECTORY_PROPERTY
+  );
+
   protected final Properties config;
 
   public BaseConfig() {
@@ -29,6 +44,11 @@ public class BaseConfig implements Config {
   public void loadConfig() {}
 
   public void saveConfig() {}
+
+  @Override
+  public Set<String> getPropertyNames() {
+    return PROPERTY_NAMES;
+  }
 
   @Override
   public int getEmailSize() {
