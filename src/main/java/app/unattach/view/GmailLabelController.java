@@ -20,9 +20,9 @@ public class GmailLabelController {
   @FXML
   private Label introductionLabel;
   @FXML
-  private ComboBox<GmailLabel> downloadLabelComboBox;
+  private ComboBox<GmailLabel> downloadedLabelComboBox;
   @FXML
-  private ComboBox<GmailLabel> removeLabelComboBox;
+  private ComboBox<GmailLabel> removedLabelComboBox;
   @FXML
   private Label customizeLabel;
   @FXML
@@ -49,10 +49,10 @@ public class GmailLabelController {
             .map(entry -> new GmailLabel(entry.getKey(), entry.getValue()))
             .sorted(Comparator.comparing(GmailLabel::name))
             .collect(Collectors.toList());
-    downloadLabelComboBox.getItems().setAll(labels);
-    removeLabelComboBox.getItems().setAll(labels);
-    selectLabel(labels, downloadedLabelId, downloadLabelComboBox);
-    selectLabel(labels, removedLabelId, removeLabelComboBox);
+    downloadedLabelComboBox.getItems().setAll(labels);
+    removedLabelComboBox.getItems().setAll(labels);
+    selectLabel(labels, downloadedLabelId, downloadedLabelComboBox);
+    selectLabel(labels, removedLabelId, removedLabelComboBox);
   }
 
   private void selectLabel(List<GmailLabel> labels, String labelId, ComboBox<GmailLabel> comboBox) {
@@ -75,9 +75,10 @@ public class GmailLabelController {
 
   @FXML
   private void onOkButtonPressed() {
-    GmailLabel label = removeLabelComboBox.getSelectionModel().getSelectedItem();
-    controller.getConfig().saveRemovedLabelId(label.id());
+    GmailLabel downloadLabel = downloadedLabelComboBox.getSelectionModel().getSelectedItem();
+    GmailLabel removedLabel = removedLabelComboBox.getSelectionModel().getSelectedItem();
+    controller.getConfig().saveDownloadedLabelId(downloadLabel.id());
+    controller.getConfig().saveRemovedLabelId(removedLabel.id());
     okButton.getScene().getWindow().hide();
   }
-
 }
