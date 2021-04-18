@@ -17,11 +17,14 @@ public class MimeMessagePrettyPrinter {
 
   private static void prettyPrint(StringBuilder sb, Part parent, int depth, boolean lastChild)
       throws MessagingException, IOException {
+    if (depth > 0) {
+      sb.append("\n");
+    }
     sb.append(StringUtils.repeat("|   ", depth - 1));
     if (depth > 0) {
       sb.append(lastChild ? "`-- " : "|-- ");
     }
-    sb.append(parent.getContentType()).append("\n");
+    sb.append(parent.getContentType());
     Object content = parent.getContent();
     if (content instanceof Multipart multipart) {
       for (int i = 0; i < multipart.getCount(); ++i) {

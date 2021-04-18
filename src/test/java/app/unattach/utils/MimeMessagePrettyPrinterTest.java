@@ -28,6 +28,6 @@ public class MimeMessagePrettyPrinterTest {
         |   |-- text/plain; charset="UTF-8"
         |   `-- text/html; charset="UTF-8"
         `-- image/png; name="logo-256.png"
-        """, output);
+        """.trim(), output);
   }
 }

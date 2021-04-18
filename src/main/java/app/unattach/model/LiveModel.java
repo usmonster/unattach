@@ -7,6 +7,7 @@ import app.unattach.model.service.GmailServiceException;
 import app.unattach.model.service.GmailServiceManager;
 import app.unattach.model.service.GmailServiceManagerException;
 import app.unattach.utils.Logger;
+import app.unattach.utils.MimeMessagePrettyPrinter;
 import com.google.api.client.googleapis.batch.json.JsonBatchCallback;
 import com.google.api.client.googleapis.json.GoogleJsonError;
 import com.google.api.client.http.HttpHeaders;
@@ -138,6 +139,7 @@ public class LiveModel implements Model {
     Message message = service.getRawMessage(email.getGmailId()); // 5 quota units
     GmailService.trackInDebugMode(logger, message);
     MimeMessage mimeMessage = GmailService.getMimeMessage(message);
+    logger.info("MIME structure:%n%s", MimeMessagePrettyPrinter.prettyPrint(mimeMessage));
     String newUniqueId = null;
     if (processSettings.processOption().backupEmail()) {
       backupEmail(email, processSettings, mimeMessage);
@@ -148,6 +150,7 @@ public class LiveModel implements Model {
     }
     if (processSettings.processOption().shouldRemove() && !fileNames.isEmpty()) {
       updateRawMessage(message, mimeMessage);
+      logger.info("New MIME structure:%n%s", MimeMessagePrettyPrinter.prettyPrint(mimeMessage));
       Message newMessage = service.insertMessage(message); // 25 quota units
       newMessage = service.getUniqueIdAndHeaders(newMessage.getId()); // 5 quota units
       GmailService.trackInDebugMode(logger, newMessage);
