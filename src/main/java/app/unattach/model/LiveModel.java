@@ -149,8 +149,8 @@ public class LiveModel implements Model {
       service.addLabel(message.getId(), processSettings.processOption().downloadedLabelId());
     }
     if (processSettings.processOption().shouldRemove() && !fileNames.isEmpty()) {
-      updateRawMessage(message, mimeMessage);
       logger.info("New MIME structure:%n%s", MimeMessagePrettyPrinter.prettyPrint(mimeMessage));
+      updateRawMessage(message, mimeMessage);
       Message newMessage = service.insertMessage(message); // 25 quota units
       newMessage = service.getUniqueIdAndHeaders(newMessage.getId()); // 5 quota units
       GmailService.trackInDebugMode(logger, newMessage);

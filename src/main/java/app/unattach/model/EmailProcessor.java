@@ -132,6 +132,9 @@ class EmailProcessor {
     if (originalToNormalizedFilename.size() == 0) {
       return;
     }
+    if (mainTextBodyPart == null && mainHtmlBodyPart == null) {
+      logger.error("Failed to find either text or HTML body part to append info about removed attachments to.");
+    }
     String dateTimeString = OffsetDateTime.now().toString();
     String hostname = getHostname();
     if (mainTextBodyPart != null) {
