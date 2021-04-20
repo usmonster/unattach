@@ -8,6 +8,7 @@ import org.jsoup.nodes.Document;
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
+import javax.mail.Part;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeUtility;
 import java.io.IOException;
@@ -46,31 +47,47 @@ class EmailProcessor {
                              ProcessSettings processSettings)
       throws IOException, MessagingException {
     EmailProcessor processor = new EmailProcessor(userStorage, email, processSettings);
-    processor.exploreContent(mimeMessage.getContent());
-    processor.removeCopiedBodyParts();
+    processor.explore(mimeMessage, processor::workAroundUnsupportedContentType);
+    if (processSettings.processOption().shouldDownload()) {
+      processor.explore(mimeMessage, processor::saveAttachment);
+    }
+    if (processSettings.processOption().shouldRemove()) {
+      processor.removeCopiedBodyParts();
+    }
     if (processSettings.addMetadata()) {
+      processor.explore(mimeMessage, processor::findTextAndHtml);
       processor.addReferencesToContent();
     }
     mimeMessage.saveChanges();
     return processor.originalToNormalizedFilename.keySet();
   }
 
-  private void exploreContent(Object content) throws MessagingException, IOException {
-    if (content instanceof Multipart multipart) {
+  @FunctionalInterface
+  private interface CheckedFunction<T> {
+    boolean accept(T t) throws MessagingException, IOException;
+  }
+
+  private void explore(Part part, CheckedFunction<BodyPart> function) throws IOException, MessagingException {
+    if (part.getContent() instanceof Multipart multipart) {
       for (int i = 0; i < multipart.getCount(); ++i) {
         BodyPart bodyPart = multipart.getBodyPart(i);
-        handleBodyPart(bodyPart);
-        fixInvalidContentType(bodyPart);
-        exploreContent(bodyPart.getContent());
+        boolean recurse = function.accept(bodyPart);
+        if (recurse) {
+          explore(bodyPart, function);
+        }
       }
     }
   }
 
-  private void fixInvalidContentType(BodyPart bodyPart) throws MessagingException {
+  /**
+   * As per https://bugs.openjdk.java.net/browse/JDK-8195686, Java doesn't have direct support for iso-8859-8-i
+   * encoding; however, iso-8859-8 is equivalent, so we pre-emptively replace it.
+   */
+  private boolean workAroundUnsupportedContentType(BodyPart bodyPart) throws MessagingException {
     String[] contentTypes = bodyPart.getHeader("Content-Type");
     if (contentTypes == null) {
       logger.warn("No Content-Type header found.");
-      return;
+      return true;
     }
     if (contentTypes.length == 1) {
       String contentType = contentTypes[0];
@@ -79,53 +96,66 @@ class EmailProcessor {
         bodyPart.setHeader("Content-Type", newContentType);
       }
     }
+    return true;
   }
 
-  private void handleBodyPart(BodyPart bodyPart) throws MessagingException, IOException {
-    if (isDownloadableBodyPart(bodyPart)) {
-      saveBodyPartToStorage(bodyPart);
-    } else {
-      if (bodyPart.isMimeType("text/plain") && mainTextBodyPart == null) {
-        mainTextBodyPart = bodyPart;
-      } else if (bodyPart.isMimeType("text/html") && mainHtmlBodyPart == null) {
-        mainHtmlBodyPart = bodyPart;
-      }
+  private boolean saveAttachment(BodyPart bodyPart) throws IOException, MessagingException {
+    if (!processSettings.processOption().shouldProcessEmbedded() && bodyPart.isMimeType("multipart/related")) {
+      return false;
     }
+    if (!isDownloadableBodyPart(bodyPart)) {
+      return true;
+    }
+    String originalFilename = getFilename(bodyPart);
+    if (originalFilename == null) {
+      return false;
+    }
+    String normalizedFilename = filenameFactory.getFilename(email, fileCounter++, originalFilename);
+    try (InputStream inputStream = bodyPart.getInputStream()) {
+      userStorage.saveAttachment(inputStream, processSettings.targetDirectory(), normalizedFilename, email.getTimestamp());
+      copiedBodyParts.add(bodyPart);
+      originalToNormalizedFilename.put(originalFilename, normalizedFilename);
+      logger.info("Saved attachment %s from email with subject '%s' to file %s.", originalFilename, email.getSubject(),
+          normalizedFilename);
+    }
+    return false;
   }
 
   private boolean isDownloadableBodyPart(BodyPart bodyPart) throws MessagingException {
     return bodyPart.getDisposition() != null;
   }
 
-  private void saveBodyPartToStorage(BodyPart bodyPart) throws IOException, MessagingException {
-    String originalFilename = getFilename(bodyPart);
-    if (originalFilename == null) {
-      return;
-    }
-    String normalizedFilename = filenameFactory.getFilename(email, fileCounter++, originalFilename);
-    try (InputStream inputStream = bodyPart.getInputStream()) {
-      if (processSettings.processOption().shouldDownload()) {
-        userStorage.saveAttachment(inputStream, processSettings.targetDirectory(), normalizedFilename, email.getTimestamp());
-      }
-      copiedBodyParts.add(bodyPart);
-      originalToNormalizedFilename.put(originalFilename, normalizedFilename);
-      logger.info("Saved attachment %s from email with subject '%s' to file %s.", originalFilename, email.getSubject(),
-          normalizedFilename);
-    }
-  }
-
   private String getFilename(BodyPart bodyPart) throws MessagingException, UnsupportedEncodingException {
     String rawFilename = bodyPart.getFileName();
     if (rawFilename == null) {
+      logger.error("Empty attachment filename.");
       return null;
     }
-    return MimeUtility.decodeText(rawFilename).trim();
+    try {
+      return MimeUtility.decodeText(rawFilename).trim();
+    } catch (UnsupportedEncodingException e) {
+      if (rawFilename.contains("iso-8859-8-i")) {
+        rawFilename = rawFilename.replace("iso-8859-8-i", "iso-8859-8");
+        return MimeUtility.decodeText(rawFilename).trim();
+      }
+      logger.error("Failed to decode the attachment filename: %s", e.getMessage());
+      return null;
+    }
   }
 
   private void removeCopiedBodyParts() throws MessagingException {
     for (BodyPart bodyPart : copiedBodyParts) {
       bodyPart.getParent().removeBodyPart(bodyPart);
     }
+  }
+
+  private boolean findTextAndHtml(BodyPart bodyPart) throws MessagingException {
+    if (bodyPart.isMimeType("text/plain") && mainTextBodyPart == null) {
+      mainTextBodyPart = bodyPart;
+    } else if (bodyPart.isMimeType("text/html") && mainHtmlBodyPart == null) {
+      mainHtmlBodyPart = bodyPart;
+    }
+    return true;
   }
 
   private void addReferencesToContent() throws IOException, MessagingException {

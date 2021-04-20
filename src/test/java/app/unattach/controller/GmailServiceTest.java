@@ -28,6 +28,8 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static app.unattach.view.Action.DOWNLOAD;
+import static app.unattach.view.Action.DOWNLOAD_AND_REMOVE;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class GmailServiceTest {
@@ -41,10 +43,13 @@ public class GmailServiceTest {
       JsonFactory factory = JacksonFactory.getDefaultInstance();
       ListLabelsResponse listLabelsResponse = TestStore.loadLabels(factory);
       SortedMap<String, String> idToLabel = GmailService.labelsResponseToMap(listLabelsResponse);
-      Message messageBefore = TestStore.loadMessage(factory, "1-simple-before");
-      //noinspection ArraysAsListWithZeroOrOneArgument
-      List<Message> messages = Arrays.asList(messageBefore);
-      Map<String, String> beforeIdToAfterId = Map.of(messageBefore.getId(), "1-simple-after");
+      Message simpleBefore = TestStore.loadMessage(factory, "1-simple-before");
+      Message mixedBefore = TestStore.loadMessage(factory, "2-mixed-before");
+      List<Message> messages = Arrays.asList(simpleBefore, mixedBefore);
+      Map<String, String> beforeIdToAfterId = Map.of(
+          simpleBefore.getId(), "1-simple-after",
+          mixedBefore.getId(), "2-mixed-after"
+      );
       GmailServiceManager gmailServiceManager =
           new FakeGmailServiceManager(emailAddress, idToLabel, messages, beforeIdToAfterId);
       Model model = new LiveModel(userStorage, gmailServiceManager);
@@ -71,65 +76,60 @@ public class GmailServiceTest {
   }
 
   @Test
-  void test_getProcessTask_SHOULD_download_backup_and_not_modify_WHEN_downloading(@TempDir Path tempDir)
+  void test_getProcessTask_SHOULD_download_backup_and_not_modify_WHEN_downloading_simple(@TempDir Path tempDir)
       throws GmailServiceException, LongTaskException, IOException {
-    final String query = "simple attachment";
-    List<ProcessEmailResult> results = processEmails(tempDir, query, Action.DOWNLOAD);
+    testDownload(tempDir,  "simple attachment", true, "logo-256.png");
+  }
 
-    // Check that there was only one result.
-    assertEquals(1, results.size());
-    ProcessEmailResult result = results.get(0);
+  @Test
+  void test_getProcessTask_SHOULD_download_backup_and_update_WHEN_downloading_and_deleting_simple(@TempDir Path tempDir)
+      throws GmailServiceException, LongTaskException, IOException, MessagingException {
+    testDownloadAndRemove(tempDir, "simple attachment", true, "logo-256.png");
+  }
 
-    // Check that email ID hasn't changed and that the right attachments were found.
-    HashSet<String> expectedAttachments = Sets.newHashSet("logo-256.png");
+  @Test
+  void test_getProcessTask_SHOULD_download_backup_and_not_modify_WHEN_downloading_mixed(@TempDir Path tempDir)
+      throws GmailServiceException, LongTaskException, IOException {
+    testDownload(tempDir, "mixed", true, "logo-attached.png", "logo-embedded.png");
+  }
+
+  @Test
+  void test_getProcessTask_SHOULD_download_backup_and_update_WHEN_downloading_and_deleting_mixed(@TempDir Path tempDir)
+      throws GmailServiceException, LongTaskException, IOException, MessagingException {
+    testDownloadAndRemove(tempDir, "mixed", false, "logo-attached.png");
+  }
+
+  @SuppressWarnings("SameParameterValue")
+  private void testDownload(Path tempDir, String query, boolean processEmbedded, String... attachments)
+      throws GmailServiceException, LongTaskException, IOException {
+    ProcessEmailResult result = processEmail(tempDir, query, DOWNLOAD, processEmbedded);
+
+    // Check that email ID hasn't changed.
     assertNull(result.newUniqueId());
-    assertEquals(expectedAttachments, result.filenames());
 
-    // Check that the attachments were correctly backed up.
-    Set<String> attachmentsFound = checkFilesEqual(tempDir.resolve("attachments"), Path.of("test-store"));
-    assertEquals(expectedAttachments, attachmentsFound);
-
-    // Check that an email backup was made.
-    File[] emailBackups = getEmailBackups(tempDir);
-    assertEquals(1, emailBackups.length);
-    File emailBackup = emailBackups[0];
+    File emailBackup = checkDownloadsAndGetEmailBackup(tempDir, result, attachments);
 
     // Check that the original email was not changed.
-    File originalEmailBackup = tempDir.resolve(emailBackups[0].getName() + ".original").toFile();
+    File originalEmailBackup = tempDir.resolve(emailBackup.getName() + ".original").toFile();
     FileUtils.moveFile(emailBackup, originalEmailBackup);
-    List<ProcessEmailResult> secondResults = processEmails(tempDir, query, Action.DOWNLOAD);
+    List<ProcessEmailResult> secondResults = processEmails(tempDir, query, DOWNLOAD, processEmbedded);
     assertEquals(1, secondResults.size());
     assertTrue(FileUtils.contentEquals(originalEmailBackup, emailBackup));
   }
 
-  @Test
-  void test_getProcessTask_SHOULD_download_backup_and_update_WHEN_downloading_and_deleting(@TempDir Path tempDir)
+  private void testDownloadAndRemove(Path tempDir, String query, boolean processEmbedded, String... attachments)
       throws GmailServiceException, LongTaskException, IOException, MessagingException {
-    final String query = "simple attachment";
-    List<ProcessEmailResult> results = processEmails(tempDir, query, Action.DOWNLOAD_AND_REMOVE);
+    ProcessEmailResult result = processEmail(tempDir, query, DOWNLOAD_AND_REMOVE, processEmbedded);
 
-    // Check that there was only one result.
-    assertEquals(1, results.size());
-    ProcessEmailResult result = results.get(0);
-
-    // Check that the email ID has changed and that right attachments were found.
-    HashSet<String> expectedAttachments = Sets.newHashSet("logo-256.png");
+    // Check that the email ID has changed.
     assertNotNull(result.newUniqueId());
-    assertEquals(expectedAttachments, result.filenames());
 
-    // Check that the attachments were correctly backed up.
-    Set<String> attachmentsFound = checkFilesEqual(tempDir.resolve("attachments"), Path.of("test-store"));
-    assertEquals(expectedAttachments, attachmentsFound);
-
-    // Check that an email backup was made.
-    File[] emailBackups = getEmailBackups(tempDir);
-    assertEquals(1, emailBackups.length);
-    File emailBackup = emailBackups[0];
+    File emailBackup = checkDownloadsAndGetEmailBackup(tempDir, result, attachments);
 
     // Check that the original email was changed.
-    File originalEmailBackup = tempDir.resolve(emailBackups[0].getName() + ".original").toFile();
+    File originalEmailBackup = tempDir.resolve(emailBackup.getName() + ".original").toFile();
     FileUtils.moveFile(emailBackup, originalEmailBackup);
-    List<ProcessEmailResult> secondResults = processEmails(tempDir, query, Action.DOWNLOAD);
+    List<ProcessEmailResult> secondResults = processEmails(tempDir, query, DOWNLOAD, processEmbedded);
     assertEquals(1, secondResults.size());
     File[] secondEmailBackups = getEmailBackups(tempDir);
     assertEquals(1, secondEmailBackups.length);
@@ -146,15 +146,39 @@ public class GmailServiceTest {
     }
   }
 
+  private File checkDownloadsAndGetEmailBackup(Path tempDir, ProcessEmailResult result, String... attachments)
+      throws IOException {
+    // Check that the right attachments were found.
+    HashSet<String> expectedAttachments = Sets.newHashSet(attachments);
+    assertEquals(expectedAttachments, result.filenames());
+
+    // Check that the attachments were correctly backed up.
+    Set<String> attachmentsFound = checkFilesEqual(tempDir.resolve("attachments"), Path.of("test-store"));
+    assertEquals(expectedAttachments, attachmentsFound);
+
+    // Check that an email backup was made.
+    File[] emailBackups = getEmailBackups(tempDir);
+    assertEquals(1, emailBackups.length);
+    return emailBackups[0];
+  }
+
+
+  private ProcessEmailResult processEmail(Path tempDir, String query, Action action, boolean processEmbedded)
+      throws GmailServiceException, LongTaskException {
+    List<ProcessEmailResult> results = processEmails(tempDir, query, action, processEmbedded);
+    assertEquals(1, results.size());
+    return results.get(0);
+  }
+
   @SuppressWarnings("SameParameterValue")
-  private List<ProcessEmailResult> processEmails(Path tempDir, String query, Action action)
+  private List<ProcessEmailResult> processEmails(Path tempDir, String query, Action action, boolean processEmbedded)
       throws GmailServiceException, LongTaskException {
     List<ProcessEmailResult> results = new ArrayList<>();
     for (Email email : searchForEmailsThroughController(query)) {
       String downloadedLabelId = controller.getOrCreateDownloadedLabelId();
       String removedLabelId = controller.getOrCreateRemovedLabelId();
-      ProcessOption processOption = new ProcessOption(action, true, true,
-          downloadedLabelId, removedLabelId);
+      ProcessOption processOption = new ProcessOption(action, processEmbedded, true,
+          true, downloadedLabelId, removedLabelId);
       String filenameSchema = "attachments/${ATTACHMENT_NAME}";
       ProcessSettings processSettings =
           new ProcessSettings(processOption, tempDir.toFile(), filenameSchema, true);

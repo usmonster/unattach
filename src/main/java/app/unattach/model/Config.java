@@ -11,6 +11,7 @@ public interface Config {
   String getFilenameSchema();
   List<String> getLabelIds();
   String getDownloadedLabelId();
+  boolean getProcessEmbedded();
   String getRemovedLabelId();
   String getSearchQuery();
   boolean getSignInAutomatically();
@@ -22,6 +23,7 @@ public interface Config {
   void saveEmailSize(int emailSize);
   void saveFilenameSchema(String schema);
   void saveLabelIds(List<String> labelIds);
+  void saveProcessEmbedded(boolean processEmbedded);
   void saveRemovedLabelId(String removedLabelId);
   void saveSearchQuery(String query);
   void saveSignInAutomatically(boolean signInAutomatically);

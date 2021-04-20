@@ -14,6 +14,7 @@ public class BaseConfig implements Config {
   private static final String EMAIL_SIZE_PROPERTY = "email_size";
   private static final String FILENAME_SCHEMA_PROPERTY = "filename_schema";
   private static final String LABEL_IDS_PROPERTY = "label_ids";
+  private static final String PROCESS_EMBEDDED_PROPERTY = "process_embedded";
   private static final String REMOVED_LABEL_ID_PROPERTY = "removed_label_id";
   private static final String SEARCH_QUERY_PROPERTY = "search_query";
   private static final String SIGN_IN_AUTOMATICALLY_PROPERTY = "sign_in_automatically";
@@ -27,6 +28,7 @@ public class BaseConfig implements Config {
       EMAIL_SIZE_PROPERTY,
       FILENAME_SCHEMA_PROPERTY,
       LABEL_IDS_PROPERTY,
+      PROCESS_EMBEDDED_PROPERTY,
       REMOVED_LABEL_ID_PROPERTY,
       SEARCH_QUERY_PROPERTY,
       SIGN_IN_AUTOMATICALLY_PROPERTY,
@@ -81,6 +83,11 @@ public class BaseConfig implements Config {
   }
 
   @Override
+  public boolean getProcessEmbedded() {
+    return Boolean.parseBoolean(config.getProperty(PROCESS_EMBEDDED_PROPERTY, "true"));
+  }
+
+  @Override
   public String getRemovedLabelId() {
     return config.getProperty(REMOVED_LABEL_ID_PROPERTY);
   }
@@ -120,6 +127,12 @@ public class BaseConfig implements Config {
   @Override
   public void saveLabelIds(List<String> labelIds) {
     config.setProperty(LABEL_IDS_PROPERTY, String.join(",", labelIds));
+    saveConfig();
+  }
+
+  @Override
+  public void saveProcessEmbedded(boolean processEmbedded) {
+    config.setProperty(PROCESS_EMBEDDED_PROPERTY, Boolean.toString(processEmbedded));
     saveConfig();
   }
 

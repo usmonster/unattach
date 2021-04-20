@@ -22,6 +22,8 @@
                      onAction="#onSignInAutomaticallyCheckMenuItemAction"/>
       <Menu fx:id="viewColumnMenu" text="View Column"/>
       <Menu fx:id="dateFormatMenu" text="Date Format"/>
+      <CheckMenuItem fx:id="processEmbeddedCheckMenuItem" text="Process embedded attachments"
+                     onAction="#onProcessEmbeddedCheckMenuItemPressed" />
       <CheckMenuItem fx:id="addMetadataCheckMenuItem" text="Add metadata about removed attachments" selected="true" />
       <Menu text="After inserting email copy without attachments..." >
         <CheckMenuItem fx:id="permanentlyRemoveOriginalMenuItem" text="Permanently remove original email" selected="true"
@@ -136,7 +138,7 @@
               <PropertyValueFactory property="sizeInMegaBytes"/>
             </cellValueFactory>
           </TableColumn>
-          <TableColumn text="Attachments">
+          <TableColumn text="Non-embedded Attachments">
             <cellValueFactory>
               <PropertyValueFactory property="attachments"/>
             </cellValueFactory>

@@ -36,6 +36,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static app.unattach.view.Action.*;
+
 public class MainViewController {
   private static final Logger logger = Logger.get();
 
@@ -56,6 +58,8 @@ public class MainViewController {
   private Menu viewColumnMenu;
   @FXML
   private Menu dateFormatMenu;
+  @FXML
+  private CheckMenuItem processEmbeddedCheckMenuItem;
   @FXML
   private CheckMenuItem permanentlyRemoveOriginalMenuItem;
   @FXML
@@ -150,6 +154,7 @@ public class MainViewController {
     signInAutomaticallyCheckMenuItem.setSelected(controller.getConfig().getSignInAutomatically());
     addMenuForHidingColumns();
     addMenuForDateFormats();
+    processEmbeddedCheckMenuItem.setSelected(controller.getConfig().getProcessEmbedded());
     if (!controller.getConfig().getRemoveOriginal()) {
       onTrashOriginalMenuItemPressed();
     }
@@ -270,6 +275,11 @@ public class MainViewController {
   @FXML
   private void onSignInAutomaticallyCheckMenuItemAction() {
     controller.getConfig().saveSignInAutomatically(signInAutomaticallyCheckMenuItem.isSelected());
+  }
+
+  @FXML
+  private void onProcessEmbeddedCheckMenuItemPressed() {
+    controller.getConfig().saveProcessEmbedded(processEmbeddedCheckMenuItem.isSelected());
   }
 
   @FXML
@@ -463,8 +473,8 @@ public class MainViewController {
   @FXML
   private void onDownloadButtonPressed() {
     String downloadedLabelId = controller.getOrCreateDownloadedLabelId();
-    ProcessOption processOption = new ProcessOption(Action.DOWNLOAD, backupCheckBox.isSelected(),
-        false, downloadedLabelId, null);
+    ProcessOption processOption = new ProcessOption(DOWNLOAD, processEmbeddedCheckMenuItem.isSelected(),
+        backupCheckBox.isSelected(), false, downloadedLabelId, null);
     processEmails(processOption);
   }
 
@@ -473,8 +483,8 @@ public class MainViewController {
     boolean permanentlyRemoveOriginal = permanentlyRemoveOriginalMenuItem.isSelected();
     String downloadedLabelId = controller.getOrCreateDownloadedLabelId();
     String removedLabelId = controller.getOrCreateRemovedLabelId();
-    ProcessOption processOption = new ProcessOption(Action.DOWNLOAD_AND_REMOVE, backupCheckBox.isSelected(),
-        permanentlyRemoveOriginal, downloadedLabelId, removedLabelId);
+    ProcessOption processOption = new ProcessOption(DOWNLOAD_AND_REMOVE, processEmbeddedCheckMenuItem.isSelected(),
+        backupCheckBox.isSelected(), permanentlyRemoveOriginal, downloadedLabelId, removedLabelId);
     processEmails(processOption);
   }
 
@@ -483,8 +493,8 @@ public class MainViewController {
     boolean permanentlyRemoveOriginal = permanentlyRemoveOriginalMenuItem.isSelected();
     String downloadedLabelId = controller.getOrCreateDownloadedLabelId();
     String removedLabelId = controller.getOrCreateRemovedLabelId();
-    ProcessOption processOption = new ProcessOption(Action.REMOVE, backupCheckBox.isSelected(),
-        permanentlyRemoveOriginal, downloadedLabelId, removedLabelId);
+    ProcessOption processOption = new ProcessOption(REMOVE, processEmbeddedCheckMenuItem.isSelected(),
+        backupCheckBox.isSelected(), permanentlyRemoveOriginal, downloadedLabelId, removedLabelId);
     processEmails(processOption);
   }
 
