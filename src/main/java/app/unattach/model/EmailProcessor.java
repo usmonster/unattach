@@ -82,6 +82,8 @@ class EmailProcessor {
   /**
    * As per https://bugs.openjdk.java.net/browse/JDK-8195686, Java doesn't have direct support for iso-8859-8-i
    * encoding; however, iso-8859-8 is equivalent, so we pre-emptively replace it.
+   *
+   * @return Whether to recursively explore child body parts.
    */
   private boolean workAroundUnsupportedContentType(BodyPart bodyPart) throws MessagingException {
     String[] contentTypes = bodyPart.getHeader("Content-Type");
@@ -99,16 +101,18 @@ class EmailProcessor {
     return true;
   }
 
+  /**
+   * Save attachment to disk if downloadable.
+   *
+   * @return Whether to recursively explore child body parts.
+   */
   private boolean saveAttachment(BodyPart bodyPart) throws IOException, MessagingException {
     if (!processSettings.processOption().shouldProcessEmbedded() && bodyPart.isMimeType("multipart/related")) {
       return false;
     }
-    if (!isDownloadableBodyPart(bodyPart)) {
-      return true;
-    }
     String originalFilename = getFilename(bodyPart);
-    if (originalFilename == null) {
-      return false;
+    if (!isDownloadable(bodyPart, originalFilename)) {
+      return true;
     }
     String normalizedFilename = filenameFactory.getFilename(email, fileCounter++, originalFilename);
     try (InputStream inputStream = bodyPart.getInputStream()) {
@@ -121,8 +125,12 @@ class EmailProcessor {
     return false;
   }
 
-  private boolean isDownloadableBodyPart(BodyPart bodyPart) throws MessagingException {
-    return bodyPart.getDisposition() != null;
+  /**
+   * Based on the documentation of {@link BodyPart#getDisposition()} and https://tools.ietf.org/html/rfc2183.
+   */
+  private boolean isDownloadable(BodyPart bodyPart, String filename) throws MessagingException {
+    String disposition = bodyPart.getDisposition();
+    return (disposition == null || disposition.equals(BodyPart.ATTACHMENT)) && filename != null;
   }
 
   private String getFilename(BodyPart bodyPart) throws MessagingException, UnsupportedEncodingException {
@@ -149,13 +157,18 @@ class EmailProcessor {
     }
   }
 
+  /**
+   * Find text and HTML body parts.
+   *
+   * @return Whether to recursively explore child body parts.
+   */
   private boolean findTextAndHtml(BodyPart bodyPart) throws MessagingException {
     if (bodyPart.isMimeType("text/plain") && mainTextBodyPart == null) {
       mainTextBodyPart = bodyPart;
     } else if (bodyPart.isMimeType("text/html") && mainHtmlBodyPart == null) {
       mainHtmlBodyPart = bodyPart;
     }
-    return true;
+    return mainTextBodyPart == null || mainHtmlBodyPart == null;
   }
 
   private void addReferencesToContent() throws IOException, MessagingException {

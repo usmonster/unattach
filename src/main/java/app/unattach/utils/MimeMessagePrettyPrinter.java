@@ -25,6 +25,7 @@ public class MimeMessagePrettyPrinter {
       sb.append(lastChild ? "`-- " : "|-- ");
     }
     sb.append(parent.getContentType());
+    sb.append(" (disposition: ").append(parent.getDisposition()).append(")");
     Object content = parent.getContent();
     if (content instanceof Multipart multipart) {
       for (int i = 0; i < multipart.getCount(); ++i) {
