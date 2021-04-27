@@ -206,22 +206,24 @@ public class LiveModel implements Model {
         String to = headerMap.get("to");
         String subject = headerMap.get("subject");
         long timestamp = message.getInternalDate();
-        List<MessagePart> messageParts = message.getPayload().getParts();
-        if (messageParts == null) {
-          logger.warn("Skipping message as GMail returned no parts:\n" +
-              "\tGMail-ID: " + emailId + "\n" +
-              "\tMessage-ID: " + uniqueId + "\n" +
-              "\tFrom: " + from + "\n" +
-              "\tTo: " + to + "\n" +
-              "\tSubject: " + subject + "\n" +
-              "\tDate: " + new Date(timestamp));
-        } else {
-          List<String> attachments = messageParts.stream()
-                  .map(MessagePart::getFilename).filter(StringUtils::isNotBlank).collect(Collectors.toList());
+        List<String> attachmentNames = getAttachmentNames(message.getPayload());
+
+//        List<MessagePart> messageParts = message.getPayload().getParts();
+//        if (messageParts == null) {
+//          logger.warn("Skipping message as GMail returned no parts:\n" +
+//              "\tGMail-ID: " + emailId + "\n" +
+//              "\tMessage-ID: " + uniqueId + "\n" +
+//              "\tFrom: " + from + "\n" +
+//              "\tTo: " + to + "\n" +
+//              "\tSubject: " + subject + "\n" +
+//              "\tDate: " + new Date(timestamp));
+//        } else {
+//          List<String> attachments = messageParts.stream()
+//                  .map(MessagePart::getFilename).filter(StringUtils::isNotBlank).collect(Collectors.toList());
           Email email = new Email(emailId, uniqueId, labelIds, from, to, subject, timestamp, message.getSizeEstimate(),
-                  attachments);
+              attachmentNames);
           searchResults.add(email);
-        }
+//        }
       }
     };
 
@@ -231,6 +233,26 @@ public class LiveModel implements Model {
         service.batchGetMetadata(emailIds, perEmailCallback);
       }
     );
+  }
+
+  private List<String> getAttachmentNames(MessagePart part) {
+    Set<String> attachmentNames = new TreeSet<>();
+    getAttachmentNamesRecursive(attachmentNames, part);
+    return new ArrayList<>(attachmentNames);
+  }
+
+  private void getAttachmentNamesRecursive(Set<String> attachmentNames, MessagePart part) {
+    String attachmentName = part.getFilename();
+    if (attachmentName != null) {
+      attachmentNames.add(attachmentName);
+      return;
+    }
+    List<MessagePart> subParts = part.getParts();
+    if (subParts != null) {
+      for (MessagePart subPart : subParts) {
+        getAttachmentNamesRecursive(attachmentNames, subPart);
+      }
+    }
   }
 
   @Override
