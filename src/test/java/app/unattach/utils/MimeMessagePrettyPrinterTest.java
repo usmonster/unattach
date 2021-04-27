@@ -23,11 +23,11 @@ public class MimeMessagePrettyPrinterTest {
     MimeMessage mimeMessage = GmailService.getMimeMessage(message);
     String output = MimeMessagePrettyPrinter.prettyPrint(mimeMessage);
     assertEquals("""
-        multipart/mixed; boundary="000000000000e3d7ec05ba5de359"
-        |-- multipart/alternative; boundary="000000000000e3d7e905ba5de357"
-        |   |-- text/plain; charset="UTF-8"
-        |   `-- text/html; charset="UTF-8"
-        `-- image/png; name="logo-256.png"
+        multipart/mixed; boundary="000000000000e3d7ec05ba5de359" (disposition: null)
+        |-- multipart/alternative; boundary="000000000000e3d7e905ba5de357" (disposition: null)
+        |   |-- text/plain; charset="UTF-8" (disposition: null)
+        |   `-- text/html; charset="UTF-8" (disposition: null)
+        `-- image/png; name="logo-256.png" (disposition: attachment)
         """.trim(), output);
   }
 }
