@@ -5,11 +5,10 @@ import app.unattach.utils.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
-import javax.mail.BodyPart;
-import javax.mail.MessagingException;
-import javax.mail.Multipart;
-import javax.mail.Part;
+import javax.mail.*;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,40 +25,44 @@ class EmailProcessor {
 
   private final UserStorage userStorage;
   private final Email email;
+  private MimeMessage mimeMessage;
   private final ProcessSettings processSettings;
   private final FilenameFactory filenameFactory;
   private int fileCounter = 0;
-  private final List<BodyPart> copiedBodyParts;
+  private final List<Part> copiedParts;
   private final Map<String, String> originalToNormalizedFilename;
-  private BodyPart mainTextBodyPart;
-  private BodyPart mainHtmlBodyPart;
+  private Part mainTextPart;
+  private Part mainHtmlPart;
 
-  private EmailProcessor(UserStorage userStorage, Email email, ProcessSettings processSettings) {
+  private EmailProcessor(UserStorage userStorage, Email email, MimeMessage mimeMessage,
+                         ProcessSettings processSettings) {
     this.userStorage = userStorage;
     this.email = email;
+    this.mimeMessage = mimeMessage;
     this.processSettings = processSettings;
     filenameFactory = new FilenameFactory(processSettings.filenameSchema());
-    copiedBodyParts = new LinkedList<>();
+    copiedParts = new LinkedList<>();
     originalToNormalizedFilename = new TreeMap<>();
   }
 
-  static Set<String> process(UserStorage userStorage, Email email, MimeMessage mimeMessage,
-                             ProcessSettings processSettings)
+  static MimeMessage process(UserStorage userStorage, Email email, MimeMessage mimeMessage,
+                             ProcessSettings processSettings, Set<String> fileNames)
       throws IOException, MessagingException {
-    EmailProcessor processor = new EmailProcessor(userStorage, email, processSettings);
-    processor.explore(mimeMessage, processor::workAroundUnsupportedContentType);
+    EmailProcessor processor = new EmailProcessor(userStorage, email, mimeMessage, processSettings);
+    processor.explore(processor.mimeMessage, processor::workAroundUnsupportedContentType);
     if (processSettings.processOption().shouldDownload()) {
-      processor.explore(mimeMessage, processor::saveAttachment);
+      processor.explore(processor.mimeMessage, processor::saveAttachment);
     }
     if (processSettings.processOption().shouldRemove()) {
       processor.removeCopiedBodyParts();
+      if (processSettings.addMetadata()) {
+        processor.explore(processor.mimeMessage, processor::findTextAndHtml);
+        processor.addReferencesToContent();
+      }
     }
-    if (processSettings.addMetadata()) {
-      processor.explore(mimeMessage, processor::findTextAndHtml);
-      processor.addReferencesToContent();
-    }
-    mimeMessage.saveChanges();
-    return processor.originalToNormalizedFilename.keySet();
+    processor.mimeMessage.saveChanges();
+    fileNames.addAll(processor.originalToNormalizedFilename.keySet());
+    return processor.mimeMessage;
   }
 
   @FunctionalInterface
@@ -67,14 +70,15 @@ class EmailProcessor {
     boolean accept(T t) throws MessagingException, IOException;
   }
 
-  private void explore(Part part, CheckedFunction<BodyPart> function) throws IOException, MessagingException {
+  private void explore(Part part, CheckedFunction<Part> function) throws IOException, MessagingException {
+    boolean recurse = function.accept(part);
+    if (!recurse) {
+      return;
+    }
     if (part.getContent() instanceof Multipart multipart) {
       for (int i = 0; i < multipart.getCount(); ++i) {
-        BodyPart bodyPart = multipart.getBodyPart(i);
-        boolean recurse = function.accept(bodyPart);
-        if (recurse) {
-          explore(bodyPart, function);
-        }
+        BodyPart subPart = multipart.getBodyPart(i);
+        explore(subPart, function);
       }
     }
   }
@@ -83,10 +87,10 @@ class EmailProcessor {
    * As per https://bugs.openjdk.java.net/browse/JDK-8195686, Java doesn't have direct support for iso-8859-8-i
    * encoding; however, iso-8859-8 is equivalent, so we pre-emptively replace it.
    *
-   * @return Whether to recursively explore child body parts.
+   * @return Whether to recursively explore sub-parts.
    */
-  private boolean workAroundUnsupportedContentType(BodyPart bodyPart) throws MessagingException {
-    String[] contentTypes = bodyPart.getHeader("Content-Type");
+  private boolean workAroundUnsupportedContentType(Part part) throws MessagingException {
+    String[] contentTypes = part.getHeader("Content-Type");
     if (contentTypes == null) {
       logger.warn("No Content-Type header found.");
       return true;
@@ -95,7 +99,7 @@ class EmailProcessor {
       String contentType = contentTypes[0];
       if (contentType.contains("iso-8859-8-i")) {
         String newContentType = contentType.replace("iso-8859-8-i", "iso-8859-8");
-        bodyPart.setHeader("Content-Type", newContentType);
+        part.setHeader("Content-Type", newContentType);
       }
     }
     return true;
@@ -106,18 +110,18 @@ class EmailProcessor {
    *
    * @return Whether to recursively explore child body parts.
    */
-  private boolean saveAttachment(BodyPart bodyPart) throws IOException, MessagingException {
-    if (!processSettings.processOption().shouldProcessEmbedded() && bodyPart.isMimeType("multipart/related")) {
+  private boolean saveAttachment(Part part) throws IOException, MessagingException {
+    if (!processSettings.processOption().shouldProcessEmbedded() && part.isMimeType("multipart/related")) {
       return false;
     }
-    String originalFilename = getFilename(bodyPart);
-    if (!isDownloadable(bodyPart, originalFilename)) {
+    String originalFilename = getFilename(part);
+    if (!isDownloadable(part, originalFilename)) {
       return true;
     }
     String normalizedFilename = filenameFactory.getFilename(email, fileCounter++, originalFilename);
-    try (InputStream inputStream = bodyPart.getInputStream()) {
+    try (InputStream inputStream = part.getInputStream()) {
       userStorage.saveAttachment(inputStream, processSettings.targetDirectory(), normalizedFilename, email.getTimestamp());
-      copiedBodyParts.add(bodyPart);
+      copiedParts.add(part);
       originalToNormalizedFilename.put(originalFilename, normalizedFilename);
       logger.info("Saved attachment %s from email with subject '%s' to file %s.", originalFilename, email.getSubject(),
           normalizedFilename);
@@ -126,17 +130,16 @@ class EmailProcessor {
   }
 
   /**
-   * Based on the documentation of {@link BodyPart#getDisposition()} and https://tools.ietf.org/html/rfc2183.
+   * Based on the documentation of {@link Part#getDisposition()} and https://tools.ietf.org/html/rfc2183.
    */
-  private boolean isDownloadable(BodyPart bodyPart, String filename) throws MessagingException {
-    String disposition = bodyPart.getDisposition();
-    return (disposition == null || disposition.equals(BodyPart.ATTACHMENT)) && filename != null;
+  private boolean isDownloadable(Part part, String filename) throws MessagingException {
+    String disposition = part.getDisposition();
+    return (disposition == null || disposition.equals(Part.ATTACHMENT)) && filename != null;
   }
 
-  private String getFilename(BodyPart bodyPart) throws MessagingException, UnsupportedEncodingException {
-    String rawFilename = bodyPart.getFileName();
+  private String getFilename(Part part) throws MessagingException, UnsupportedEncodingException {
+    String rawFilename = part.getFileName();
     if (rawFilename == null) {
-      logger.error("Empty attachment filename.");
       return null;
     }
     try {
@@ -152,9 +155,48 @@ class EmailProcessor {
   }
 
   private void removeCopiedBodyParts() throws MessagingException {
-    for (BodyPart bodyPart : copiedBodyParts) {
-      bodyPart.getParent().removeBodyPart(bodyPart);
+    // If an attachment is the whole email body, replace it with an empty multipart alternative.
+    if (copiedParts.size() == 1 && copiedParts.get(0) == mimeMessage) {
+      mimeMessage = shallowCopy(mimeMessage);
+      return;
     }
+    for (Part part : copiedParts) {
+      if (part instanceof BodyPart bodyPart) {
+        bodyPart.getParent().removeBodyPart(bodyPart);
+      }
+    }
+  }
+
+  private MimeMessage shallowCopy(MimeMessage mimeMessage) throws MessagingException {
+    MimeMessage emptyMimeMessage = new MimeMessage(mimeMessage.getSession());
+    Enumeration<String> allHeaderLines = mimeMessage.getAllHeaderLines();
+    while (allHeaderLines.hasMoreElements()) {
+      String headerLine = allHeaderLines.nextElement();
+      if (!headerLine.startsWith("Content-Type") &&
+          !headerLine.startsWith("Content-Disposition") &&
+          !headerLine.startsWith("Content-Transfer-Encoding")) {
+        emptyMimeMessage.addHeaderLine(headerLine);
+      }
+    }
+    emptyMimeMessage.setSubject(mimeMessage.getSubject());
+    emptyMimeMessage.setSender(mimeMessage.getSender());
+    emptyMimeMessage.setRecipients(Message.RecipientType.TO, mimeMessage.getRecipients(Message.RecipientType.TO));
+    emptyMimeMessage.setRecipients(Message.RecipientType.CC, mimeMessage.getRecipients(Message.RecipientType.CC));
+    emptyMimeMessage.setRecipients(Message.RecipientType.BCC, mimeMessage.getRecipients(Message.RecipientType.BCC));
+    emptyMimeMessage.setReplyTo(mimeMessage.getReplyTo());
+    emptyMimeMessage.setSentDate(mimeMessage.getSentDate());
+    emptyMimeMessage.setContentID(mimeMessage.getContentID());
+    emptyMimeMessage.setFlags(mimeMessage.getFlags(), true);
+    MimeMultipart multipart = new MimeMultipart("alternative");
+    MimeBodyPart textBodyPart = new MimeBodyPart();
+    textBodyPart.setContent("", "text/plain; charset=utf-8");
+    multipart.addBodyPart(textBodyPart);
+    MimeBodyPart htmlBodyPart = new MimeBodyPart();
+    htmlBodyPart.setContent("", "text/html; charset=utf-8");
+    multipart.addBodyPart(htmlBodyPart);
+    emptyMimeMessage.setContent(multipart);
+    emptyMimeMessage.saveChanges();
+    return emptyMimeMessage;
   }
 
   /**
@@ -162,33 +204,33 @@ class EmailProcessor {
    *
    * @return Whether to recursively explore child body parts.
    */
-  private boolean findTextAndHtml(BodyPart bodyPart) throws MessagingException {
-    if (bodyPart.isMimeType("text/plain") && mainTextBodyPart == null) {
-      mainTextBodyPart = bodyPart;
-    } else if (bodyPart.isMimeType("text/html") && mainHtmlBodyPart == null) {
-      mainHtmlBodyPart = bodyPart;
+  private boolean findTextAndHtml(Part part) throws MessagingException {
+    if (part.isMimeType("text/plain") && mainTextPart == null) {
+      mainTextPart = part;
+    } else if (part.isMimeType("text/html") && mainHtmlPart == null) {
+      mainHtmlPart = part;
     }
-    return mainTextBodyPart == null || mainHtmlBodyPart == null;
+    return mainTextPart == null || mainHtmlPart == null;
   }
 
   private void addReferencesToContent() throws IOException, MessagingException {
     if (originalToNormalizedFilename.size() == 0) {
       return;
     }
-    if (mainTextBodyPart == null && mainHtmlBodyPart == null) {
+    if (mainTextPart == null && mainHtmlPart == null) {
       logger.error("Failed to find either text or HTML body part to append info about removed attachments to.");
     }
     String dateTimeString = OffsetDateTime.now().toString();
     String hostname = getHostname();
-    if (mainTextBodyPart != null) {
-      String text = mainTextBodyPart.getContent().toString();
+    if (mainTextPart != null) {
+      String text = mainTextPart.getContent().toString();
       String newText = generateTextSuffix(text, originalToNormalizedFilename, dateTimeString, hostname);
-      mainTextBodyPart.setContent(newText, "text/plain; charset=utf-8");
+      mainTextPart.setContent(newText, "text/plain; charset=utf-8");
     }
-    if (mainHtmlBodyPart != null) {
-      String html = mainHtmlBodyPart.getContent().toString();
+    if (mainHtmlPart != null) {
+      String html = mainHtmlPart.getContent().toString();
       String newHtml = generateHtmlSuffix(html, originalToNormalizedFilename, dateTimeString, hostname);
-      mainHtmlBodyPart.setContent(newHtml, "text/html; charset=utf-8");
+      mainHtmlPart.setContent(newHtml, "text/html; charset=utf-8");
     }
   }
 

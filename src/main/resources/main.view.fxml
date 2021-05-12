@@ -138,7 +138,7 @@
               <PropertyValueFactory property="sizeInMegaBytes"/>
             </cellValueFactory>
           </TableColumn>
-          <TableColumn text="Non-embedded Attachments">
+          <TableColumn text="Non-embedded Attachments" styleClass="center">
             <cellValueFactory>
               <PropertyValueFactory property="attachments"/>
             </cellValueFactory>

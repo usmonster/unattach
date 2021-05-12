@@ -45,10 +45,12 @@ public class GmailServiceTest {
       SortedMap<String, String> idToLabel = GmailService.labelsResponseToMap(listLabelsResponse);
       Message simpleBefore = TestStore.loadMessage(factory, "1-simple-before");
       Message mixedBefore = TestStore.loadMessage(factory, "2-mixed-before");
-      List<Message> messages = Arrays.asList(simpleBefore, mixedBefore);
+      Message noBodyBefore = TestStore.loadMessage(factory, "3-no-body-before");
+      List<Message> messages = Arrays.asList(simpleBefore, mixedBefore, noBodyBefore);
       Map<String, String> beforeIdToAfterId = Map.of(
           simpleBefore.getId(), "1-simple-after",
-          mixedBefore.getId(), "2-mixed-after"
+          mixedBefore.getId(), "2-mixed-after",
+          noBodyBefore.getId(), "3-no-body-after"
       );
       GmailServiceManager gmailServiceManager =
           new FakeGmailServiceManager(emailAddress, idToLabel, messages, beforeIdToAfterId);
@@ -76,7 +78,7 @@ public class GmailServiceTest {
   }
 
   @Test
-  void test_getProcessTask_SHOULD_download_backup_and_not_modify_WHEN_downloading_simple(@TempDir Path tempDir)
+  void test_getProcessTask_SHOULD_download_backup_and_not_update_WHEN_downloading_simple(@TempDir Path tempDir)
       throws GmailServiceException, LongTaskException, IOException {
     testDownload(tempDir,  "simple attachment", true, "logo-256.png");
   }
@@ -88,7 +90,7 @@ public class GmailServiceTest {
   }
 
   @Test
-  void test_getProcessTask_SHOULD_download_backup_and_not_modify_WHEN_downloading_mixed(@TempDir Path tempDir)
+  void test_getProcessTask_SHOULD_download_backup_and_not_update_WHEN_downloading_mixed(@TempDir Path tempDir)
       throws GmailServiceException, LongTaskException, IOException {
     testDownload(tempDir, "mixed", true, "logo-attached.png", "logo-embedded.png");
   }
@@ -97,6 +99,18 @@ public class GmailServiceTest {
   void test_getProcessTask_SHOULD_download_backup_and_update_WHEN_downloading_and_deleting_mixed(@TempDir Path tempDir)
       throws GmailServiceException, LongTaskException, IOException, MessagingException {
     testDownloadAndRemove(tempDir, "mixed", false, "logo-attached.png");
+  }
+
+  @Test
+  void test_getProcessTask_SHOULD_download_backup_and_not_update_WHEN_downloading_no_body(@TempDir Path tempDir)
+      throws GmailServiceException, LongTaskException, IOException {
+    testDownload(tempDir, "PDF attachment", true, "Google.pdf");
+  }
+
+  @Test
+  void test_getProcessTask_SHOULD_download_backup_and_update_WHEN_downloading_and_deleting_no_body(@TempDir Path tempDir)
+      throws GmailServiceException, LongTaskException, IOException, MessagingException {
+    testDownloadAndRemove(tempDir, "PDF attachment", true, "Google.pdf");
   }
 
   @SuppressWarnings("SameParameterValue")

@@ -37,7 +37,7 @@ public record LiveGmailService(Gmail gmail) implements GmailService {
       BatchRequest batch = gmail.batch();
       for (String emailId : messageIds) {
         // 1 messages.get == 5 quota units
-        String fields = "id,labelIds,internalDate,payload/parts/filename,payload/headers,sizeEstimate";
+        String fields = "id,labelIds,internalDate,payload/filename,payload/headers,payload/parts/filename,sizeEstimate";
         gmail.users().messages().get(USER, emailId).setFields(fields).queue(batch, callback);
       }
       batch.execute();

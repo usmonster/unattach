@@ -12,7 +12,6 @@ import com.google.api.client.googleapis.batch.json.JsonBatchCallback;
 import com.google.api.client.googleapis.json.GoogleJsonError;
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.services.gmail.model.*;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
 import javax.mail.MessagingException;
@@ -144,7 +143,8 @@ public class LiveModel implements Model {
     if (processSettings.processOption().backupEmail()) {
       backupEmail(email, processSettings, mimeMessage);
     }
-    Set<String> fileNames = EmailProcessor.process(userStorage, email, mimeMessage, processSettings);
+    Set<String> fileNames = new TreeSet<>();
+    mimeMessage = EmailProcessor.process(userStorage, email, mimeMessage, processSettings, fileNames);
     if (processSettings.processOption().shouldDownload() && !processSettings.processOption().shouldRemove()) {
       service.addLabel(message.getId(), processSettings.processOption().downloadedLabelId());
     }
@@ -207,23 +207,9 @@ public class LiveModel implements Model {
         String subject = headerMap.get("subject");
         long timestamp = message.getInternalDate();
         List<String> attachmentNames = getAttachmentNames(message.getPayload());
-
-//        List<MessagePart> messageParts = message.getPayload().getParts();
-//        if (messageParts == null) {
-//          logger.warn("Skipping message as GMail returned no parts:\n" +
-//              "\tGMail-ID: " + emailId + "\n" +
-//              "\tMessage-ID: " + uniqueId + "\n" +
-//              "\tFrom: " + from + "\n" +
-//              "\tTo: " + to + "\n" +
-//              "\tSubject: " + subject + "\n" +
-//              "\tDate: " + new Date(timestamp));
-//        } else {
-//          List<String> attachments = messageParts.stream()
-//                  .map(MessagePart::getFilename).filter(StringUtils::isNotBlank).collect(Collectors.toList());
-          Email email = new Email(emailId, uniqueId, labelIds, from, to, subject, timestamp, message.getSizeEstimate(),
-              attachmentNames);
-          searchResults.add(email);
-//        }
+        Email email = new Email(emailId, uniqueId, labelIds, from, to, subject, timestamp, message.getSizeEstimate(),
+            attachmentNames);
+        searchResults.add(email);
       }
     };
 
