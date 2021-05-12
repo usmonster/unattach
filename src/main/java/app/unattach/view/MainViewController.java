@@ -196,6 +196,7 @@ public class MainViewController {
     labelsListView.setItems(FXCollections.observableList(labels));
     selectSavedLabels(labels);
     saveLabelsOnChange();
+    resultsTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
     enableScheduleCheckBox.selectedProperty()
         .addListener((checkBox, previous, current) -> onEnableScheduleCheckBoxChange());
     schedulePeriodComboBox.setItems(FXCollections.observableList(Arrays.asList(
