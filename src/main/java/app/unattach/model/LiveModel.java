@@ -143,12 +143,12 @@ public class LiveModel implements Model {
     if (processSettings.processOption().backupEmail()) {
       backupEmail(email, processSettings, mimeMessage);
     }
-    Set<String> fileNames = new TreeSet<>();
-    mimeMessage = EmailProcessor.process(userStorage, email, mimeMessage, processSettings, fileNames);
+    Set<String> originalAttachmentNames = new TreeSet<>();
+    mimeMessage = EmailProcessor.process(userStorage, email, mimeMessage, processSettings, originalAttachmentNames);
     if (processSettings.processOption().shouldDownload() && !processSettings.processOption().shouldRemove()) {
       service.addLabel(message.getId(), processSettings.processOption().downloadedLabelId());
     }
-    if (processSettings.processOption().shouldRemove() && !fileNames.isEmpty()) {
+    if (processSettings.processOption().shouldRemove() && !originalAttachmentNames.isEmpty()) {
       logger.info("New MIME structure:%n%s", MimeMessagePrettyPrinter.prettyPrint(mimeMessage));
       updateRawMessage(message, mimeMessage);
       Message newMessage = service.insertMessage(message); // 25 quota units
@@ -163,7 +163,7 @@ public class LiveModel implements Model {
       // 5-10 quota units
       service.removeMessage(message.getId(), processSettings.processOption().permanentlyRemoveOriginal());
     }
-    return new ProcessEmailResult(newUniqueId, fileNames);
+    return new ProcessEmailResult(newUniqueId, originalAttachmentNames);
   }
 
   private void backupEmail(Email email, ProcessSettings processSettings, MimeMessage mimeMessage)

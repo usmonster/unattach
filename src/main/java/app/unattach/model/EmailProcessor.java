@@ -29,7 +29,8 @@ class EmailProcessor {
   private final ProcessSettings processSettings;
   private final FilenameFactory filenameFactory;
   private int fileCounter = 0;
-  private final List<Part> copiedParts;
+  private final List<Part> detectedAttachmentParts;
+  private final Set<String> originalAttachmentNames;
   private final Map<String, String> originalToNormalizedFilename;
   private Part mainTextPart;
   private Part mainHtmlPart;
@@ -41,27 +42,26 @@ class EmailProcessor {
     this.mimeMessage = mimeMessage;
     this.processSettings = processSettings;
     filenameFactory = new FilenameFactory(processSettings.filenameSchema());
-    copiedParts = new LinkedList<>();
+    detectedAttachmentParts = new LinkedList<>();
+    originalAttachmentNames = new TreeSet<>();
     originalToNormalizedFilename = new TreeMap<>();
   }
 
   static MimeMessage process(UserStorage userStorage, Email email, MimeMessage mimeMessage,
-                             ProcessSettings processSettings, Set<String> fileNames)
+                             ProcessSettings processSettings, Set<String> originalAttachmentNames)
       throws IOException, MessagingException {
     EmailProcessor processor = new EmailProcessor(userStorage, email, mimeMessage, processSettings);
     processor.explore(processor.mimeMessage, processor::workAroundUnsupportedContentType);
-    if (processSettings.processOption().shouldDownload()) {
-      processor.explore(processor.mimeMessage, processor::saveAttachment);
-    }
+    processor.explore(processor.mimeMessage, processor::detectAndMaybeSaveAttachment);
     if (processSettings.processOption().shouldRemove()) {
-      processor.removeCopiedBodyParts();
+      processor.removeDetectedAttachmentParts();
       if (processSettings.addMetadata()) {
         processor.explore(processor.mimeMessage, processor::findTextAndHtml);
         processor.addReferencesToContent();
       }
     }
     processor.mimeMessage.saveChanges();
-    fileNames.addAll(processor.originalToNormalizedFilename.keySet());
+    originalAttachmentNames.addAll(processor.originalAttachmentNames);
     return processor.mimeMessage;
   }
 
@@ -106,11 +106,11 @@ class EmailProcessor {
   }
 
   /**
-   * Save attachment to disk if downloadable.
+   * Detect attachment names. Save attachments to disk if downloading.
    *
    * @return Whether to recursively explore child body parts.
    */
-  private boolean saveAttachment(Part part) throws IOException, MessagingException {
+  private boolean detectAndMaybeSaveAttachment(Part part) throws IOException, MessagingException {
     if (!processSettings.processOption().shouldProcessEmbedded() && part.isMimeType("multipart/related")) {
       return false;
     }
@@ -118,10 +118,14 @@ class EmailProcessor {
     if (!isDownloadable(part, originalFilename)) {
       return true;
     }
+    originalAttachmentNames.add(originalFilename);
+    detectedAttachmentParts.add(part);
+    if (!processSettings.processOption().shouldDownload()) {
+      return false;
+    }
     String normalizedFilename = filenameFactory.getFilename(email, fileCounter++, originalFilename);
     try (InputStream inputStream = part.getInputStream()) {
       userStorage.saveAttachment(inputStream, processSettings.targetDirectory(), normalizedFilename, email.getTimestamp());
-      copiedParts.add(part);
       originalToNormalizedFilename.put(originalFilename, normalizedFilename);
       logger.info("Saved attachment %s from email with subject '%s' to file %s.", originalFilename, email.getSubject(),
           normalizedFilename);
@@ -154,13 +158,13 @@ class EmailProcessor {
     }
   }
 
-  private void removeCopiedBodyParts() throws MessagingException {
+  private void removeDetectedAttachmentParts() throws MessagingException {
     // If an attachment is the whole email body, replace it with an empty multipart alternative.
-    if (copiedParts.size() == 1 && copiedParts.get(0) == mimeMessage) {
+    if (detectedAttachmentParts.size() == 1 && detectedAttachmentParts.get(0) == mimeMessage) {
       mimeMessage = shallowCopy(mimeMessage);
       return;
     }
-    for (Part part : copiedParts) {
+    for (Part part : detectedAttachmentParts) {
       if (part instanceof BodyPart bodyPart) {
         bodyPart.getParent().removeBodyPart(bodyPart);
       }
@@ -214,7 +218,7 @@ class EmailProcessor {
   }
 
   private void addReferencesToContent() throws IOException, MessagingException {
-    if (originalToNormalizedFilename.size() == 0) {
+    if (detectedAttachmentParts.size() == 0) {
       return;
     }
     if (mainTextPart == null && mainHtmlPart == null) {

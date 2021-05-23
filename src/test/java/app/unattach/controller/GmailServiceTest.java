@@ -28,8 +28,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static app.unattach.view.Action.DOWNLOAD;
-import static app.unattach.view.Action.DOWNLOAD_AND_REMOVE;
+import static app.unattach.view.Action.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class GmailServiceTest {
@@ -79,68 +78,80 @@ public class GmailServiceTest {
 
   @Test
   void test_getProcessTask_SHOULD_download_backup_and_not_update_WHEN_downloading_simple(@TempDir Path tempDir)
-      throws GmailServiceException, LongTaskException, IOException {
-    testDownload(tempDir,  "simple attachment", true, "logo-256.png");
+      throws GmailServiceException, LongTaskException, IOException, MessagingException {
+    testDownloadAndOrRemove(tempDir,  "simple attachment", DOWNLOAD, true,
+        "logo-256.png");
   }
 
   @Test
-  void test_getProcessTask_SHOULD_download_backup_and_update_WHEN_downloading_and_deleting_simple(@TempDir Path tempDir)
+  void test_getProcessTask_SHOULD_download_backup_and_update_WHEN_downloading_and_removing_simple(@TempDir Path tempDir)
       throws GmailServiceException, LongTaskException, IOException, MessagingException {
-    testDownloadAndRemove(tempDir, "simple attachment", true, "logo-256.png");
+    testDownloadAndOrRemove(tempDir, "simple attachment", DOWNLOAD_AND_REMOVE, true,
+        "logo-256.png");
+  }
+
+  @Test
+  void test_getProcessTask_SHOULD_remove_backup_and_update_WHEN_removing_simple(@TempDir Path tempDir)
+      throws GmailServiceException, LongTaskException, IOException, MessagingException {
+    testDownloadAndOrRemove(tempDir, "simple attachment", REMOVE, true, "logo-256.png");
   }
 
   @Test
   void test_getProcessTask_SHOULD_download_backup_and_not_update_WHEN_downloading_mixed(@TempDir Path tempDir)
-      throws GmailServiceException, LongTaskException, IOException {
-    testDownload(tempDir, "mixed", true, "logo-attached.png", "logo-embedded.png");
+      throws GmailServiceException, LongTaskException, IOException, MessagingException {
+    testDownloadAndOrRemove(tempDir, "mixed", DOWNLOAD, true, "logo-attached.png",
+        "logo-embedded.png");
   }
 
   @Test
-  void test_getProcessTask_SHOULD_download_backup_and_update_WHEN_downloading_and_deleting_mixed(@TempDir Path tempDir)
+  void test_getProcessTask_SHOULD_download_backup_and_update_WHEN_downloading_and_removing_mixed(@TempDir Path tempDir)
       throws GmailServiceException, LongTaskException, IOException, MessagingException {
-    testDownloadAndRemove(tempDir, "mixed", false, "logo-attached.png");
+    testDownloadAndOrRemove(tempDir, "mixed", DOWNLOAD_AND_REMOVE, false,
+        "logo-attached.png");
+  }
+
+  @Test
+  void test_getProcessTask_SHOULD_remove_backup_and_update_WHEN_downloading_and_removing_mixed(@TempDir Path tempDir)
+      throws GmailServiceException, LongTaskException, IOException, MessagingException {
+    testDownloadAndOrRemove(tempDir, "mixed", REMOVE, false, "logo-attached.png");
   }
 
   @Test
   void test_getProcessTask_SHOULD_download_backup_and_not_update_WHEN_downloading_no_body(@TempDir Path tempDir)
-      throws GmailServiceException, LongTaskException, IOException {
-    testDownload(tempDir, "PDF attachment", true, "Google.pdf");
+      throws GmailServiceException, LongTaskException, IOException, MessagingException {
+    testDownloadAndOrRemove(tempDir, "PDF attachment", DOWNLOAD, true, "Google.pdf");
   }
 
   @Test
-  void test_getProcessTask_SHOULD_download_backup_and_update_WHEN_downloading_and_deleting_no_body(@TempDir Path tempDir)
+  void test_getProcessTask_SHOULD_download_backup_and_update_WHEN_downloading_and_removing_no_body(@TempDir Path tempDir)
       throws GmailServiceException, LongTaskException, IOException, MessagingException {
-    testDownloadAndRemove(tempDir, "PDF attachment", true, "Google.pdf");
+    testDownloadAndOrRemove(tempDir, "PDF attachment", DOWNLOAD_AND_REMOVE, true,
+        "Google.pdf");
   }
 
-  @SuppressWarnings("SameParameterValue")
-  private void testDownload(Path tempDir, String query, boolean processEmbedded, String... attachments)
-      throws GmailServiceException, LongTaskException, IOException {
-    ProcessEmailResult result = processEmail(tempDir, query, DOWNLOAD, processEmbedded);
-
-    // Check that email ID hasn't changed.
-    assertNull(result.newUniqueId());
-
-    File emailBackup = checkDownloadsAndGetEmailBackup(tempDir, result, attachments);
-
-    // Check that the original email was not changed.
-    File originalEmailBackup = tempDir.resolve(emailBackup.getName() + ".original").toFile();
-    FileUtils.moveFile(emailBackup, originalEmailBackup);
-    List<ProcessEmailResult> secondResults = processEmails(tempDir, query, DOWNLOAD, processEmbedded);
-    assertEquals(1, secondResults.size());
-    assertTrue(FileUtils.contentEquals(originalEmailBackup, emailBackup));
+  @Test
+  void test_getProcessTask_SHOULD_remove_backup_and_update_WHEN_downloading_and_removing_no_body(@TempDir Path tempDir)
+      throws GmailServiceException, LongTaskException, IOException, MessagingException {
+    testDownloadAndOrRemove(tempDir, "PDF attachment", REMOVE, true, "Google.pdf");
   }
 
-  private void testDownloadAndRemove(Path tempDir, String query, boolean processEmbedded, String... attachments)
+  private void testDownloadAndOrRemove(Path tempDir, String query, Action action, boolean processEmbedded,
+                                       String... attachments)
       throws GmailServiceException, LongTaskException, IOException, MessagingException {
-    ProcessEmailResult result = processEmail(tempDir, query, DOWNLOAD_AND_REMOVE, processEmbedded);
+    ProcessEmailResult result = processEmail(tempDir, query, action, processEmbedded);
 
-    // Check that the email ID has changed.
-    assertNotNull(result.newUniqueId());
+    if (action == DOWNLOAD) {
+      // Check that email ID hasn't changed.
+      assertNull(result.newUniqueId());
+    } else {
+      // Check that the email ID has changed.
+      assertNotNull(result.newUniqueId());
+    }
 
-    File emailBackup = checkDownloadsAndGetEmailBackup(tempDir, result, attachments);
+    boolean checkDownloadedFiles = action == DOWNLOAD || action == DOWNLOAD_AND_REMOVE;
+    File emailBackup = checkDownloadsAndGetEmailBackup(tempDir, result, checkDownloadedFiles, attachments);
 
-    // Check that the original email was changed.
+    // Check that the original email was changed if attachments were removed.
     File originalEmailBackup = tempDir.resolve(emailBackup.getName() + ".original").toFile();
     FileUtils.moveFile(emailBackup, originalEmailBackup);
     List<ProcessEmailResult> secondResults = processEmails(tempDir, query, DOWNLOAD, processEmbedded);
@@ -148,27 +159,36 @@ public class GmailServiceTest {
     File[] secondEmailBackups = getEmailBackups(tempDir);
     assertEquals(1, secondEmailBackups.length);
     File newEmailBackup = secondEmailBackups[0];
-    assertFalse(FileUtils.contentEquals(originalEmailBackup, newEmailBackup));
+    if (action == DOWNLOAD) {
+      assertTrue(FileUtils.contentEquals(originalEmailBackup, newEmailBackup));
+    } else {
+      assertFalse(FileUtils.contentEquals(originalEmailBackup, newEmailBackup));
+    }
 
-    // Sanity check the new email backup.
-    assertTrue(newEmailBackup.length() < originalEmailBackup.length());
-    Session session = Session.getInstance(new Properties());
-    try (InputStream inputStream = new FileInputStream(newEmailBackup)) {
-      MimeMessage newMimeMessage = new MimeMessage(session, inputStream);
-      String content = getMainContent(newMimeMessage.getContent());
-      assertTrue(content.contains("Previous attachments"));
+    if (action != DOWNLOAD) {
+      // Sanity check the new email backup.
+      assertTrue(newEmailBackup.length() < originalEmailBackup.length());
+      Session session = Session.getInstance(new Properties());
+      try (InputStream inputStream = new FileInputStream(newEmailBackup)) {
+        MimeMessage newMimeMessage = new MimeMessage(session, inputStream);
+        String content = getMainContent(newMimeMessage.getContent());
+        assertTrue(content.contains("Previous attachments"));
+      }
     }
   }
 
-  private File checkDownloadsAndGetEmailBackup(Path tempDir, ProcessEmailResult result, String... attachments)
+  private File checkDownloadsAndGetEmailBackup(Path tempDir, ProcessEmailResult result, boolean checkDownloadedFiles,
+                                               String... attachments)
       throws IOException {
     // Check that the right attachments were found.
     HashSet<String> expectedAttachments = Sets.newHashSet(attachments);
     assertEquals(expectedAttachments, result.filenames());
 
-    // Check that the attachments were correctly backed up.
-    Set<String> attachmentsFound = checkFilesEqual(tempDir.resolve("attachments"), Path.of("test-store"));
-    assertEquals(expectedAttachments, attachmentsFound);
+    if (checkDownloadedFiles) {
+      // Check that the attachments were correctly backed up.
+      Set<String> attachmentsFound = checkFilesEqual(tempDir.resolve("attachments"), Path.of("test-store"));
+      assertEquals(expectedAttachments, attachmentsFound);
+    }
 
     // Check that an email backup was made.
     File[] emailBackups = getEmailBackups(tempDir);
