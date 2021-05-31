@@ -39,7 +39,9 @@ public class MockModel implements Model {
       for (int i = minEmailSizeInBytes / 1000 / 1000; i < maxEmailId; ++i) {
         if (startIndexInclusive <= i && i < endIndexExclusive) {
           String emailId = String.valueOf(i);
-          emails.add(new Email(emailId, emailId, Arrays.asList("INBOX", "IMPORTANT"),
+          List<GmailLabel> labels =
+              Arrays.asList(new GmailLabel("INBOX", "INBOX"), new GmailLabel("IMPORTANT", "IMPORTANT"));
+          emails.add(new Email(emailId, emailId, labels,
               "john.doe@example.com", "jane.doe@example.com",
               "Subject " + i, System.currentTimeMillis(),
               i * (int) Math.pow(2, 20), Collections.singletonList("data.zip")));

@@ -182,6 +182,8 @@ public class LiveModel implements Model {
 
   @Override
   public GetEmailMetadataTask getSearchTask(String query) throws GmailServiceException {
+    logger.info("Getting email labels...");
+    SortedMap<String, String> idToLabel = getIdToLabel();
     logger.info("Searching with query '%s'...", query);
     clearPreviousSearchResults();
     List<Message> messages = service.search(query);
@@ -202,12 +204,13 @@ public class LiveModel implements Model {
         String emailId = message.getId();
         String uniqueId = headerMap.get("message-id");
         List<String> labelIds = message.getLabelIds();
+        List<GmailLabel> labels = getLabelsForIds(idToLabel, labelIds);
         String from = headerMap.get("from");
         String to = headerMap.get("to");
         String subject = headerMap.get("subject");
         long timestamp = message.getInternalDate();
         List<String> attachmentNames = getAttachmentNames(message.getPayload());
-        Email email = new Email(emailId, uniqueId, labelIds, from, to, subject, timestamp, message.getSizeEstimate(),
+        Email email = new Email(emailId, uniqueId, labels, from, to, subject, timestamp, message.getSizeEstimate(),
             attachmentNames);
         searchResults.add(email);
       }
@@ -219,6 +222,10 @@ public class LiveModel implements Model {
         service.batchGetMetadata(emailIds, perEmailCallback);
       }
     );
+  }
+
+  private List<GmailLabel> getLabelsForIds(SortedMap<String, String> idToLabel, List<String> labelIds) {
+    return labelIds.stream().map(id -> new GmailLabel(id, idToLabel.getOrDefault(id, id))).collect(Collectors.toList());
   }
 
   private List<String> getAttachmentNames(MessagePart part) {

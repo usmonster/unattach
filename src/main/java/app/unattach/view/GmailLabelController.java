@@ -3,6 +3,7 @@ package app.unattach.view;
 import app.unattach.controller.Controller;
 import app.unattach.controller.ControllerFactory;
 import app.unattach.model.Constants;
+import app.unattach.model.GmailLabel;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;

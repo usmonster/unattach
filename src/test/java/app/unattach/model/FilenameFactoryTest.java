@@ -7,6 +7,8 @@ import java.security.InvalidParameterException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -93,7 +95,18 @@ public class FilenameFactoryTest {
 
   @Test
   public void testLabels() {
-    testGetFilename("${LABELS}", "a%b@.jpg", "IMPORTANT_SENT");
+    testGetFilename("${LABELS}", "a%b@.jpg", "LABEL_42_IMPORTANT_LABEL_13");
+  }
+
+  @Test
+  public void testLabelNames() {
+    testGetFilename("${LABEL_NAMES}", "a%b@.jpg",
+        "Friends__Files__IMPORTANT__Unattach_-_Downloaded");
+  }
+
+  @Test
+  public void testCustomLabelNames() {
+    testGetFilename("${CUSTOM_LABEL_NAMES}", "a%b@.jpg", "Friends__Files");
   }
 
   @Test
@@ -104,13 +117,17 @@ public class FilenameFactoryTest {
   }
 
   private static Email createEmail(String from) {
-    return new Email("id3", "uid42", Arrays.asList("SENT", "IMPORTANT"),
+    List<GmailLabel> labels = Arrays.asList(
+        new GmailLabel("IMPORTANT", "IMPORTANT"),
+        new GmailLabel("LABEL_13", "Unattach - Downloaded"),
+        new GmailLabel("LABEL_42", "Friends' Files"));
+    return new Email("id3", "uid42", labels,
         from, "to@example.com", "subject", 1501545600000L,
         32141, Collections.singletonList("data.zip"));
   }
 
   private void testGetFilename(String schema, String attachmentName, String expectedFilename) {
-    FilenameFactory filenameFactory = new FilenameFactory(schema);
+    FilenameFactory filenameFactory = new FilenameFactory(schema, Set.of("LABEL_13"));
     String actualFilename = filenameFactory.getFilename(email, 234, attachmentName);
     assertEquals(expectedFilename, actualFilename);
   }

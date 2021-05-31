@@ -41,7 +41,9 @@ class EmailProcessor {
     this.email = email;
     this.mimeMessage = mimeMessage;
     this.processSettings = processSettings;
-    filenameFactory = new FilenameFactory(processSettings.filenameSchema());
+    Set<String> unattachLabelIds =
+        Set.of(processSettings.processOption().downloadedLabelId(), processSettings.processOption().removedLabelId());
+    filenameFactory = new FilenameFactory(processSettings.filenameSchema(), unattachLabelIds);
     detectedAttachmentParts = new LinkedList<>();
     originalAttachmentNames = new TreeSet<>();
     originalToNormalizedFilename = new TreeMap<>();

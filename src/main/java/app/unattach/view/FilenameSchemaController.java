@@ -4,6 +4,7 @@ import app.unattach.controller.Controller;
 import app.unattach.controller.ControllerFactory;
 import app.unattach.model.Email;
 import app.unattach.model.FilenameFactory;
+import app.unattach.model.GmailLabel;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -12,10 +13,14 @@ import javafx.scene.text.Text;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 public class FilenameSchemaController {
+  private static final List<GmailLabel> labels = Arrays.asList(
+      new GmailLabel("IMPORTANT", "IMPORTANT"), new GmailLabel("LABEL_42", "Custom Label"));
   private static final Email email = new Email("17b4aed892cc3f0b", "17b4aed892cc3f0b",
-          Arrays.asList("IMPORTANT", "SENT"), "\"John Doe\" <john.doe@example.com>",
+          labels, "\"John Doe\" <john.doe@example.com>",
           "\"Jane Doe\" <jane.doe@example.com>", "Re: Holiday plans",
           1501597962321L, 1234567, Collections.singletonList("data.zip"));
   private Controller controller;
@@ -53,7 +58,9 @@ public class FilenameSchemaController {
             "- ID, e.g. " + getSchemaVariableExample("ID") + "\n" +
             "- BODY_PART_INDEX, e.g. " + getSchemaVariableExample("BODY_PART_INDEX") + "\n" +
             "- ATTACHMENT_NAME, e.g. " + getSchemaVariableExample("ATTACHMENT_NAME") + "\n" +
-            "- LABELS, e.g. " + getSchemaVariableExample("LABELS") + "\n\n" +
+            "- LABELS, e.g. " + getSchemaVariableExample("LABELS") + "\n" +
+            "- LABEL_NAMES, e.g. " + getSchemaVariableExample("LABEL_NAMES") + "\n" +
+            "- CUSTOM_LABEL_NAMES, e.g. " + getSchemaVariableExample("CUSTOM_LABEL_NAMES") + "\n\n" +
             "There are also RAW_ (e.g. RAW_SUBJECT) variants of the above variables, but they are not recommended,\n" +
             "since they may contain symbols not suitable for file names.\n\n" +
             "We highly recommend ending your schema with ${ATTACHMENT_NAME}, so that the operating system correctly\n" +
@@ -64,7 +71,7 @@ public class FilenameSchemaController {
     );
     filenameSchemaTextField.textProperty().addListener(observable -> {
       String schema = filenameSchemaTextField.getText();
-      FilenameFactory filenameFactory = new FilenameFactory(schema);
+      FilenameFactory filenameFactory = new FilenameFactory(schema, Set.of());
       try {
         String filename = filenameFactory.getFilename(email, 3, "the beach.jpg");
         filenameExampleLabel.setText(filename);
@@ -98,7 +105,7 @@ public class FilenameSchemaController {
   }
 
   private String getSchemaVariableExample(String variable) {
-    FilenameFactory filenameFactory = new FilenameFactory("${" + variable + "}");
+    FilenameFactory filenameFactory = new FilenameFactory("${" + variable + "}", Set.of());
     return filenameFactory.getFilename(email, 3, "the beach.jpg");
   }
 }

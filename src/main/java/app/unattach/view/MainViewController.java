@@ -474,8 +474,9 @@ public class MainViewController {
   @FXML
   private void onDownloadButtonPressed() {
     String downloadedLabelId = controller.getOrCreateDownloadedLabelId();
+    String removedLabelId = controller.getOrCreateRemovedLabelId();
     ProcessOption processOption = new ProcessOption(DOWNLOAD, processEmbeddedCheckMenuItem.isSelected(),
-        backupCheckBox.isSelected(), false, downloadedLabelId, null);
+        backupCheckBox.isSelected(), false, downloadedLabelId, removedLabelId);
     processEmails(processOption);
   }
 

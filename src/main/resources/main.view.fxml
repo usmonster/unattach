@@ -110,7 +110,7 @@
           </TableColumn>
           <TableColumn text="Labels" styleClass="center-left">
             <cellValueFactory>
-              <PropertyValueFactory property="labelIdsString"/>
+              <PropertyValueFactory property="labelNamesDelimited"/>
             </cellValueFactory>
           </TableColumn>
           <TableColumn text="Date" styleClass="center">
