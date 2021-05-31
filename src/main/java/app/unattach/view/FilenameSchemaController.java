@@ -45,7 +45,7 @@ public class FilenameSchemaController {
         "Here, you can configure the file name schema for the downloaded attachments.\n\n" +
             "For example, to configure that every downloaded attachment should first contain Google's email\n" +
             "ID, followed by the index of the attachment within the email, followed by a normalized name of\n" +
-            "the attachment file itself, with dashes as separators, you could write the following schema below:\n\n" +
+            "the attachment file itself, with dashes as separators, you would write the following schema below:\n\n" +
             "    ${ID}-${BODY_PART_INDEX}-${ATTACHMENT_NAME}\n\n" +
             "The available schema variables are:\n" +
             "- FROM_EMAIL, e.g. " + getSchemaVariableExample("FROM_EMAIL") + "\n" +
@@ -65,9 +65,9 @@ public class FilenameSchemaController {
             "since they may contain symbols not suitable for file names.\n\n" +
             "We highly recommend ending your schema with ${ATTACHMENT_NAME}, so that the operating system correctly\n" +
             "recognises the attachment type.\n\n" +
-            "Additionally, you can set the maximum length for each variable's expansion. For example, to use\n" +
-            "up to 5 characters of the SUBJECT, use ${SUBJECT:5}. For attachment name variables, the extension\n" +
-            "of the file is preserved."
+            "For each occurrence of '/' in the schema, the app will create a sub-directory.\n\n" +
+            "You can set the maximum length for each variable's expansion. For example, to use up to 5 characters\n" +
+            "of the SUBJECT, use ${SUBJECT:5}. For attachment name variables, the extension of the file is preserved."
     );
     filenameSchemaTextField.textProperty().addListener(observable -> {
       String schema = filenameSchemaTextField.getText();
