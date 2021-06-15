@@ -738,16 +738,16 @@ public class MainViewController {
   }
 
   @FXML
-  private void onGmailLabelMenuItemPressed() {
+  private void onUnattachLabelMenuItemPressed() {
     try {
-      Stage dialog = Scenes.createNewStage(Constants.PRODUCT_NAME + " : Gmail label");
+      Stage dialog = Scenes.createNewStage(Constants.PRODUCT_NAME + " : Unattach labels");
       dialog.initOwner(root.getScene().getWindow());
       dialog.initModality(Modality.APPLICATION_MODAL);
-      Scene scene = Scenes.loadScene("/gmail-label.view.fxml");
+      Scene scene = Scenes.loadScene("/unattach-labels.view.fxml");
       dialog.setScene(scene);
       Scenes.showAndPreventMakingSmaller(dialog);
     } catch (IOException e) {
-      logger.error("Failed to open the gmail label dialog.", e);
+      logger.error("Failed to open the Unattach labels dialog.", e);
     }
   }
 

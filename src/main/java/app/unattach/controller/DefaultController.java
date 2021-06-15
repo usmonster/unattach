@@ -61,6 +61,11 @@ public record DefaultController(Model model) implements Controller {
   }
 
   private String getOrCreateLabelId(String labelId, String defaultLabelName, Consumer<String> saveLabelId) {
+    // If no label has been set, don't try to match it to Gmail labels.
+    if (GmailLabel.NO_LABEL.id().equals(labelId)) {
+      return labelId;
+    }
+    // If the passed-in labelId is set and exists within Gmail labels, use it.
     SortedMap<String, String> idToLabel = getIdToLabel();
     if (labelId != null) {
       if (idToLabel.containsKey(labelId)) {
@@ -68,6 +73,7 @@ public record DefaultController(Model model) implements Controller {
       }
       logger.error("Couldn't find the label ID in the user config within Gmail label IDs: " + labelId);
     }
+    // Otherwise, use an existing label with the passed-in defaultLabelName name.
     for (Map.Entry<String, String> entry : idToLabel.entrySet()) {
       String id = entry.getKey();
       String name = entry.getValue();
@@ -76,6 +82,7 @@ public record DefaultController(Model model) implements Controller {
         return id;
       }
     }
+    // If not such label exists, create it.
     String id = createLabel(defaultLabelName);
     saveLabelId.accept(id);
     return id;

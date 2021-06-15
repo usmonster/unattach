@@ -15,7 +15,9 @@ import java.util.OptionalInt;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class GmailLabelController {
+import static app.unattach.model.GmailLabel.NO_LABEL;
+
+public class UnattachLabelsController {
   private Controller controller;
 
   @FXML
@@ -50,6 +52,7 @@ public class GmailLabelController {
             .map(entry -> new GmailLabel(entry.getKey(), entry.getValue()))
             .sorted(Comparator.comparing(GmailLabel::name))
             .collect(Collectors.toList());
+    labels.add(0, NO_LABEL);
     downloadedLabelComboBox.getItems().setAll(labels);
     removedLabelComboBox.getItems().setAll(labels);
     selectLabel(labels, downloadedLabelId, downloadedLabelComboBox);

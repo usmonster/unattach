@@ -20,6 +20,7 @@ import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static app.unattach.model.GmailLabel.NO_LABEL;
 import static org.apache.commons.codec.binary.Base64.encodeBase64URLSafeString;
 
 public class LiveModel implements Model {
@@ -140,15 +141,17 @@ public class LiveModel implements Model {
     MimeMessage mimeMessage = GmailService.getMimeMessage(message);
     logger.info("MIME structure:%n%s", MimeMessagePrettyPrinter.prettyPrint(mimeMessage));
     String newUniqueId = null;
-    if (processSettings.processOption().backupEmail()) {
+    ProcessOption processOption = processSettings.processOption();
+    if (processOption.backupEmail()) {
       backupEmail(email, processSettings, mimeMessage);
     }
     Set<String> originalAttachmentNames = new TreeSet<>();
     mimeMessage = EmailProcessor.process(userStorage, email, mimeMessage, processSettings, originalAttachmentNames);
-    if (processSettings.processOption().shouldDownload() && !processSettings.processOption().shouldRemove()) {
-      service.addLabel(message.getId(), processSettings.processOption().downloadedLabelId());
+    if (processOption.shouldDownload() && !processOption.shouldRemove() &&
+        !NO_LABEL.id().equals(processOption.downloadedLabelId())) {
+      service.addLabel(message.getId(), processOption.downloadedLabelId());
     }
-    if (processSettings.processOption().shouldRemove() && !originalAttachmentNames.isEmpty()) {
+    if (processOption.shouldRemove() && !originalAttachmentNames.isEmpty()) {
       logger.info("New MIME structure:%n%s", MimeMessagePrettyPrinter.prettyPrint(mimeMessage));
       updateRawMessage(message, mimeMessage);
       Message newMessage = service.insertMessage(message); // 25 quota units
@@ -156,12 +159,14 @@ public class LiveModel implements Model {
       GmailService.trackInDebugMode(logger, newMessage);
       Map<String, String> headerMap = GmailService.getHeaderMap(newMessage);
       newUniqueId = headerMap.get("message-id");
-      if (processSettings.processOption().shouldDownload()) {
-        service.addLabel(newMessage.getId(), processSettings.processOption().downloadedLabelId());
+      if (processOption.shouldDownload() && !NO_LABEL.id().equals(processOption.downloadedLabelId())) {
+        service.addLabel(newMessage.getId(), processOption.downloadedLabelId());
       }
-      service.addLabel(newMessage.getId(), processSettings.processOption().removedLabelId());
+      if (!NO_LABEL.id().equals(processOption.removedLabelId())) {
+        service.addLabel(newMessage.getId(), processOption.removedLabelId());
+      }
       // 5-10 quota units
-      service.removeMessage(message.getId(), processSettings.processOption().permanentlyRemoveOriginal());
+      service.removeMessage(message.getId(), processOption.permanentlyRemoveOriginal());
     }
     return new ProcessEmailResult(newUniqueId, originalAttachmentNames);
   }
@@ -225,6 +230,9 @@ public class LiveModel implements Model {
   }
 
   private List<GmailLabel> getLabelsForIds(SortedMap<String, String> idToLabel, List<String> labelIds) {
+    if (labelIds == null) {
+      return List.of();
+    }
     return labelIds.stream().map(id -> new GmailLabel(id, idToLabel.getOrDefault(id, id))).collect(Collectors.toList());
   }
 

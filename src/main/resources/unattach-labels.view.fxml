@@ -4,7 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import java.net.URL?>
-<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="app.unattach.view.GmailLabelController"
+<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="app.unattach.view.UnattachLabelsController"
       alignment="CENTER" spacing="10">
   <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
   <GridPane VBox.vgrow="ALWAYS" vgap="10" hgap="10">

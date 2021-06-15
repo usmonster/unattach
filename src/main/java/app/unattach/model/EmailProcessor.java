@@ -20,6 +20,8 @@ import java.nio.file.Paths;
 import java.time.OffsetDateTime;
 import java.util.*;
 
+import static app.unattach.model.GmailLabel.NO_LABEL;
+
 class EmailProcessor {
   private static final Logger logger = Logger.get();
 
@@ -41,12 +43,23 @@ class EmailProcessor {
     this.email = email;
     this.mimeMessage = mimeMessage;
     this.processSettings = processSettings;
-    Set<String> unattachLabelIds =
-        Set.of(processSettings.processOption().downloadedLabelId(), processSettings.processOption().removedLabelId());
+    Set<String> unattachLabelIds = getUnattachLabelIds(processSettings);
     filenameFactory = new FilenameFactory(processSettings.filenameSchema(), unattachLabelIds);
     detectedAttachmentParts = new LinkedList<>();
     originalAttachmentNames = new TreeSet<>();
     originalToNormalizedFilename = new TreeMap<>();
+  }
+
+  private Set<String> getUnattachLabelIds(ProcessSettings processSettings) {
+    Set<String> unattachLabelIds = new HashSet<>();
+    ProcessOption processOption = processSettings.processOption();
+    if (!NO_LABEL.id().equals(processOption.downloadedLabelId())) {
+      unattachLabelIds.add(processOption.downloadedLabelId());
+    }
+    if (!NO_LABEL.id().equals(processOption.removedLabelId())) {
+      unattachLabelIds.add(processOption.downloadedLabelId());
+    }
+    return unattachLabelIds;
   }
 
   static MimeMessage process(UserStorage userStorage, Email email, MimeMessage mimeMessage,
@@ -117,7 +130,7 @@ class EmailProcessor {
       return false;
     }
     String originalFilename = getFilename(part);
-    if (!isDownloadable(part, originalFilename)) {
+    if (!isDownloadable(processSettings.processOption(), part, originalFilename)) {
       return true;
     }
     originalAttachmentNames.add(originalFilename);
@@ -138,9 +151,10 @@ class EmailProcessor {
   /**
    * Based on the documentation of {@link Part#getDisposition()} and https://tools.ietf.org/html/rfc2183.
    */
-  private boolean isDownloadable(Part part, String filename) throws MessagingException {
+  private boolean isDownloadable(ProcessOption processOption, Part part, String filename) throws MessagingException {
     String disposition = part.getDisposition();
-    return (disposition == null || disposition.equals(Part.ATTACHMENT)) && filename != null;
+    return (disposition == null || disposition.equalsIgnoreCase(Part.ATTACHMENT) || processOption.processEmbedded())
+        && filename != null;
   }
 
   private String getFilename(Part part) throws MessagingException, UnsupportedEncodingException {
