@@ -103,6 +103,14 @@
     <VBox alignment="CENTER" spacing="10">
       <TableView fx:id="resultsTable" prefHeight="100" minHeight="100" VBox.vgrow="ALWAYS">
         <columns>
+          <TableColumn fx:id="selectedTableColumn" styleClass="center">
+            <cellValueFactory>
+              <SelectedCheckBoxTableCellFactory/>
+            </cellValueFactory>
+            <graphic>
+              <CheckBox fx:id="toggleAllEmailsCheckBox"/>
+            </graphic>
+          </TableColumn>
           <TableColumn text="Open" styleClass="center">
             <cellValueFactory>
               <LinkButtonTableCellFactory/>
@@ -141,19 +149,6 @@
           <TableColumn text="Non-embedded Attachments" styleClass="center">
             <cellValueFactory>
               <PropertyValueFactory property="attachments"/>
-            </cellValueFactory>
-          </TableColumn>
-          <TableColumn fx:id="selectedTableColumn" text="Selected" styleClass="center">
-            <cellValueFactory>
-              <SelectedCheckBoxTableCellFactory/>
-            </cellValueFactory>
-            <graphic>
-              <CheckBox fx:id="toggleAllEmailsCheckBox"/>
-            </graphic>
-          </TableColumn>
-          <TableColumn text="Status" styleClass="center">
-            <cellValueFactory>
-              <PropertyValueFactory property="status"/>
             </cellValueFactory>
           </TableColumn>
           <TableColumn text="Process Log" styleClass="center-left">
