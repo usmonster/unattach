@@ -103,7 +103,7 @@
     <VBox alignment="CENTER" spacing="10">
       <TableView fx:id="resultsTable" prefHeight="100" minHeight="100" VBox.vgrow="ALWAYS">
         <columns>
-          <TableColumn fx:id="selectedTableColumn" styleClass="center">
+          <TableColumn fx:id="selectedTableColumn" text="Status" styleClass="center">
             <cellValueFactory>
               <SelectedCheckBoxTableCellFactory/>
             </cellValueFactory>
