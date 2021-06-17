@@ -9,12 +9,12 @@ See [homepage](https://unattach.app/) for more info.
   * tl;dr: Your personal data flows only between Google servers and your computer.
 
 ## Dependencies
-* Install [Java 15](https://www.oracle.com/java/technologies/javase-downloads.html).
+* Install [Java 16](https://www.oracle.com/java/technologies/javase-downloads.html).
 * Install [Maven](https://maven.apache.org/download.cgi).
 
 ## Build & Run
 * Build with `mvn clean package`.
-* Run with `java -jar --enable-preview target/client-3.1.0-jar-with-dependencies.jar`.
+* Run with `java -jar target/client-3.2.0-jar-with-dependencies.jar`.
 
 ## Known Limitations
 * On some emails, the app will fail with `OutOfMemoryError` even with the maximum heap size set to 2GB. This occurs

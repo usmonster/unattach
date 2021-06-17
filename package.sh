@@ -9,7 +9,7 @@ DESCRIPTION="Easily download and optionally remove Gmail attachments from many e
 VENDOR="Rok Strniša"
 COPYRIGHT="Copyright 2020, All rights reserved"
 MAIN_CLASS="app.unattach.Main"
-JAVA_OPTION="-Xmx2000m --enable-preview"
+JAVA_OPTION="-Xmx2000m"
 JAR_PATH=$(ls target/*-with-dependencies.jar)
 JAR_FILE=$(basename "$JAR_PATH")
 
