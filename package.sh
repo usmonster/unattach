@@ -72,7 +72,7 @@ elif [[ "$OSTYPE" == "msys" ]]; then
   jpackage --type msi --name Unattach --app-version $VERSION --description "$DESCRIPTION" --vendor "$VENDOR" --copyright "$COPYRIGHT" \
     --license-file LICENSE \
     --icon src/main/resources/logo-256.ico \
-    --win-shortcut --win-dir-chooser \
+    --win-shortcut --win-dir-chooser --win-menu --win-menu-group "Unattach" \
     --win-upgrade-uuid c1fce3eb-862f-4321-98ed-67178316160c \
     --input target \
     --java-options "$JAVA_OPTION" \
