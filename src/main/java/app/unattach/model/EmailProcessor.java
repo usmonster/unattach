@@ -135,15 +135,14 @@ class EmailProcessor {
     }
     originalAttachmentNames.add(originalFilename);
     detectedAttachmentParts.add(part);
-    if (!processSettings.processOption().shouldDownload()) {
-      return false;
-    }
     String normalizedFilename = filenameFactory.getFilename(email, fileCounter++, originalFilename);
-    try (InputStream inputStream = part.getInputStream()) {
-      userStorage.saveAttachment(inputStream, processSettings.targetDirectory(), normalizedFilename, email.getTimestamp());
-      originalToNormalizedFilename.put(originalFilename, normalizedFilename);
-      logger.info("Saved attachment %s from email with subject '%s' to file %s.", originalFilename, email.getSubject(),
-          normalizedFilename);
+    originalToNormalizedFilename.put(originalFilename, normalizedFilename);
+    if (processSettings.processOption().shouldDownload()) {
+      try (InputStream inputStream = part.getInputStream()) {
+        userStorage.saveAttachment(inputStream, processSettings.targetDirectory(), normalizedFilename, email.getTimestamp());
+        logger.info("Saved attachment %s from email with subject '%s' to file %s.", originalFilename, email.getSubject(),
+            normalizedFilename);
+      }
     }
     return false;
   }

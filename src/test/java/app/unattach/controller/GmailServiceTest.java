@@ -173,6 +173,9 @@ public class GmailServiceTest {
         MimeMessage newMimeMessage = new MimeMessage(session, inputStream);
         String content = getMainContent(newMimeMessage.getContent());
         assertTrue(content.contains("Previous attachments"));
+        for (String attachment : attachments) {
+          assertTrue(content.contains(attachment));
+        }
       }
     }
   }
