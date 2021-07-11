@@ -112,8 +112,9 @@ public class Email implements Observable {
   }
 
   @FXML
-  public int getSizeInMegaBytes() {
-    return sizeInBytes / Constants.BYTES_IN_MEGABYTE;
+  public double getSizeInMegaBytes() {
+    // Round to 1 decimal place.
+    return Math.round(10d * sizeInBytes / Constants.BYTES_IN_MEGABYTE) / 10d;
   }
 
   @FXML
