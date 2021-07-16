@@ -134,7 +134,7 @@ public record DefaultController(Model model) implements Controller {
     try {
       logger.info("Getting email labels...");
       SortedMap<String, String> idToLabel = model.getIdToLabel();
-      logger.info("Getting email labels... successful.");
+      logger.info("Getting email labels... successful: " + idToLabel);
       return idToLabel;
     } catch (Throwable t) {
       logger.error("Getting email labels... failed.", t);
