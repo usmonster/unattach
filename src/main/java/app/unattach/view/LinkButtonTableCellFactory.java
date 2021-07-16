@@ -3,22 +3,28 @@ package app.unattach.view;
 import app.unattach.controller.Controller;
 import app.unattach.controller.ControllerFactory;
 import app.unattach.model.Email;
+import app.unattach.model.service.GmailServiceException;
+import app.unattach.utils.Logger;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.util.Callback;
 
-import java.net.URLEncoder;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 public class LinkButtonTableCellFactory
     implements Callback<TableColumn.CellDataFeatures<Email, Button>, ObservableValue<Button>> {
+  private static final Logger logger = Logger.get();
+
   private final Controller controller;
+  private String emailAddress;
 
   public LinkButtonTableCellFactory() {
     controller = ControllerFactory.getDefaultController();
+    try {
+      emailAddress = controller.getEmailAddress();
+    } catch (GmailServiceException e) {
+      logger.error("Failed to get the user's email address.", e);
+    }
   }
 
   @Override
@@ -32,9 +38,8 @@ public class LinkButtonTableCellFactory
 
   private void addOnActionHandler(Email email, Button button) {
     button.setOnAction(event -> {
-      String query = URLEncoder.encode("rfc822msgid:" + email.getUniqueId(), UTF_8);
-      String baseUrl = "https://mail.google.com/mail/u/0/#search/";
-      controller.openWebPage(baseUrl + query);
+      String url = String.format("https://mail.google.com/mail/u/%s/#inbox/%s", emailAddress, email.getGmailId());
+      controller.openWebPage(url);
     });
   }
 }
