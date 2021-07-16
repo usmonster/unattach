@@ -53,7 +53,8 @@ public class GmailServiceTest {
       );
       GmailServiceManager gmailServiceManager =
           new FakeGmailServiceManager(emailAddress, idToLabel, messages, beforeIdToAfterId);
-      Model model = new LiveModel(userStorage, gmailServiceManager);
+      Config config = new BaseConfig();
+      Model model = new LiveModel(config, userStorage, gmailServiceManager);
       controller = new DefaultController(model);
       assertEquals(controller.signIn(), emailAddress);
     } catch (IOException e) {

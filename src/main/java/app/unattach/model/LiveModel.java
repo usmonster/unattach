@@ -33,8 +33,8 @@ public class LiveModel implements Model {
   private List<Email> searchResults;
   private String emailAddress;
 
-  public LiveModel(UserStorage userStorage, GmailServiceManager gmailServiceManager) {
-    this.config = new FileConfig();
+  public LiveModel(Config config, UserStorage userStorage, GmailServiceManager gmailServiceManager) {
+    this.config = config;
     this.userStorage = userStorage;
     this.gmailServiceManager = gmailServiceManager;
     configureMimeLibrary();

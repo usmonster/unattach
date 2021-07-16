@@ -1,5 +1,7 @@
 package app.unattach.controller;
 
+import app.unattach.model.Config;
+import app.unattach.model.FileConfig;
 import app.unattach.model.attachmentstorage.UserStorage;
 import app.unattach.model.attachmentstorage.FileUserStorage;
 import app.unattach.model.service.GmailServiceManager;
@@ -14,7 +16,8 @@ public class ControllerFactory {
     if (defaultController == null) {
       UserStorage userStorage = new FileUserStorage();
       GmailServiceManager gmailServiceManager = new LiveGmailServiceManager();
-      Model model = new LiveModel(userStorage, gmailServiceManager);
+      Config config = new FileConfig();
+      Model model = new LiveModel(config, userStorage, gmailServiceManager);
       defaultController = new DefaultController(model);
     }
     return defaultController;
