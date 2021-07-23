@@ -137,6 +137,7 @@ public class LiveModel implements Model {
   private ProcessEmailResult processEmail(Email email, ProcessSettings processSettings)
       throws IOException, MessagingException, GmailServiceException {
     Message message = service.getRawMessage(email.getGmailId()); // 5 quota units
+    logger.info("Label IDs of the original email: " + message.getLabelIds());
     GmailService.trackInDebugMode(logger, message);
     MimeMessage mimeMessage = GmailService.getMimeMessage(message);
     logger.info("MIME structure:%n%s", MimeMessagePrettyPrinter.prettyPrint(mimeMessage));
@@ -154,6 +155,7 @@ public class LiveModel implements Model {
     if (processOption.shouldRemove() && !originalAttachmentNames.isEmpty()) {
       logger.info("New MIME structure:%n%s", MimeMessagePrettyPrinter.prettyPrint(mimeMessage));
       updateRawMessage(message, mimeMessage);
+      logger.info("Label IDs of the email being inserted: " + message.getLabelIds());
       Message newMessage = service.insertMessage(message); // 25 quota units
       newMessage = service.getUniqueIdAndHeaders(newMessage.getId()); // 5 quota units
       GmailService.trackInDebugMode(logger, newMessage);
