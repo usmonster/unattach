@@ -51,12 +51,12 @@
         <dependency>
             <groupId>com.google.http-client</groupId>
             <artifactId>google-http-client</artifactId>
-            <version>1.29.1</version>
+            <version>1.39.2</version>
         </dependency>
         <dependency>
             <groupId>com.google.apis</groupId>
             <artifactId>google-api-services-gmail</artifactId>
-            <version>v1-rev103-1.25.0</version>
+            <version>v1-rev110-1.25.0</version>
         </dependency>
 
         <!-- Processing emails. -->
@@ -119,7 +119,7 @@
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20201115</version>
+            <version>20210307</version>
         </dependency>
 
         <!-- Testing. -->
