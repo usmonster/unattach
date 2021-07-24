@@ -10,8 +10,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class Email implements Observable {
-  private final String gmailId;
-  private String uniqueId;
+  private String gmailId;
   private final SortedSet<GmailLabel> labels;
   private final String from;
   private final String to;
@@ -25,10 +24,9 @@ public class Email implements Observable {
 
   private final List<InvalidationListener> listeners = new ArrayList<>();
 
-  public Email(String gmailId, String uniqueId, List<GmailLabel> labels, String from, String to, String subject,
-               long timestamp, int sizeInBytes, List<String> attachments) {
+  public Email(String gmailId, List<GmailLabel> labels, String from, String to, String subject, long timestamp,
+               int sizeInBytes, List<String> attachments) {
     this.gmailId = gmailId;
-    this.uniqueId = uniqueId;
     this.labels = Collections.unmodifiableSortedSet(labels == null ?
         Collections.emptySortedSet() : new TreeSet<>(labels));
     this.from = from;
@@ -47,9 +45,8 @@ public class Email implements Observable {
     return gmailId;
   }
 
-  @FXML
-  public String getUniqueId() {
-    return uniqueId;
+  public void setGmailId(String gmailId) {
+    this.gmailId = gmailId;
   }
 
   @FXML
@@ -165,15 +162,10 @@ public class Email implements Observable {
     listeners.remove(listener);
   }
 
-  public void setUniqueId(String uniqueId) {
-    this.uniqueId = uniqueId;
-  }
-
   @Override
   public String toString() {
     return "Email{" +
             "gmailId='" + gmailId + '\'' +
-            ", uniqueId='" + uniqueId + '\'' +
             ", labels=" + labels +
             ", from='" + from + '\'' +
             ", subject='" + subject + '\'' +

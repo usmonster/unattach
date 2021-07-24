@@ -41,7 +41,7 @@ public class MockModel implements Model {
           String emailId = String.valueOf(i);
           List<GmailLabel> labels =
               Arrays.asList(new GmailLabel("INBOX", "INBOX"), new GmailLabel("IMPORTANT", "IMPORTANT"));
-          emails.add(new Email(emailId, emailId, labels,
+          emails.add(new Email(emailId, labels,
               "john.doe@example.com", "jane.doe@example.com",
               "Subject " + i, System.currentTimeMillis(),
               i * (int) Math.pow(2, 20), Collections.singletonList("data.zip")));

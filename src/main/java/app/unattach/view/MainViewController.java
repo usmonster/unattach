@@ -563,8 +563,8 @@ public class MainViewController {
       protected void succeeded() {
         ProcessEmailResult processEmailResult = getValue();
         if (processEmailResult != null) {
-          if (processEmailResult.newUniqueId() != null) {
-            email.setUniqueId(processEmailResult.newUniqueId());
+          if (processEmailResult.newId() != null) {
+            email.setGmailId(processEmailResult.newId());
           }
           bytesProcessed += email.getSizeInBytes();
           processingProgressBarWithText.progressProperty().setValue(1.0 * bytesProcessed / allBytesToProcess);

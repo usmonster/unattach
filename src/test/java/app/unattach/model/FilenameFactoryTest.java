@@ -121,7 +121,7 @@ public class FilenameFactoryTest {
         new GmailLabel("IMPORTANT", "IMPORTANT"),
         new GmailLabel("LABEL_13", "Unattach - Downloaded"),
         new GmailLabel("LABEL_42", "Friends' Files"));
-    return new Email("id3", "uid42", labels,
+    return new Email("id3", labels,
         from, "to@example.com", "subject", 1501545600000L,
         32141, Collections.singletonList("data.zip"));
   }

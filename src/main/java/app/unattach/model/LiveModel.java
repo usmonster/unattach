@@ -141,7 +141,7 @@ public class LiveModel implements Model {
     GmailService.trackInDebugMode(logger, message);
     MimeMessage mimeMessage = GmailService.getMimeMessage(message);
     logger.info("MIME structure:%n%s", MimeMessagePrettyPrinter.prettyPrint(mimeMessage));
-    String newUniqueId = null;
+    String newId = null;
     ProcessOption processOption = processSettings.processOption();
     if (processOption.backupEmail()) {
       backupEmail(email, processSettings, mimeMessage);
@@ -157,10 +157,8 @@ public class LiveModel implements Model {
       updateRawMessage(message, mimeMessage);
       logger.info("Label IDs of the email being inserted: " + message.getLabelIds());
       Message newMessage = service.insertMessage(message); // 25 quota units
-      newMessage = service.getUniqueIdAndHeaders(newMessage.getId()); // 5 quota units
+      newId = newMessage.getId();
       GmailService.trackInDebugMode(logger, newMessage);
-      Map<String, String> headerMap = GmailService.getHeaderMap(newMessage);
-      newUniqueId = headerMap.get("message-id");
       if (processOption.shouldDownload() && !NO_LABEL.id().equals(processOption.downloadedLabelId())) {
         service.addLabel(newMessage.getId(), processOption.downloadedLabelId());
       }
@@ -170,7 +168,7 @@ public class LiveModel implements Model {
       // 5-10 quota units
       service.removeMessage(message.getId(), processOption.permanentlyRemoveOriginal());
     }
-    return new ProcessEmailResult(newUniqueId, originalAttachmentNames);
+    return new ProcessEmailResult(newId, originalAttachmentNames);
   }
 
   private void backupEmail(Email email, ProcessSettings processSettings, MimeMessage mimeMessage)
@@ -217,7 +215,7 @@ public class LiveModel implements Model {
         String subject = headerMap.get("subject");
         long timestamp = message.getInternalDate();
         List<String> attachmentNames = getAttachmentNames(message.getPayload());
-        Email email = new Email(emailId, uniqueId, labels, from, to, subject, timestamp, message.getSizeEstimate(),
+        Email email = new Email(emailId, labels, from, to, subject, timestamp, message.getSizeEstimate(),
             attachmentNames);
         searchResults.add(email);
       }

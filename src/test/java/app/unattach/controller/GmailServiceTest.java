@@ -143,10 +143,10 @@ public class GmailServiceTest {
 
     if (action == DOWNLOAD) {
       // Check that email ID hasn't changed.
-      assertNull(result.newUniqueId());
+      assertNull(result.newId());
     } else {
       // Check that the email ID has changed.
-      assertNotNull(result.newUniqueId());
+      assertNotNull(result.newId());
     }
 
     boolean checkDownloadedFiles = action == DOWNLOAD || action == DOWNLOAD_AND_REMOVE;

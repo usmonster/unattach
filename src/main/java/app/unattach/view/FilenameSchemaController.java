@@ -19,8 +19,8 @@ import java.util.Set;
 public class FilenameSchemaController {
   private static final List<GmailLabel> labels = Arrays.asList(
       new GmailLabel("IMPORTANT", "IMPORTANT"), new GmailLabel("LABEL_42", "Custom Label"));
-  private static final Email email = new Email("17b4aed892cc3f0b", "17b4aed892cc3f0b",
-          labels, "\"John Doe\" <john.doe@example.com>",
+  private static final Email email = new Email("17b4aed892cc3f0b",
+      labels, "\"John Doe\" <john.doe@example.com>",
           "\"Jane Doe\" <jane.doe@example.com>", "Re: Holiday plans",
           1501597962321L, 1234567, Collections.singletonList("data.zip"));
   private Controller controller;

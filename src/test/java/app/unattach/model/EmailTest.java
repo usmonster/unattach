@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class EmailTest {
   private Email getEmail(String from) {
-    return new Email("id3", "uid42", null, from, "to@example.com", "subject",
+    return new Email("id3", null, from, "to@example.com", "subject",
         1501545600000L, 32141, Collections.singletonList("data.zip"));
   }
 
