@@ -22,7 +22,7 @@ import java.util.*;
 
 import static app.unattach.model.GmailLabel.NO_LABEL;
 
-class EmailProcessor {
+public class EmailProcessor {
   private static final Logger logger = Logger.get();
 
   private final UserStorage userStorage;
@@ -66,12 +66,14 @@ class EmailProcessor {
                              ProcessSettings processSettings, Set<String> originalAttachmentNames)
       throws IOException, MessagingException {
     EmailProcessor processor = new EmailProcessor(userStorage, email, mimeMessage, processSettings);
-    processor.explore(processor.mimeMessage, processor::workAroundUnsupportedContentType);
-    processor.explore(processor.mimeMessage, processor::detectAndMaybeSaveAttachment);
+    // As per https://bugs.openjdk.java.net/browse/JDK-8195686, Java doesn't have direct support for iso-8859-8-i
+    // encoding; however, iso-8859-8 is equivalent, so we pre-emptively replace it.
+    explore(processor.mimeMessage, replaceContentType("iso-8859-8-i", "iso-8859-8", true));
+    explore(processor.mimeMessage, processor::detectAndMaybeSaveAttachment);
     if (processSettings.processOption().shouldRemove()) {
       processor.removeDetectedAttachmentParts();
       if (processSettings.addMetadata()) {
-        processor.explore(processor.mimeMessage, processor::findTextAndHtml);
+        explore(processor.mimeMessage, processor::findTextAndHtml);
         processor.addReferencesToContent();
       }
     }
@@ -81,11 +83,11 @@ class EmailProcessor {
   }
 
   @FunctionalInterface
-  private interface CheckedFunction<T> {
+  public interface CheckedFunction<T> {
     boolean accept(T t) throws MessagingException, IOException;
   }
 
-  private void explore(Part part, CheckedFunction<Part> function) throws IOException, MessagingException {
+  public static void explore(Part part, CheckedFunction<Part> function) throws IOException, MessagingException {
     boolean recurse = function.accept(part);
     if (!recurse) {
       return;
@@ -98,26 +100,23 @@ class EmailProcessor {
     }
   }
 
-  /**
-   * As per https://bugs.openjdk.java.net/browse/JDK-8195686, Java doesn't have direct support for iso-8859-8-i
-   * encoding; however, iso-8859-8 is equivalent, so we pre-emptively replace it.
-   *
-   * @return Whether to recursively explore sub-parts.
-   */
-  private boolean workAroundUnsupportedContentType(Part part) throws MessagingException {
-    String[] contentTypes = part.getHeader("Content-Type");
-    if (contentTypes == null) {
-      logger.warn("No Content-Type header found.");
-      return true;
-    }
-    if (contentTypes.length == 1) {
-      String contentType = contentTypes[0];
-      if (contentType.contains("iso-8859-8-i")) {
-        String newContentType = contentType.replace("iso-8859-8-i", "iso-8859-8");
-        part.setHeader("Content-Type", newContentType);
+  public static CheckedFunction<Part> replaceContentType(String fromEncoding, String toEncoding, boolean replaceAll) {
+    return part -> {
+      String[] contentTypes = part.getHeader("Content-Type");
+      if (contentTypes == null) {
+        logger.warn("No Content-Type header found.");
+        return true;
       }
-    }
-    return true;
+      if (contentTypes.length == 1) {
+        String contentType = contentTypes[0];
+        if (contentType.contains(fromEncoding)) {
+          String newContentType = contentType.replace(fromEncoding, toEncoding);
+          part.setHeader("Content-Type", newContentType);
+          return replaceAll;
+        }
+      }
+      return true;
+    };
   }
 
   /**

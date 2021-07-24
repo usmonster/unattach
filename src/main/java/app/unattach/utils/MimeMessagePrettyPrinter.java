@@ -7,6 +7,7 @@ import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 public class MimeMessagePrettyPrinter {
   public static String prettyPrint(Part part) throws MessagingException, IOException {
@@ -26,12 +27,16 @@ public class MimeMessagePrettyPrinter {
     }
     sb.append(parent.getContentType());
     sb.append(" (disposition: ").append(parent.getDisposition()).append(")");
-    Object content = parent.getContent();
-    if (content instanceof Multipart multipart) {
-      for (int i = 0; i < multipart.getCount(); ++i) {
-        BodyPart child = multipart.getBodyPart(i);
-        prettyPrint(sb, child, depth + 1, i == multipart.getCount() - 1);
+    try {
+      Object content = parent.getContent();
+      if (content instanceof Multipart multipart) {
+        for (int i = 0; i < multipart.getCount(); ++i) {
+          BodyPart child = multipart.getBodyPart(i);
+          prettyPrint(sb, child, depth + 1, i == multipart.getCount() - 1);
+        }
       }
+    } catch (UnsupportedEncodingException e) {
+      sb.append(" [UnsupportedEncoding: ").append(e.getMessage()).append("]");
     }
   }
 }
