@@ -218,8 +218,9 @@ public class GmailServiceTest {
       ProcessOption processOption = new ProcessOption(action, processEmbedded, true,
           true, downloadedLabelId, removedLabelId);
       String filenameSchema = "attachments/${ATTACHMENT_NAME}";
+      SortedMap<String, String> idToLabel = controller.getIdToLabel();
       ProcessSettings processSettings =
-          new ProcessSettings(processOption, tempDir.toFile(), filenameSchema, true);
+          new ProcessSettings(processOption, tempDir.toFile(), filenameSchema, true, idToLabel);
       LongTask<ProcessEmailResult> task = controller.getProcessTask(email, processSettings);
       results.add(task.takeStep());
     }

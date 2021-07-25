@@ -155,6 +155,7 @@ public class LiveModel implements Model {
     if (processOption.shouldRemove() && !originalAttachmentNames.isEmpty()) {
       logger.info("New MIME structure:%n%s", MimeMessagePrettyPrinter.prettyPrint(mimeMessage));
       updateRawMessage(message, mimeMessage);
+      removeUnknownLabels(processSettings, message);
       logger.info("Label IDs of the email being inserted: " + message.getLabelIds());
       Message newMessage = service.insertMessage(message); // 25 quota units
       newId = newMessage.getId();
@@ -169,6 +170,20 @@ public class LiveModel implements Model {
       service.removeMessage(message.getId(), processOption.permanentlyRemoveOriginal());
     }
     return new ProcessEmailResult(newId, originalAttachmentNames);
+  }
+
+  private void removeUnknownLabels(ProcessSettings processSettings, Message message) {
+    if (message.getLabelIds() == null) {
+      return;
+    }
+    Set<String> unknownLabelIds = new TreeSet<>(message.getLabelIds());
+    unknownLabelIds.removeAll(processSettings.idToLabel().keySet());
+    if (!unknownLabelIds.isEmpty()) {
+      logger.warn("Found unknown label IDs: " + unknownLabelIds + ". Removing them before inserting.");
+      Set<String> newLabelIdSet = new TreeSet<>(message.getLabelIds());
+      newLabelIdSet.removeAll(unknownLabelIds);
+      message.setLabelIds(new ArrayList<>(newLabelIdSet));
+    }
   }
 
   private void backupEmail(Email email, ProcessSettings processSettings, MimeMessage mimeMessage)

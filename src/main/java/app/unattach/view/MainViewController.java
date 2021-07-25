@@ -516,8 +516,10 @@ public class MainViewController {
     allBytesToProcess = emailsToProcess.stream().mapToLong(email -> (long) email.getSizeInBytes()).sum();
     processingProgressBarWithText.progressProperty().setValue(0);
     String filenameSchema = controller.getConfig().getFilenameSchema();
+    logger.info("Getting email labels...");
+    SortedMap<String, String> idToLabel = controller.getIdToLabel();
     ProcessSettings processSettings = new ProcessSettings(processOption, targetDirectory, filenameSchema,
-        addMetadataCheckMenuItem.isSelected());
+        addMetadataCheckMenuItem.isSelected(), idToLabel);
     processEmail(emailsToProcess, 0, 0, processSettings);
   }
 
