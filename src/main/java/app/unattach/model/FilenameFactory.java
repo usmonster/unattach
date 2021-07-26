@@ -1,6 +1,7 @@
 package app.unattach.model;
 
 import javafx.fxml.FXML;
+import org.apache.commons.io.FilenameUtils;
 
 import java.security.InvalidParameterException;
 import java.util.HashMap;
@@ -30,6 +31,8 @@ public class FilenameFactory {
   public String getFilename(Email email, int bodyPartIndex, String attachmentName) {
     String template = schema;
     String name_or_email = email.getFromName().isEmpty() ? email.getFromEmail() : email.getFromName();
+    String attachmentBase = FilenameUtils.getBaseName(attachmentName);
+    String attachmentExtension = FilenameUtils.getExtension(attachmentName);
     template = replaceRawAndNormalised(template, "FROM_EMAIL", email.getFromEmail(), FilenameFactory::simpleTrim);
     template = replaceRawAndNormalised(template, "FROM_NAME", email.getFromName(), FilenameFactory::simpleTrim);
     template = replaceRawAndNormalised(template, "FROM_NAME_OR_EMAIL", name_or_email, FilenameFactory::simpleTrim);
@@ -43,6 +46,8 @@ public class FilenameFactory {
     template = replaceRawAndNormalised(template, "LABEL_NAMES", getLabelNamesForFilenames(email), FilenameFactory::simpleTrim);
     template = replaceRawAndNormalised(template, "CUSTOM_LABEL_NAMES", getCustomLabelNamesForFilenames(email, unattachLabelIds), FilenameFactory::simpleTrim);
     template = replaceRawAndNormalised(template, "ATTACHMENT_NAME", attachmentName, FilenameFactory::basenameTrim);
+    template = replaceRawAndNormalised(template, "ATTACHMENT_BASE", attachmentBase, FilenameFactory::simpleTrim);
+    template = replaceRawAndNormalised(template, "ATTACHMENT_EXTENSION", attachmentExtension, FilenameFactory::simpleTrim);
     if (template.contains("${")) {
       int start = template.indexOf("${");
       int end = template.indexOf("}", start);

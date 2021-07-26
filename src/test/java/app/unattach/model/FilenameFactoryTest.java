@@ -94,6 +94,34 @@ public class FilenameFactoryTest {
   }
 
   @Test
+  public void testAttachmentBase() {
+    testGetFilename("${RAW_ATTACHMENT_BASE}", "a%b~.jpg", "a%b~");
+    testGetFilename("${RAW_ATTACHMENT_BASE:2}", "a%b~.jpg", "a%");
+    testGetFilename("${RAW_ATTACHMENT_BASE:5}", "a%b~", "a%b~");
+  }
+
+  @Test
+  public void testNormalizedAttachmentBase() {
+    testGetFilename("${ATTACHMENT_BASE}", "a%b~.jpg", "a_b_");
+    testGetFilename("${ATTACHMENT_BASE:2}", "a%b~", "a_");
+    testGetFilename("${ATTACHMENT_BASE:5}", "a%b~.jpg", "a_b_");
+  }
+
+  @Test
+  public void testAttachmentExtension() {
+    testGetFilename("${RAW_ATTACHMENT_EXTENSION}", "a%b~.jpg", "jpg");
+    testGetFilename("${RAW_ATTACHMENT_EXTENSION:2}", "a%b~.jpg", "jp");
+    testGetFilename("${RAW_ATTACHMENT_EXTENSION:5}", "a%b~", "");
+  }
+
+  @Test
+  public void testNormalizedAttachmentExtension() {
+    testGetFilename("${ATTACHMENT_EXTENSION}", "a%b~.jpg", "jpg");
+    testGetFilename("${ATTACHMENT_EXTENSION:2}", "a%b~.jpg", "jp");
+    testGetFilename("${ATTACHMENT_EXTENSION:5}", "a%b~", "");
+  }
+
+  @Test
   public void testLabels() {
     testGetFilename("${LABELS}", "a%b@.jpg", "LABEL_42_IMPORTANT_LABEL_13");
   }

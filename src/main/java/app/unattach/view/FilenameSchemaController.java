@@ -43,10 +43,9 @@ public class FilenameSchemaController {
     controller = ControllerFactory.getDefaultController();
     introductionText.setText(
         "Here, you can configure the file name schema for the downloaded attachments.\n\n" +
-            "For example, to configure that every downloaded attachment should first contain Google's email\n" +
-            "ID, followed by the index of the attachment within the email, followed by a normalized name of\n" +
-            "the attachment file itself, with dashes as separators, you would write the following schema below:\n\n" +
-            "    ${ID}-${BODY_PART_INDEX}-${ATTACHMENT_NAME}\n\n" +
+            "For example, to configure file names contain attachment's base name, last 4 digits of the email's ID\n" +
+            "the index of the attachment within the email, and the attachment's extension, you'd write:\n\n" +
+            "    ${ATTACHMENT_BASE}-${ID:-4}-${BODY_PART_INDEX}${ATTACHMENT_EXTENSION}\n\n" +
             "The available schema variables are:\n" +
             "- FROM_EMAIL, e.g. " + getSchemaVariableExample("FROM_EMAIL") + "\n" +
             "- FROM_NAME, e.g. " + getSchemaVariableExample("FROM_NAME") + "\n" +
@@ -58,13 +57,15 @@ public class FilenameSchemaController {
             "- ID, e.g. " + getSchemaVariableExample("ID") + "\n" +
             "- BODY_PART_INDEX, e.g. " + getSchemaVariableExample("BODY_PART_INDEX") + "\n" +
             "- ATTACHMENT_NAME, e.g. " + getSchemaVariableExample("ATTACHMENT_NAME") + "\n" +
+            "- ATTACHMENT_BASE, e.g. " + getSchemaVariableExample("ATTACHMENT_BASE") + "\n" +
+            "- ATTACHMENT_EXTENSION, e.g. " + getSchemaVariableExample("ATTACHMENT_EXTENSION") + "\n" +
             "- LABELS, e.g. " + getSchemaVariableExample("LABELS") + "\n" +
             "- LABEL_NAMES, e.g. " + getSchemaVariableExample("LABEL_NAMES") + "\n" +
             "- CUSTOM_LABEL_NAMES, e.g. " + getSchemaVariableExample("CUSTOM_LABEL_NAMES") + "\n\n" +
             "There are also RAW_ (e.g. RAW_SUBJECT) variants of the above variables, but they are not recommended,\n" +
             "since they may contain symbols not suitable for file names.\n\n" +
-            "We highly recommend ending your schema with ${ATTACHMENT_NAME}, so that the operating system correctly\n" +
-            "recognises the attachment type.\n\n" +
+            "We highly recommend ending your schema with ${ATTACHMENT_NAME} or ${ATTACHMENT_EXTENSION}, \n" +
+            "so that the operating system correctly recognises the attachment type.\n\n" +
             "For each occurrence of '/' in the schema, the app will create a sub-directory.\n\n" +
             "You can set the maximum length for each variable's expansion. For example, to use up to 5 characters\n" +
             "of the SUBJECT, use ${SUBJECT:5}. For attachment name variables, the extension of the file is preserved."
