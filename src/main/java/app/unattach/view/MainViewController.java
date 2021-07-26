@@ -716,7 +716,7 @@ public class MainViewController {
   @FXML
   private void onFilenameSchemaMenuItemPressed() {
     try {
-      Stage dialog = Scenes.createNewStage(Constants.PRODUCT_NAME + " : file name scheme");
+      Stage dialog = Scenes.createNewStage(Constants.PRODUCT_NAME + " : file name schema");
       dialog.initOwner(root.getScene().getWindow());
       dialog.initModality(Modality.APPLICATION_MODAL);
       Scene scene = Scenes.loadScene("/filename-schema.view.fxml");
@@ -725,7 +725,7 @@ public class MainViewController {
       dialog.setScene(scene);
       Scenes.showAndPreventMakingSmaller(dialog);
     } catch (IOException e) {
-      logger.error("Failed to open the file name scheme dialog.", e);
+      logger.error("Failed to open the file name schema dialog.", e);
     }
   }
 

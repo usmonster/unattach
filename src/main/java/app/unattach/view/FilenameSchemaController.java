@@ -45,7 +45,7 @@ public class FilenameSchemaController {
         "Here, you can configure the file name schema for the downloaded attachments.\n\n" +
             "For example, to configure file names contain attachment's base name, last 4 digits of the email's ID\n" +
             "the index of the attachment within the email, and the attachment's extension, you'd write:\n\n" +
-            "    ${ATTACHMENT_BASE}-${ID:-4}-${BODY_PART_INDEX}${ATTACHMENT_EXTENSION}\n\n" +
+            "    ${ATTACHMENT_BASE}-${ID:-4}-${BODY_PART_INDEX}.${ATTACHMENT_EXTENSION}\n\n" +
             "The available schema variables are:\n" +
             "- FROM_EMAIL, e.g. " + getSchemaVariableExample("FROM_EMAIL") + "\n" +
             "- FROM_NAME, e.g. " + getSchemaVariableExample("FROM_NAME") + "\n" +
@@ -67,8 +67,8 @@ public class FilenameSchemaController {
             "We highly recommend ending your schema with ${ATTACHMENT_NAME} or ${ATTACHMENT_EXTENSION}, \n" +
             "so that the operating system correctly recognises the attachment type.\n\n" +
             "For each occurrence of '/' in the schema, the app will create a sub-directory.\n\n" +
-            "You can set the maximum length for each variable's expansion. For example, to use up to 5 characters\n" +
-            "of the SUBJECT, use ${SUBJECT:5}. For attachment name variables, the extension of the file is preserved."
+            "You can set the maximum length for each variable. To use up to first 5 characters of SUBJECT, use ${SUBJECT:5};\n" +
+            "for up to last 5, use ${SUBJECT:-5}. For ATTACHMENT_NAME, the extension of the file is preserved."
     );
     filenameSchemaTextField.textProperty().addListener(observable -> {
       String schema = filenameSchemaTextField.getText();
@@ -76,10 +76,10 @@ public class FilenameSchemaController {
       try {
         String filename = filenameFactory.getFilename(email, 3, "the beach.jpg");
         filenameExampleLabel.setText(filename);
-        if (schema.endsWith("${ATTACHMENT_NAME}")) {
+        if (schema.endsWith("${ATTACHMENT_NAME}") || schema.endsWith("${ATTACHMENT_EXTENSION}")) {
           errorLabel.setText("");
         } else {
-          errorLabel.setText("The schema doesn't end with ${ATTACHMENT_NAME}.");
+          errorLabel.setText("The schema doesn't end with ${ATTACHMENT_NAME} or ${ATTACHMENT_EXTENSION}.");
         }
         okButton.setDisable(false);
       } catch (Throwable t) {

@@ -16,7 +16,7 @@ public class FilenameFactory {
       "CATEGORY_FORUMS", "CATEGORY_PERSONAL", "CATEGORY_PROMOTIONS", "CATEGORY_SOCIAL", "CATEGORY_UPDATES",
       "CHAT", "DRAFT", "IMPORTANT", "INBOX", "SENT", "SPAM", "STARRED", "TRASH", "UNREAD"
   );
-  static final String DEFAULT_SCHEMA = "${ID}-${BODY_PART_INDEX}-${ATTACHMENT_NAME}";
+  static final String DEFAULT_SCHEMA = "${ATTACHMENT_BASE}-${ID:-4}-${BODY_PART_INDEX}.${ATTACHMENT_EXTENSION}";
 
   private final Map<String, Pattern> keyToPattern;
   private final String schema;
@@ -62,7 +62,7 @@ public class FilenameFactory {
     if (keyToPattern.containsKey(key)) {
       pattern = keyToPattern.get(key);
     } else {
-      keyToPattern.put(key, pattern = Pattern.compile("\\$\\{" + key + "(:([0-9]+))?}"));
+      keyToPattern.put(key, pattern = Pattern.compile("\\$\\{" + key + "(:(-?[0-9]+))?}"));
     }
     return pattern;
   }
@@ -112,19 +112,23 @@ public class FilenameFactory {
   }
 
   private static String simpleTrim(String replacement, @SuppressWarnings("unused") int maxLength, int newLength) {
-    return replacement.substring(0, newLength);
+    if (newLength >= 0) {
+      return replacement.substring(0, newLength);
+    }
+    int length = replacement.length();
+    int startIndex = Math.max(0, length + newLength);
+    return replacement.substring(startIndex, length);
   }
 
   private static String basenameTrim(String replacement, int maxLength, int newLength) {
     int lastDotIndex = replacement.lastIndexOf('.');
-    if (lastDotIndex == -1) {
+    if (lastDotIndex == -1 || newLength < 0) {
       return simpleTrim(replacement, maxLength, newLength);
-    } else {
-      String basename = replacement.substring(0, lastDotIndex);
-      String extension = replacement.substring(lastDotIndex + 1);
-      int maxBasenameLength = Math.max(0, maxLength - extension.length() - 1);
-      int newBasenameLength = Math.min(maxBasenameLength, basename.length());
-      return basename.substring(0, newBasenameLength) + '.' + extension;
     }
+    String basename = replacement.substring(0, lastDotIndex);
+    String extension = replacement.substring(lastDotIndex + 1);
+    int maxBasenameLength = Math.max(0, maxLength - extension.length() - 1);
+    int newBasenameLength = Math.min(maxBasenameLength, basename.length());
+    return basename.substring(0, newBasenameLength) + '.' + extension;
   }
 }

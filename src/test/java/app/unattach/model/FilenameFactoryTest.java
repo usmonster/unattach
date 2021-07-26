@@ -24,6 +24,8 @@ public class FilenameFactoryTest {
   public void testFromEmail() {
     testGetFilename("${FROM_EMAIL}", "a%b@.jpg", "rok.strnisa@gmail.com");
     testGetFilename("${FROM_EMAIL:3}", "a%b@.jpg", "rok");
+    testGetFilename("${FROM_EMAIL:-9}", "a%b@.jpg", "gmail.com");
+    testGetFilename("${FROM_EMAIL:-42}", "a%b@.jpg", "rok.strnisa@gmail.com");
   }
 
   @Test
@@ -91,6 +93,7 @@ public class FilenameFactoryTest {
     testGetFilename("${ATTACHMENT_NAME}", "a%b~.jpg", "a_b_.jpg");
     testGetFilename("${ATTACHMENT_NAME:3}", "a%b~", "a_b");
     testGetFilename("${ATTACHMENT_NAME:6}", "a%b~.jpg", "a_.jpg");
+    testGetFilename("${ATTACHMENT_NAME:-2}", "a%b~.jpg", "pg");
   }
 
   @Test
