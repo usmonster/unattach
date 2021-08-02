@@ -6,6 +6,7 @@ import app.unattach.model.service.GmailService;
 import app.unattach.model.service.GmailServiceException;
 import app.unattach.model.service.GmailServiceManager;
 import app.unattach.model.service.GmailServiceManagerException;
+import app.unattach.utils.AttachmentNameExtractor;
 import app.unattach.utils.Logger;
 import app.unattach.utils.MimeMessagePrettyPrinter;
 import com.google.api.client.googleapis.batch.json.JsonBatchCallback;
@@ -222,14 +223,13 @@ public class LiveModel implements Model {
         GmailService.trackInDebugMode(logger, message);
         Map<String, String> headerMap = GmailService.getHeaderMap(message);
         String emailId = message.getId();
-        String uniqueId = headerMap.get("message-id");
         List<String> labelIds = message.getLabelIds();
         List<GmailLabel> labels = getLabelsForIds(idToLabel, labelIds);
         String from = headerMap.get("from");
         String to = headerMap.get("to");
         String subject = headerMap.get("subject");
         long timestamp = message.getInternalDate();
-        List<String> attachmentNames = getAttachmentNames(message.getPayload());
+        List<String> attachmentNames = AttachmentNameExtractor.getAttachmentNames(message);
         Email email = new Email(emailId, labels, from, to, subject, timestamp, message.getSizeEstimate(),
             attachmentNames);
         searchResults.add(email);
@@ -249,26 +249,6 @@ public class LiveModel implements Model {
       return List.of();
     }
     return labelIds.stream().map(id -> new GmailLabel(id, idToLabel.getOrDefault(id, id))).collect(Collectors.toList());
-  }
-
-  private List<String> getAttachmentNames(MessagePart part) {
-    Set<String> attachmentNames = new TreeSet<>();
-    getAttachmentNamesRecursive(attachmentNames, part);
-    return new ArrayList<>(attachmentNames);
-  }
-
-  private void getAttachmentNamesRecursive(Set<String> attachmentNames, MessagePart part) {
-    String attachmentName = part.getFilename();
-    if (attachmentName != null) {
-      attachmentNames.add(attachmentName);
-      return;
-    }
-    List<MessagePart> subParts = part.getParts();
-    if (subParts != null) {
-      for (MessagePart subPart : subParts) {
-        getAttachmentNamesRecursive(attachmentNames, subPart);
-      }
-    }
   }
 
   @Override

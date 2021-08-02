@@ -200,7 +200,6 @@ public class GmailServiceTest {
     return emailBackups[0];
   }
 
-
   private ProcessEmailResult processEmail(Path tempDir, String query, Action action, boolean processEmbedded)
       throws GmailServiceException, LongTaskException {
     List<ProcessEmailResult> results = processEmails(tempDir, query, action, processEmbedded);

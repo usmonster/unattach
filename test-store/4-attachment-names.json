@@ -1,0 +1,21 @@
+{
+  "id": "150277b23e0e9f00",
+  "internalDate": "1443771392000",
+  "labelIds": [],
+  "payload": {
+    "filename": "",
+    "headers": [],
+    "parts": [
+      {
+        "filename": ""
+      },
+      {
+        "filename": "test1.jpg"
+      },
+      {
+        "filename": "test2.jpg"
+      }
+    ]
+  },
+  "sizeEstimate": 13199360
+}
