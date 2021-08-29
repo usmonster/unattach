@@ -180,7 +180,9 @@ public class EmailProcessor {
     }
     for (Part part : detectedAttachmentParts) {
       if (part instanceof BodyPart bodyPart) {
-        bodyPart.getParent().removeBodyPart(bodyPart);
+        bodyPart.setContent("", "text/plain; charset=utf-8");
+        bodyPart.setFileName("Deleted: " + bodyPart.getFileName());
+        bodyPart.setHeader("X-Unattach-Altered", "AttachmentDeleted; date=\"" + OffsetDateTime.now().toString() + "\"");
       }
     }
   }
